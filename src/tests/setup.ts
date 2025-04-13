@@ -1,20 +1,9 @@
 import { vi } from 'vitest';
-import { PrismaClient } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { PrismaClient, Prisma } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import { HttpStatusCode } from '../constants/httpCodes';
-
-// Enum para Status HTTP
-export enum HttpStatusCode {
-  OK = 200,
-  BAD_REQUEST = 400,
-  UNAUTHORIZED = 401,
-  NOT_FOUND = 404,
-  CONFLICT = 409,
-  INTERNAL_SERVER_ERROR = 500
-}
 
 // Mock do PrismaClient
 export const mockPrisma = {
@@ -49,19 +38,29 @@ export const mockPrisma = {
 
 // Helper para criar erros do Prisma
 export const createPrismaError = (code: string, meta?: Record<string, any>) => {
-  const error = new Error('Prisma Error');
-  Object.setPrototypeOf(error, PrismaClientKnownRequestError.prototype);
-  Object.assign(error, {
-    code,
-    meta,
-    name: 'PrismaClientKnownRequestError',
-    message: `Prisma error with code ${code}`
-  });
-  return error as PrismaClientKnownRequestError;
+  const error = new Error('Prisma Error') as Prisma.PrismaClientKnownRequestError;
+  error.code = code;
+  error.meta = meta;
+  error.name = 'PrismaClientKnownRequestError';
+  error.message = `Prisma error with code ${code}`;
+  return error;
 };
 
 vi.mock('@prisma/client', () => ({
-  PrismaClient: vi.fn().mockImplementation(() => mockPrisma)
+  PrismaClient: vi.fn().mockImplementation(() => mockPrisma),
+  Prisma: {
+    PrismaClientKnownRequestError: class extends Error {
+      code: string;
+      meta?: Record<string, any>;
+      name = 'PrismaClientKnownRequestError';
+
+      constructor(message = 'Prisma Error', code = 'P2002', meta?: Record<string, any>) {
+        super(message);
+        this.code = code;
+        this.meta = meta;
+      }
+    }
+  }
 }));
 
 // Mock do bcrypt

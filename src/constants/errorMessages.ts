@@ -1,18 +1,12 @@
 export const ERROR_MESSAGES = {
-  INVALID_TOKEN: 'Token inválido',
-  MISSING_TOKEN: 'Token não fornecido',
-  UNAUTHORIZED: 'Não autorizado',
-  RECORD_NOT_FOUND: 'Registro não encontrado',
-  DUPLICATE_ENTRY: 'Registro duplicado',
-  INVALID_DATA: 'Dados inválidos',
-  VALIDATION_ERROR: 'Erro de validação',
+  EMAIL_DUPLICATED: 'Já existe uma conta com este e-mail',
+  INVALID_PASSWORD: 'Senha inválida',
   INTERNAL_ERROR: 'Erro interno do servidor',
-  DATABASE_ERROR: 'Erro de banco de dados',
-  TIMEOUT_ERROR: 'Tempo limite excedido',
-  INSUFFICIENT_PERMISSIONS: 'Permissões insuficientes',
-  RESOURCE_LOCKED: 'Recurso bloqueado',
-  INVALID_OPERATION: 'Operação inválida',
-  INVALID_CREDENTIALS: 'Credenciais inválidas'
+  NOT_FOUND: 'Registro não encontrado',
+  INVALID_CREDENTIALS: 'Credenciais inválidas',
+  VALIDATION_ERROR: 'Erro de validação',
+  TOKEN_EXPIRED: 'Token expirado',
+  UNAUTHORIZED: 'Não autorizado'
 } as const;
 
 export const ERROR_CODES = {

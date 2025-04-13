@@ -1,10 +1,10 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { AppError } from '../utils/AppError';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { loginSchema, registerSchema, LoginDTO, RegisterDTO } from '../validators/authSchema';
-import { ERROR_CODES } from '../constants/errorCodes';
-import { PrismaClientKnownRequestError } from '../tests/helpers/prismaMocks';
+import { HttpStatusCode } from '../constants/httpCodes';
+import { PrismaErrorHandler } from '../utils/prismaErrors';
 
 export class AuthService {
   private static prisma = new PrismaClient();
@@ -12,7 +12,7 @@ export class AuthService {
   static async cadastrar(data: RegisterDTO) {
     const validacao = registerSchema.safeParse(data);
     if (!validacao.success) {
-      throw new AppError('VALIDATION_ERROR', 400);
+      throw new AppError('VALIDATION_ERROR', HttpStatusCode.BAD_REQUEST);
     }
 
     try {
@@ -33,17 +33,14 @@ export class AuthService {
 
       return usuario;
     } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError && error.code === 'P2002') {
-        throw new AppError('DUPLICATE_ENTRY', 400);
-      }
-      throw new AppError('INTERNAL_ERROR', 500);
+      PrismaErrorHandler.handle(error);
     }
   }
 
   static async login(data: LoginDTO) {
     const validacao = loginSchema.safeParse(data);
     if (!validacao.success) {
-      throw new AppError('VALIDATION_ERROR', 400);
+      throw new AppError('VALIDATION_ERROR', HttpStatusCode.BAD_REQUEST);
     }
 
     try {
@@ -59,13 +56,13 @@ export class AuthService {
       });
 
       if (!usuario) {
-        throw new AppError('INVALID_CREDENTIALS', 401);
+        throw new AppError('INVALID_CREDENTIALS', HttpStatusCode.UNAUTHORIZED);
       }
 
       const senhaCorreta = await this.comparePasswords(data.senha, usuario.senha);
       
       if (!senhaCorreta) {
-        throw new AppError('INVALID_CREDENTIALS', 401);
+        throw new AppError('INVALID_CREDENTIALS', HttpStatusCode.UNAUTHORIZED);
       }
 
       const token = this.generateToken(usuario.id);
@@ -80,7 +77,7 @@ export class AuthService {
       if (error instanceof AppError) {
         throw error;
       }
-      throw new AppError('INTERNAL_ERROR', 500);
+      PrismaErrorHandler.handle(error);
     }
   }
 

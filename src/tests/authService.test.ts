@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AuthService } from '../services/authService';
-import { mockPrisma } from './setup';
+import { mockPrisma, createPrismaError } from './setup';
 import { AppError } from '../utils/AppError';
 import { createDuplicateEmailError, getMockUser } from './helpers/prismaMocks';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { HttpStatusCode } from '../constants/httpCodes';
 
 describe('AuthService', () => {
   beforeEach(() => {
@@ -20,7 +21,11 @@ describe('AuthService', () => {
     };
 
     it('deve criar um novo usuário com sucesso', async () => {
-      const mockCreatedUser = getMockUser(testUserData);
+      const mockCreatedUser = {
+        id: 1,
+        ...testUserData,
+        senha: `hashed_${testUserData.senha}`
+      };
       mockPrisma.usuario.create.mockResolvedValueOnce(mockCreatedUser);
 
       const result = await AuthService.cadastrar(testUserData);
@@ -34,25 +39,27 @@ describe('AuthService', () => {
     });
 
     it('deve lançar erro ao tentar cadastrar com email já existente', async () => {
-      mockPrisma.usuario.create.mockRejectedValueOnce(createDuplicateEmailError());
+      mockPrisma.usuario.create.mockRejectedValueOnce(
+        createPrismaError('P2002', { target: ['email'] })
+      );
 
       await expect(AuthService.cadastrar(testUserData))
         .rejects
-        .toThrow(new AppError('DUPLICATE_ENTRY', 400));
+        .toThrow(new AppError('EMAIL_DUPLICATED', HttpStatusCode.CONFLICT));
     });
 
     it('deve lançar erro ao tentar cadastrar com senha muito curta', async () => {
       await expect(AuthService.cadastrar({
         ...testUserData,
         senha: '123'
-      })).rejects.toThrow(new AppError('VALIDATION_ERROR', 400));
+      })).rejects.toThrow(new AppError('VALIDATION_ERROR', HttpStatusCode.BAD_REQUEST));
     });
 
     it('deve lançar erro ao tentar cadastrar com tipo de usuário inválido', async () => {
       await expect(AuthService.cadastrar({
         ...testUserData,
         tipoUsuario: 'invalid' as any
-      })).rejects.toThrow(new AppError('VALIDATION_ERROR', 400));
+      })).rejects.toThrow(new AppError('VALIDATION_ERROR', HttpStatusCode.BAD_REQUEST));
     });
   });
 
@@ -62,10 +69,13 @@ describe('AuthService', () => {
       senha: 'senha123'
     };
 
-    const mockUser = getMockUser({
+    const mockUser = {
+      id: 1,
+      email: testLoginData.email,
+      nome: 'Usuário Teste',
       senha: `hashed_${testLoginData.senha}`,
-      id: 1
-    });
+      tipoUsuario: 'ADMIN' as const
+    };
 
     it('deve fazer login com sucesso', async () => {
       mockPrisma.usuario.findUnique.mockResolvedValueOnce(mockUser);
@@ -93,32 +103,33 @@ describe('AuthService', () => {
 
       await expect(AuthService.login(testLoginData))
         .rejects
-        .toThrow(new AppError('INVALID_CREDENTIALS', 401));
+        .toThrow(new AppError('INVALID_CREDENTIALS', HttpStatusCode.UNAUTHORIZED));
     });
 
     it('deve lançar erro quando senha está incorreta', async () => {
-      const userWithDifferentPassword = getMockUser({
+      const userWithDifferentPassword = {
+        ...mockUser,
         senha: 'hashed_outra_senha'
-      });
+      };
       mockPrisma.usuario.findUnique.mockResolvedValueOnce(userWithDifferentPassword);
 
       await expect(AuthService.login(testLoginData))
         .rejects
-        .toThrow(new AppError('INVALID_CREDENTIALS', 401));
+        .toThrow(new AppError('INVALID_CREDENTIALS', HttpStatusCode.UNAUTHORIZED));
     });
 
     it('deve lançar erro quando email é inválido', async () => {
       await expect(AuthService.login({
         ...testLoginData,
         email: 'invalid-email'
-      })).rejects.toThrow(new AppError('VALIDATION_ERROR', 400));
+      })).rejects.toThrow(new AppError('VALIDATION_ERROR', HttpStatusCode.BAD_REQUEST));
     });
 
     it('deve lançar erro quando senha é muito curta', async () => {
       await expect(AuthService.login({
         ...testLoginData,
         senha: '123'
-      })).rejects.toThrow(new AppError('VALIDATION_ERROR', 400));
+      })).rejects.toThrow(new AppError('VALIDATION_ERROR', HttpStatusCode.BAD_REQUEST));
     });
   });
 }); 
