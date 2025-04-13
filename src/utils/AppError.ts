@@ -1,12 +1,12 @@
-import { ErrorCode, ErrorMessages } from './errorConstants';
+import { ERROR_CODES, ErrorCode } from '../constants/errorCodes';
 
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly code: ErrorCode;
   public readonly details?: any;
 
-  constructor(code: ErrorCode, statusCode = 400, details?: any) {
-    super(ErrorMessages[code]);
+  constructor(code: ErrorCode, statusCode: number, details?: any) {
+    super(ERROR_CODES[code].message);
     this.name = 'AppError';
     this.code = code;
     this.statusCode = statusCode;

@@ -1,19 +1,28 @@
 import { vi } from 'vitest';
 import { PrismaClient } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
+import { HttpStatusCode } from '../constants/httpCodes';
+
+// Enum para Status HTTP
+export enum HttpStatusCode {
+  OK = 200,
+  BAD_REQUEST = 400,
+  UNAUTHORIZED = 401,
+  NOT_FOUND = 404,
+  CONFLICT = 409,
+  INTERNAL_SERVER_ERROR = 500
+}
 
 // Mock do PrismaClient
 export const mockPrisma = {
   usuario: {
-    findUnique: vi.fn(),
-    findFirst: vi.fn(),
-    findMany: vi.fn(),
     create: vi.fn(),
+    findUnique: vi.fn(),
     update: vi.fn(),
-    delete: vi.fn(),
-    count: vi.fn(),
+    delete: vi.fn()
   },
   produto: {
     findUnique: vi.fn(),
@@ -38,17 +47,31 @@ export const mockPrisma = {
   $transaction: vi.fn(),
 } as unknown as PrismaClient;
 
+// Helper para criar erros do Prisma
+export const createPrismaError = (code: string, meta?: Record<string, any>) => {
+  const error = new Error('Prisma Error');
+  Object.setPrototypeOf(error, PrismaClientKnownRequestError.prototype);
+  Object.assign(error, {
+    code,
+    meta,
+    name: 'PrismaClientKnownRequestError',
+    message: `Prisma error with code ${code}`
+  });
+  return error as PrismaClientKnownRequestError;
+};
+
 vi.mock('@prisma/client', () => ({
-  PrismaClient: vi.fn(() => mockPrisma),
+  PrismaClient: vi.fn().mockImplementation(() => mockPrisma)
 }));
 
 // Mock do bcrypt
 vi.mock('bcrypt', () => ({
   default: {
-    hash: vi.fn((str) => Promise.resolve(`hashed_${str}`)),
-    compare: vi.fn((str, hash) => Promise.resolve(true)),
-    genSalt: vi.fn(() => Promise.resolve('salt')),
-  },
+    hash: vi.fn().mockImplementation((senha) => Promise.resolve(`hashed_${senha}`)),
+    compare: vi.fn().mockImplementation((senha, hash) => {
+      return Promise.resolve(hash === `hashed_${senha}`);
+    })
+  }
 }));
 
 // Classes de erro do JWT
@@ -69,15 +92,12 @@ class JsonWebTokenError extends Error {
 // Mock do jsonwebtoken
 vi.mock('jsonwebtoken', () => ({
   default: {
-    sign: vi.fn((payload, secret, options) => 'mock_token'),
-    verify: vi.fn((token, secret) => {
-      if (token === 'expired') throw new TokenExpiredError();
-      if (token === 'invalid') throw new JsonWebTokenError();
-      return { id: 1, tipoUsuario: 'cliente' };
-    }),
-  },
-  TokenExpiredError,
-  JsonWebTokenError,
+    sign: vi.fn().mockImplementation((payload) => `mock_token_${payload.userId}`),
+    verify: vi.fn().mockImplementation((token) => {
+      const userId = token.split('_').pop();
+      return { userId: Number(userId) };
+    })
+  }
 }));
 
 // Configuração do ambiente de teste
