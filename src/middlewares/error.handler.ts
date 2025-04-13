@@ -3,6 +3,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { ZodError } from 'zod';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import { AppError } from '../utils/AppError';
+import { HttpStatusCode } from '../constants/httpCodes';
 
 export const errorHandler = (
   error: Error | PrismaClientKnownRequestError | ZodError | AppError,
@@ -14,6 +15,7 @@ export const errorHandler = (
   if (error instanceof AppError) {
     return res.status(error.statusCode).json({
       status: 'error',
+      code: error.code,
       message: error.message,
       ...(error.details && { details: error.details })
     });
@@ -21,63 +23,88 @@ export const errorHandler = (
 
   // Erros JWT
   if (error instanceof TokenExpiredError) {
-    return res.status(401).json({
+    const appError = AppError.tokenExpired();
+    return res.status(appError.statusCode).json({
       status: 'error',
-      message: 'Token expirado'
+      code: appError.code,
+      message: appError.message
     });
   }
 
   if (error instanceof JsonWebTokenError) {
-    return res.status(401).json({
+    const appError = AppError.tokenInvalid();
+    return res.status(appError.statusCode).json({
       status: 'error',
-      message: 'Token inválido'
+      code: appError.code,
+      message: appError.message
     });
   }
 
   // Erros do Prisma
   if (error instanceof PrismaClientKnownRequestError) {
     switch (error.code) {
-      case 'P2002':
-        return res.status(409).json({
+      case 'P2002': {
+        const appError = AppError.conflict({ field: error.meta?.target });
+        return res.status(appError.statusCode).json({
           status: 'error',
-          message: 'Registro duplicado',
-          field: error.meta?.target
+          code: appError.code,
+          message: appError.message,
+          details: appError.details
         });
-      case 'P2025':
-        return res.status(404).json({
+      }
+      case 'P2025': {
+        const appError = AppError.notFound();
+        return res.status(appError.statusCode).json({
           status: 'error',
-          message: 'Registro não encontrado'
+          code: appError.code,
+          message: appError.message
         });
-      default:
-        return res.status(400).json({
+      }
+      default: {
+        const appError = AppError.internal({ 
+          prismaCode: error.code,
+          details: error.message 
+        });
+        return res.status(appError.statusCode).json({
           status: 'error',
-          message: 'Erro na operação do banco de dados',
-          code: error.code
+          code: appError.code,
+          message: appError.message,
+          details: appError.details
         });
+      }
     }
   }
 
   // Erros de validação Zod
   if (error instanceof ZodError) {
-    return res.status(400).json({
-      status: 'error',
-      message: 'Erro de validação',
+    const appError = AppError.validationError({
       errors: error.errors.map(e => ({
         field: e.path.join('.'),
         message: e.message
       }))
+    });
+    return res.status(appError.statusCode).json({
+      status: 'error',
+      code: appError.code,
+      message: appError.message,
+      details: appError.details
     });
   }
 
   // Erro genérico
   console.error(error);
   
-  return res.status(500).json({
-    status: 'error',
-    message: 'Erro interno do servidor',
+  const appError = AppError.internal({
     ...(process.env.NODE_ENV === 'development' && {
       stack: error.stack,
       detail: error.message
     })
+  });
+
+  return res.status(appError.statusCode).json({
+    status: 'error',
+    code: appError.code,
+    message: appError.message,
+    ...(appError.details && { details: appError.details })
   });
 }; 

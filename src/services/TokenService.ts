@@ -1,9 +1,10 @@
 import { injectable, inject } from 'tsyringe';
-import jwt from 'jsonwebtoken';
+import jwt, { sign, verify } from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 import { AppError } from '../utils/AppError';
 import { HttpStatusCode } from '../constants/httpCodes';
 import { ERROR_MESSAGES } from '../constants/errorMessages';
+import { prisma } from '../database';
 
 @injectable()
 export class TokenService {
@@ -81,6 +82,52 @@ export class TokenService {
   async revokeAllUserTokens(userId: number): Promise<void> {
     await this.prisma.refreshToken.deleteMany({
       where: { userId }
+    });
+  }
+
+  public async generatePasswordResetToken(userId: number): Promise<string> {
+    const token = sign({ userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+    
+    await this.prisma.passwordResetToken.create({
+      data: {
+        token,
+        userId,
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
+      }
+    });
+
+    return token;
+  }
+
+  public async verifyPasswordResetToken(token: string): Promise<number> {
+    try {
+      const decoded = verify(token, process.env.JWT_SECRET!) as { userId: number };
+      
+      const resetToken = await this.prisma.passwordResetToken.findFirst({
+        where: {
+          token,
+          userId: decoded.userId,
+          used: false,
+          expiresAt: {
+            gt: new Date()
+          }
+        }
+      });
+
+      if (!resetToken) {
+        throw new AppError('Token inválido ou expirado', 401);
+      }
+
+      return decoded.userId;
+    } catch (error) {
+      throw new AppError('Token inválido ou expirado', 401);
+    }
+  }
+
+  public async revokePasswordResetToken(token: string): Promise<void> {
+    await this.prisma.passwordResetToken.update({
+      where: { token },
+      data: { used: true }
     });
   }
 } 

@@ -1,30 +1,43 @@
-import { ERROR_MESSAGES, ErrorMessageKey } from '../constants/errorMessages';
-import { HttpStatusCode, HttpStatusCodeType } from '../constants/httpCodes';
+import { ERROR_CODES, ERROR_MESSAGES, ErrorCodeKey, getErrorMessage } from '../constants/errorMessages';
 
 export class AppError extends Error {
-  public readonly message: string;
-  public readonly statusCode: HttpStatusCodeType;
+  public readonly statusCode: number;
+  public readonly code: string;
+  public readonly details?: any;
 
-  constructor(messageKey: ErrorMessageKey, statusCode: HttpStatusCodeType) {
-    const message = ERROR_MESSAGES[messageKey];
-    super(message);
-    this.message = message;
+  constructor(code: ErrorCodeKey, statusCode: number, details?: any) {
+    super(getErrorMessage(code));
+    this.name = 'AppError';
+    this.code = ERROR_CODES[code];
     this.statusCode = statusCode;
+    this.details = details;
   }
 
-  static notFound() {
-    return new AppError('NOT_FOUND', HttpStatusCode.NOT_FOUND);
+  static notFound(details?: any) {
+    return new AppError('NOT_FOUND', 404, details);
   }
 
-  static unauthorized() {
-    return new AppError('UNAUTHORIZED', HttpStatusCode.UNAUTHORIZED);
+  static unauthorized(details?: any) {
+    return new AppError('UNAUTHORIZED', 401, details);
   }
 
-  static validationError() {
-    return new AppError('VALIDATION_ERROR', HttpStatusCode.BAD_REQUEST);
+  static validationError(details?: any) {
+    return new AppError('VALIDATION_ERROR', 400, details);
   }
 
-  static internal() {
-    return new AppError('INTERNAL_ERROR', HttpStatusCode.INTERNAL_SERVER_ERROR);
+  static internal(details?: any) {
+    return new AppError('INTERNAL_ERROR', 500, details);
+  }
+
+  static conflict(details?: any) {
+    return new AppError('DUPLICATE_ENTRY', 409, details);
+  }
+
+  static tokenExpired(details?: any) {
+    return new AppError('TOKEN_EXPIRED', 401, details);
+  }
+
+  static tokenInvalid(details?: any) {
+    return new AppError('TOKEN_INVALID', 401, details);
   }
 } 
