@@ -1,19 +1,18 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 
+export type PrismaModels = Exclude<keyof PrismaClient, `$${string}`>;
+export type PrismaModelName = PrismaModels;
+
 export interface PaginationParams<T = any> {
-  page?: number;
-  limit?: number;
-  orderBy?: keyof T;
-  order?: 'asc' | 'desc';
-  where?: Partial<T>;
+  skip?: number;
+  take?: number;
+  where?: T;
+  orderBy?: Prisma.SortOrder | Record<string, Prisma.SortOrder>;
 }
 
 export interface PaginatedResult<T> {
   data: T[];
   total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
 }
 
 export interface QueryOptions<T = any> {
@@ -21,9 +20,6 @@ export interface QueryOptions<T = any> {
   select?: Record<string, boolean | object>;
   where?: Partial<T>;
 }
-
-export type PrismaModels = Exclude<keyof PrismaClient, `$${string}`>;
-export type PrismaModelName = PrismaModels;
 
 export enum PrismaErrorCodes {
   UNIQUE_CONSTRAINT = 'P2002',
