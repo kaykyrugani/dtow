@@ -15,17 +15,18 @@ datasource db {
 }
 
 model Usuario {
-  id           Int         @id @default(autoincrement())
-  nome         String
-  email        String      @unique
-  senha        String
-  cpf          String      @unique
-  tipoUsuario  String      @default("cliente")
-  criadoEm     DateTime    @default(now())
-  atualizadoEm DateTime    @updatedAt
-  endereco     Endereco?
-  pedidos      Pedido[]
-  avaliacoes   Avaliacao[]
+  id            Int            @id @default(autoincrement())
+  nome          String
+  email         String         @unique
+  senha         String
+  cpf           String         @unique
+  tipoUsuario   String         @default("cliente")
+  criadoEm      DateTime       @default(now())
+  atualizadoEm  DateTime       @updatedAt
+  endereco      Endereco?
+  pedidos       Pedido[]
+  avaliacoes    Avaliacao[]
+  refreshTokens RefreshToken[]
 
   @@map("usuarios")
 }
@@ -127,4 +128,17 @@ model Cupom {
   pedidos      Pedido[]
 
   @@map("cupons")
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  expiresAt DateTime
+  userId    Int
+  usuario   Usuario  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([token])
 }

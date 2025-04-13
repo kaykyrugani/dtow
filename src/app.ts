@@ -1,11 +1,13 @@
+import 'reflect-metadata';
 import express from 'express'
 import cors from 'cors'
 import swaggerUi from 'swagger-ui-express'
-import swaggerDoc from './docs/swagger.json'
+import { swaggerSpec } from './config/swagger'
 import { router } from './routes'
 import { errorHandler } from './middlewares/errorHandler'
 import { applySecurityMiddleware } from './middlewares/security'
 import logger from './utils/logger'
+import './config/container'
 
 const app = express()
 
@@ -17,7 +19,7 @@ app.use(express.json())
 applySecurityMiddleware(app)
 
 // Documentação Swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc))
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 // Rotas da API
 app.use('/api', router)

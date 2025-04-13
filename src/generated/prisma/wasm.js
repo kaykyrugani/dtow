@@ -201,6 +201,15 @@ exports.Prisma.CupomScalarFieldEnum = {
   atualizadoEm: 'atualizadoEm'
 };
 
+exports.Prisma.RefreshTokenScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  expiresAt: 'expiresAt',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -219,7 +228,8 @@ exports.Prisma.ModelName = {
   Avaliacao: 'Avaliacao',
   Pedido: 'Pedido',
   PedidoItem: 'PedidoItem',
-  Cupom: 'Cupom'
+  Cupom: 'Cupom',
+  RefreshToken: 'RefreshToken'
 };
 
 /**

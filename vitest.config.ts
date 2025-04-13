@@ -15,13 +15,9 @@ export default defineConfig({
         'node_modules/**',
         'dist/**',
         '**/*.d.ts',
-        'test/**',
-        'vite.config.ts',
-        'vitest.config.ts',
-        'vitest.integration.config.ts',
-        'coverage/**',
+        '**/*.test.ts',
         'src/tests/**'
-      ],
+      ]
     },
   },
 }); 

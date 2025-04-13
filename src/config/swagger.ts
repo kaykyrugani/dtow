@@ -3,22 +3,18 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { version } from '../../package.json';
 
-const options: swaggerJsdoc.Options = {
+const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'OnlyWave API',
-      version,
-      description: 'Documentação da API do OnlyWave',
-      license: {
-        name: 'MIT',
-        url: 'https://spdx.org/licenses/MIT.html',
-      },
+      title: 'API OnlyWave25',
+      version: '1.0.0',
+      description: 'Documentação da API OnlyWave25',
     },
     servers: [
       {
         url: 'http://localhost:3000',
-        description: 'Servidor de Desenvolvimento',
+        description: 'Servidor de desenvolvimento',
       },
     ],
     components: {
@@ -39,7 +35,7 @@ const options: swaggerJsdoc.Options = {
   apis: ['./src/routes/*.ts', './src/models/*.ts'],
 };
 
-const swaggerSpec = swaggerJsdoc(options);
+export const swaggerSpec = swaggerJsdoc(options);
 
 export function setupSwagger(app: Express) {
   // Endpoint para servir a documentação do Swagger

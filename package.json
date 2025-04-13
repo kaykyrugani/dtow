@@ -4,9 +4,9 @@
   "description": "Backend da loja de roupas OnlyWave",
   "main": "src/server.ts",
   "scripts": {
-    "dev": "ts-node-dev --transpile-only --ignore-watch node_modules --respawn --poll --exit-child src/server.ts",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:int": "vitest run --config vitest.integration.config.ts",
@@ -29,7 +29,6 @@
     "@types/helmet": "^0.0.48",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.14.1",
-    "@types/swagger-ui-express": "^4.1.8",
     "@types/winston": "^2.4.4",
     "@zxcvbn-ts/core": "^3.0.4",
     "@zxcvbn-ts/language-common": "^3.0.4",
@@ -46,7 +45,6 @@
     "pino-pretty": "^13.0.0",
     "prisma": "^6.6.0",
     "reflect-metadata": "^0.2.2",
-    "swagger-ui-express": "^5.0.1",
     "ts-node-dev": "^2.0.0",
     "tsyringe": "^4.9.1",
     "typescript": "^5.8.3",
@@ -59,12 +57,18 @@
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/supertest": "^6.0.3",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@vitest/coverage-v8": "^3.1.1",
     "@vitest/ui": "^3.1.1",
     "eslint-plugin-vitest": "^0.5.4",
     "jest": "^29.7.0",
     "supertest": "^7.1.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "ts-jest": "^29.3.1",
     "tsx": "^4.19.3",
-    "vitest": "^3.1.1"
+    "vitest": "^3.1.1",
+    "vitest-mock-extended": "^3.1.0"
   }
 }

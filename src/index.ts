@@ -4,6 +4,7 @@ import cors from 'cors';
 import { router } from './routes';
 import { errorHandler } from './middlewares/errorHandler';
 import './config/container';
+import { app } from './app';
 
 const app = express();
 

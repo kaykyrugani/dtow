@@ -3,19 +3,30 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import { Express } from 'express';
 import logger from '../utils/logger';
+import { HttpStatusCode } from '../constants/httpCodes';
+import { ERROR_MESSAGES } from '../constants/errorMessages';
 
 // Rate limiter global
-export const globalLimiter = rateLimit({
-  windowMs: Number(process.env.RATE_LIMIT_WINDOW) || 15 * 60 * 1000,
-  max: Number(process.env.RATE_LIMIT_MAX) || 100,
-  message: { erro: 'Muitas requisições. Tente novamente mais tarde.' }
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // limite de 100 requisições por windowMs
+  message: {
+    status: 'error',
+    message: ERROR_MESSAGES.RATE_LIMIT_EXCEEDED
+  },
+  statusCode: HttpStatusCode.TOO_MANY_REQUESTS
 });
 
 // Rate limiter específico para autenticação
-export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // 5 tentativas
-  message: { erro: 'Muitas tentativas de login. Tente novamente em 15 minutos.' }
+const authLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hora
+  max: 5, // limite de 5 tentativas por hora
+  message: {
+    status: 'error',
+    message: ERROR_MESSAGES.AUTH_LIMIT_EXCEEDED
+  },
+  statusCode: HttpStatusCode.TOO_MANY_REQUESTS,
+  skipSuccessfulRequests: true // não conta requisições bem-sucedidas
 });
 
 // Headers de segurança
@@ -73,33 +84,25 @@ export const timeout = (req: Request, res: Response, next: NextFunction) => {
 };
 
 export function applySecurityMiddleware(app: Express) {
-  // Configuração do Helmet para headers de segurança
+  // Headers de segurança básicos
   app.use(helmet());
 
-  // Rate Limiting para prevenir ataques de força bruta
-  const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 100, // limite de 100 requisições por IP
-    message: 'Muitas requisições deste IP. Tente novamente mais tarde.',
-    standardHeaders: true,
-    legacyHeaders: false,
-    handler: (req, res) => {
-      logger.warn('Rate limit excedido', {
-        ip: req.ip,
-        path: req.path
-      });
-      res.status(429).json({
-        success: false,
-        message: 'Muitas requisições — tente novamente mais tarde.'
-      });
-    }
-  });
+  // Headers específicos
+  app.use(helmet.noSniff());
+  app.use(helmet.xssFilter());
+  app.use(helmet.hidePoweredBy());
+  app.use(helmet.frameguard({ action: 'deny' }));
 
-  // Aplicar rate limit em todas as rotas
+  // Rate limiting global
   app.use(limiter);
+
+  // Rate limiting específico para autenticação
+  app.use('/auth/login', authLimiter);
+  app.use('/auth/register', authLimiter);
 
   // Configurações adicionais de segurança
   app.disable('x-powered-by');
+  app.set('trust proxy', 1);
   
   logger.info('Middlewares de segurança configurados');
 } 

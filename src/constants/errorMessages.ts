@@ -6,7 +6,9 @@ export const ERROR_MESSAGES = {
   INVALID_CREDENTIALS: 'Credenciais inválidas',
   VALIDATION_ERROR: 'Erro de validação',
   TOKEN_EXPIRED: 'Token expirado',
-  UNAUTHORIZED: 'Não autorizado'
+  UNAUTHORIZED: 'Não autorizado',
+  RATE_LIMIT_EXCEEDED: 'Muitas requisições. Tente novamente mais tarde',
+  AUTH_LIMIT_EXCEEDED: 'Muitas tentativas. Tente novamente em 1 hora'
 } as const;
 
 export const ERROR_CODES = {
