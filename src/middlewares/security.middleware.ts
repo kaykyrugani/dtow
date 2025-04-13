@@ -1,60 +1,96 @@
 import { Request, Response, NextFunction } from 'express';
+import { SECURITY, REQUEST_TIMEOUT, SENSITIVE_FIELDS } from '../config/constants';
+import { AppError } from '../utils/AppError';
+import { ErrorMessages } from '../utils/errorConstants';
+import { LoggerService } from '../utils/LoggerService';
 
-const TIMEOUT_MS = 5000;
-const SENSITIVE_FIELDS = ['senha', 'token', 'cpf', 'password', 'authorization'];
-
-export class SecurityMiddleware {
-  static timeoutMiddleware(req: Request, res: Response, next: NextFunction) {
-    const timeout = setTimeout(() => {
+export const securityMiddleware = {
+  /**
+   * Middleware para timeout de requisição
+   */
+  timeout: (req: Request, res: Response, next: NextFunction) => {
+    const timeoutId = setTimeout(() => {
       if (!res.headersSent) {
-        res.status(408).json({ 
-          error: 'Request Timeout',
-          message: 'A requisição excedeu o tempo limite'
-        });
+        next(AppError.internal(ErrorMessages.TIMEOUT_ERROR));
       }
-    }, TIMEOUT_MS);
+    }, REQUEST_TIMEOUT);
 
-    res.on('finish', () => clearTimeout(timeout));
+    // Limpa o timeout quando a resposta for enviada
+    res.on('finish', () => clearTimeout(timeoutId));
+    res.on('close', () => clearTimeout(timeoutId));
+
     next();
-  }
+  },
 
-  static sanitizeLog(data: Record<string, any>): Record<string, any> {
-    return Object.entries(data).reduce((acc, [key, value]) => {
-      if (typeof value === 'object' && value !== null) {
-        acc[key] = SecurityMiddleware.sanitizeLog(value);
-      } else {
-        acc[key] = SENSITIVE_FIELDS.includes(key.toLowerCase()) 
-          ? '[REDACTED]' 
-          : value;
+  /**
+   * Middleware para sanitização de dados sensíveis
+   */
+  sanitizeData: (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.body) {
+        req.body = sanitizeObject(req.body);
       }
-      return acc;
-    }, {} as Record<string, any>);
-  }
+      if (req.query) {
+        req.query = sanitizeObject(req.query);
+      }
+      if (req.params) {
+        req.params = sanitizeObject(req.params);
+      }
+      next();
+    } catch (error) {
+      LoggerService.error('Erro na sanitização:', error);
+      next(error);
+    }
+  },
 
-  static loggerMiddleware(req: Request, res: Response, next: NextFunction) {
-    const start = Date.now();
+  /**
+   * Middleware para configuração de headers de segurança
+   */
+  securityHeaders: (_req: Request, res: Response, next: NextFunction) => {
+    // Previne clickjacking
+    res.setHeader('X-Frame-Options', 'DENY');
     
-    res.on('finish', () => {
-      const duration = Date.now() - start;
-      const sanitizedReq = {
-        method: req.method,
-        url: req.url,
-        query: SecurityMiddleware.sanitizeLog(req.query),
-        body: SecurityMiddleware.sanitizeLog(req.body),
-        headers: SecurityMiddleware.sanitizeLog(req.headers)
-      };
-
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        duration,
-        request: sanitizedReq,
-        response: {
-          statusCode: res.statusCode,
-          statusMessage: res.statusMessage
-        }
-      }, null, 2));
-    });
-
+    // Habilita proteção XSS do navegador
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    
+    // Previne MIME-type sniffing
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    
+    // Configura CORS
+    res.setHeader('Access-Control-Allow-Origin', SECURITY.CORS_ORIGINS.join(', '));
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
+    // Remove header que expõe informações do servidor
+    res.removeHeader('X-Powered-By');
+    
     next();
   }
+};
+
+/**
+ * Função auxiliar para sanitizar objetos recursivamente
+ */
+export function sanitizeObject<T extends Record<string, any>>(obj: T): Record<string, any> {
+  if (!obj || typeof obj !== 'object') {
+    return obj;
+  }
+
+  const sanitized: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (SENSITIVE_FIELDS.includes(key.toLowerCase())) {
+      sanitized[key] = '[REDACTED]';
+    } else if (Array.isArray(value)) {
+      sanitized[key] = value.map(item => 
+        typeof item === 'object' ? sanitizeObject(item) : item
+      );
+    } else if (value && typeof value === 'object') {
+      sanitized[key] = sanitizeObject(value);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+
+  return sanitized as T;
 } 

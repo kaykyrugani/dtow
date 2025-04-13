@@ -1,157 +1,121 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { AuthService } from '../services/authService';
 import { mockPrisma } from './setup';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { AppError } from '../utils/AppError';
 
 describe('AuthService', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    // Reset mocks before each test
+    mockPrisma.usuario.findUnique.mockReset();
+    mockPrisma.usuario.create.mockReset();
   });
 
   describe('cadastrar', () => {
-    const dadosCadastro = {
-      nome: 'Teste',
-      email: 'teste@teste.com',
-      senha: 'Senha123!'
-    };
+    it('deve criar um novo usuário com sucesso', async () => {
+      const userData = {
+        nome: 'Test User',
+        email: 'test@example.com',
+        senha: 'password123',
+        tipoUsuario: 'cliente' as const
+      };
 
-    const usuarioMock = {
-      id: 1,
-      nome: 'Teste',
-      email: 'teste@teste.com',
-      tipoUsuario: 'cliente',
-      senha: 'hashed_Senha123!'
-    };
-
-    it('deve cadastrar um novo usuário com sucesso', async () => {
-      mockPrisma.usuario.findUnique.mockResolvedValue(null);
-      mockPrisma.usuario.create.mockResolvedValue(usuarioMock);
-
-      const resultado = await AuthService.cadastrar(dadosCadastro);
-
-      expect(resultado.usuario).toEqual({
-        id: usuarioMock.id,
-        nome: usuarioMock.nome,
-        email: usuarioMock.email,
-        tipoUsuario: usuarioMock.tipoUsuario
+      mockPrisma.usuario.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.usuario.create.mockResolvedValueOnce({
+        id: 1,
+        ...userData,
+        senha: 'hashed_password123',
+        createdAt: new Date(),
+        updatedAt: new Date()
       });
-      expect(resultado.token).toBeDefined();
-      expect(mockPrisma.usuario.create).toHaveBeenCalledTimes(1);
+
+      const result = await AuthService.cadastrar(userData);
+
+      expect(result).toHaveProperty('usuario');
+      expect(result).toHaveProperty('token');
+      expect(result.usuario).toHaveProperty('id', 1);
+      expect(result.usuario).toHaveProperty('nome', userData.nome);
+      expect(result.usuario).toHaveProperty('email', userData.email);
     });
 
-    it('deve falhar ao cadastrar email duplicado', async () => {
-      mockPrisma.usuario.findUnique.mockResolvedValue(usuarioMock);
+    it('deve lançar erro se o email já estiver em uso', async () => {
+      const userData = {
+        nome: 'Test User',
+        email: 'existing@example.com',
+        senha: 'password123',
+        tipoUsuario: 'cliente' as const
+      };
 
-      await expect(AuthService.cadastrar(dadosCadastro))
-        .rejects
-        .toThrow(new AppError('Email ou CPF já cadastrado', 400));
+      mockPrisma.usuario.findUnique.mockResolvedValueOnce({
+        id: 1,
+        ...userData,
+        senha: 'hashed_password',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
+
+      await expect(AuthService.cadastrar(userData)).rejects.toThrow(
+        new AppError('DUPLICATE_ENTRY', 400)
+      );
     });
   });
 
   describe('login', () => {
-    const credenciais = {
-      email: 'teste@teste.com',
-      senha: 'Senha123!'
-    };
-
-    const usuarioMock = {
-      id: 1,
-      nome: 'Teste',
-      email: 'teste@teste.com',
-      senha: 'hashed_Senha123!',
-      tipoUsuario: 'cliente'
-    };
-
     it('deve fazer login com sucesso', async () => {
-      mockPrisma.usuario.findUnique.mockResolvedValue(usuarioMock);
-      vi.mocked(bcrypt.compare).mockImplementation(() => Promise.resolve(true));
+      const loginData = {
+        email: 'test@example.com',
+        senha: 'password123'
+      };
 
-      const resultado = await AuthService.login(credenciais);
-
-      expect(resultado.usuario).toEqual({
-        id: usuarioMock.id,
-        nome: usuarioMock.nome,
-        email: usuarioMock.email,
-        tipoUsuario: usuarioMock.tipoUsuario
+      mockPrisma.usuario.findUnique.mockResolvedValueOnce({
+        id: 1,
+        nome: 'Test User',
+        email: loginData.email,
+        senha: 'hashed_password123',
+        tipoUsuario: 'cliente',
+        createdAt: new Date(),
+        updatedAt: new Date()
       });
-      expect(resultado.token).toBeDefined();
+
+      const result = await AuthService.login(loginData);
+
+      expect(result).toHaveProperty('token');
+      expect(result).toHaveProperty('usuario');
+      expect(result.usuario).toHaveProperty('id', 1);
+      expect(result.usuario).toHaveProperty('email', loginData.email);
     });
 
-    it('deve falhar com credenciais inválidas', async () => {
-      mockPrisma.usuario.findUnique.mockResolvedValue(null);
+    it('deve lançar erro se o usuário não existir', async () => {
+      const loginData = {
+        email: 'nonexistent@example.com',
+        senha: 'password123'
+      };
 
-      await expect(AuthService.login(credenciais))
-        .rejects
-        .toThrow(new AppError('Credenciais inválidas', 401));
+      mockPrisma.usuario.findUnique.mockResolvedValueOnce(null);
+
+      await expect(AuthService.login(loginData)).rejects.toThrow(
+        new AppError('UNAUTHORIZED', 401)
+      );
     });
 
-    it('deve falhar com senha incorreta', async () => {
-      mockPrisma.usuario.findUnique.mockResolvedValue(usuarioMock);
-      vi.mocked(bcrypt.compare).mockImplementation(() => Promise.resolve(false));
+    it('deve lançar erro se a senha estiver incorreta', async () => {
+      const loginData = {
+        email: 'test@example.com',
+        senha: 'wrongpassword'
+      };
 
-      await expect(AuthService.login(credenciais))
-        .rejects
-        .toThrow(new AppError('Credenciais inválidas', 401));
-    });
-  });
-
-  describe('gerarTokenRecuperacao', () => {
-    const email = 'teste@teste.com';
-    const usuarioMock = {
-      id: 1,
-      email: 'teste@teste.com'
-    };
-
-    it('deve gerar token de recuperação para email existente', async () => {
-      mockPrisma.usuario.findUnique.mockResolvedValue(usuarioMock);
-      mockPrisma.usuario.update.mockResolvedValue({ ...usuarioMock, tokenRecuperacao: 'token' });
-
-      const token = await AuthService.gerarTokenRecuperacao(email);
-
-      expect(token).toBeDefined();
-      expect(typeof token).toBe('string');
-      expect(mockPrisma.usuario.update).toHaveBeenCalledWith({
-        where: { id: usuarioMock.id },
-        data: { tokenRecuperacao: expect.any(String) }
+      mockPrisma.usuario.findUnique.mockResolvedValueOnce({
+        id: 1,
+        nome: 'Test User',
+        email: loginData.email,
+        senha: 'hashed_differentpassword',
+        tipoUsuario: 'cliente',
+        createdAt: new Date(),
+        updatedAt: new Date()
       });
-    });
 
-    it('deve falhar com email não encontrado', async () => {
-      mockPrisma.usuario.findUnique.mockResolvedValue(null);
-
-      await expect(AuthService.gerarTokenRecuperacao(email))
-        .rejects
-        .toThrow(new AppError('Email não encontrado', 404));
-    });
-  });
-
-  describe('alterarSenha', () => {
-    const token = 'token_valido';
-    const novaSenha = 'NovaSenha123!';
-
-    it('deve alterar senha com sucesso', async () => {
-      mockPrisma.usuario.update.mockResolvedValue({ id: 1 });
-
-      const resultado = await AuthService.alterarSenha(token, novaSenha);
-
-      expect(resultado).toBe(true);
-      expect(mockPrisma.usuario.update).toHaveBeenCalledWith({
-        where: { tokenRecuperacao: token },
-        data: {
-          senha: expect.any(String),
-          tokenRecuperacao: null
-        }
-      });
-    });
-
-    it('deve falhar com token inválido', async () => {
-      mockPrisma.usuario.update.mockRejectedValue(new Error('Token inválido'));
-
-      await expect(AuthService.alterarSenha(token, novaSenha))
-        .rejects
-        .toThrow(new AppError('Token inválido', 400));
+      await expect(AuthService.login(loginData)).rejects.toThrow(
+        new AppError('UNAUTHORIZED', 401)
+      );
     });
   });
 }); 

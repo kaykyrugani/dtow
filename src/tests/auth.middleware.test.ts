@@ -1,87 +1,105 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { Request, Response, NextFunction } from 'express';
+import { describe, it, expect, beforeEach } from 'vitest';
 import jwt from 'jsonwebtoken';
-import { mockPrisma } from './setup';
-import { authMiddleware } from '../middlewares/authMiddleware';
+import { authMiddleware } from '../middlewares/auth.middleware';
 import { AppError } from '../utils/AppError';
-
-vi.mock('@prisma/client', () => ({
-  PrismaClient: vi.fn(() => mockPrisma)
-}));
-
-vi.mock('jsonwebtoken', () => ({
-  default: {
-    verify: vi.fn()
-  }
-}));
-
-vi.mock('../lib/prisma');
+import { ErrorMessages } from '../utils/errorConstants';
+import { SECURITY } from '../config/constants';
+import {
+  createMockRequest,
+  createMockResponse,
+  mockNext,
+  mockJwtPayload
+} from './setup';
 
 describe('AuthMiddleware', () => {
-  let mockReq: Partial<Request>;
-  let mockRes: Partial<Response>;
-  let mockNext: NextFunction;
+  const validToken = jwt.sign(mockJwtPayload, SECURITY.JWT_SECRET);
+  const expiredToken = jwt.sign(mockJwtPayload, SECURITY.JWT_SECRET, { expiresIn: '0s' });
 
   beforeEach(() => {
-    mockReq = {
-      headers: {},
-    };
-    mockRes = {
-      status: vi.fn().mockReturnThis(),
-      json: vi.fn(),
-    };
-    mockNext = vi.fn();
+    mockNext.mockClear();
   });
 
-  it('deve retornar 401 quando não houver token', async () => {
-    await authMiddleware(mockReq as Request, mockRes as Response, mockNext);
+  describe('Token Validation', () => {
+    it('deve passar quando o token é válido', async () => {
+      const req = createMockRequest({
+        headers: { authorization: `Bearer ${validToken}` }
+      });
+      const res = createMockResponse();
 
-    expect(mockRes.status).toHaveBeenCalledWith(401);
-    expect(mockRes.json).toHaveBeenCalledWith({
-      status: 'error',
-      message: 'Token não fornecido',
+      await authMiddleware()(req, res, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith();
+      expect(req.user).toEqual(expect.objectContaining({
+        userId: mockJwtPayload.userId,
+        email: mockJwtPayload.email
+      }));
+    });
+
+    it('deve retornar erro quando o token está ausente', async () => {
+      const req = createMockRequest();
+      const res = createMockResponse();
+
+      await authMiddleware()(req, res, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(
+        expect.any(AppError)
+      );
+      expect(mockNext.mock.calls[0][0].message).toBe(ErrorMessages.MISSING_TOKEN);
+    });
+
+    it('deve retornar erro quando o token está expirado', async () => {
+      const req = createMockRequest({
+        headers: { authorization: `Bearer ${expiredToken}` }
+      });
+      const res = createMockResponse();
+
+      await authMiddleware()(req, res, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(
+        expect.any(AppError)
+      );
+      expect(mockNext.mock.calls[0][0].message).toBe(ErrorMessages.INVALID_TOKEN);
+    });
+
+    it('deve retornar erro quando o token é inválido', async () => {
+      const req = createMockRequest({
+        headers: { authorization: 'Bearer invalid.token.here' }
+      });
+      const res = createMockResponse();
+
+      await authMiddleware()(req, res, mockNext);
+
+      expect(mockNext).toHaveBeenCalledWith(
+        expect.any(AppError)
+      );
+      expect(mockNext.mock.calls[0][0].message).toBe(ErrorMessages.INVALID_TOKEN);
     });
   });
 
-  it('deve retornar 401 quando o token estiver expirado', async () => {
-    mockReq.headers = {
-      authorization: 'Bearer expired',
-    };
+  describe('Role Validation', () => {
+    it('deve passar quando o usuário tem a role necessária', async () => {
+      const req = createMockRequest({
+        headers: { authorization: `Bearer ${validToken}` }
+      });
+      const res = createMockResponse();
 
-    await authMiddleware(mockReq as Request, mockRes as Response, mockNext);
+      await authMiddleware(['admin'])(req, res, mockNext);
 
-    expect(mockRes.status).toHaveBeenCalledWith(401);
-    expect(mockRes.json).toHaveBeenCalledWith({
-      status: 'error',
-      message: 'Token expirado',
+      expect(mockNext).toHaveBeenCalledWith();
     });
-  });
 
-  it('deve retornar 401 quando o token for inválido', async () => {
-    mockReq.headers = {
-      authorization: 'Bearer invalid',
-    };
+    it('deve retornar erro quando o usuário não tem a role necessária', async () => {
+      const req = createMockRequest({
+        headers: { authorization: `Bearer ${validToken}` }
+      });
+      const res = createMockResponse();
 
-    await authMiddleware(mockReq as Request, mockRes as Response, mockNext);
+      await authMiddleware(['superadmin'])(req, res, mockNext);
 
-    expect(mockRes.status).toHaveBeenCalledWith(401);
-    expect(mockRes.json).toHaveBeenCalledWith({
-      status: 'error',
-      message: 'Token inválido',
-    });
-  });
-
-  it('deve chamar next() quando o token for válido', async () => {
-    mockReq.headers = {
-      authorization: 'Bearer valid_token',
-    };
-
-    await authMiddleware(mockReq as Request, mockRes as Response, mockNext);
-
-    expect(mockNext).toHaveBeenCalled();
-    expect(mockReq.user).toEqual({
-      id: 1,
-      tipoUsuario: 'cliente',
+      expect(mockNext).toHaveBeenCalledWith(
+        expect.any(AppError)
+      );
+      expect(mockNext.mock.calls[0][0].message).toBe(ErrorMessages.INSUFFICIENT_PERMISSIONS);
     });
   });
 }); 

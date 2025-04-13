@@ -1,174 +1,149 @@
 import { PrismaClient } from '@prisma/client';
+import { PaginationParams, PaginatedResult, QueryOptions, PrismaModels } from '../types/shared';
 import { AppError } from '../utils/AppError';
-import { PaginationParams, PaginatedResult, QueryOptions } from '../types/pagination';
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, DEFAULT_ORDER } from '../config/constants';
+import { LoggerService } from '../utils/LoggerService';
+import { PrismaErrorCodes } from '../utils/errorConstants';
 
-export class BaseService<T extends keyof PrismaClient> {
-  constructor(
-    protected readonly prisma: PrismaClient,
-    protected readonly model: T
-  ) {}
+export class BaseService<T extends PrismaModels> {
+  protected prisma: PrismaClient;
+  protected model: T;
 
-  async findAll<R>(params: PaginationParams<R> = {}): Promise<PaginatedResult<R>> {
-    return this.paginateInternal(params);
+  constructor(prisma: PrismaClient, model: T) {
+    this.prisma = prisma;
+    this.model = model;
   }
 
-  async findById<R>(id: number, options: QueryOptions<R> = {}): Promise<R | null> {
-    return this.findByIdInternal(id, options);
+  // Métodos Públicos
+  async findAll<R = any>(params: PaginationParams<R> = {}): Promise<PaginatedResult<R>> {
+    try {
+      return await this._paginateInternal(params);
+    } catch (error) {
+      this._handleError(error);
+      throw error;
+    }
   }
 
-  async create<R>(data: Record<string, any>, options: QueryOptions<R> = {}): Promise<R> {
-    return this.createInternal(data, options);
+  async findById<R = any>(id: number, options: QueryOptions<R> = {}): Promise<R | null> {
+    try {
+      return await this._findByIdInternal(id, options);
+    } catch (error) {
+      this._handleError(error);
+      throw error;
+    }
   }
 
-  async update<R>(id: number, data: Record<string, any>, options: QueryOptions<R> = {}): Promise<R> {
-    return this.updateInternal(id, data, options);
+  async create<R = any>(data: Record<string, any>, options: QueryOptions<R> = {}): Promise<R> {
+    try {
+      return await this._createInternal(data, options);
+    } catch (error) {
+      this._handleError(error);
+      throw error;
+    }
+  }
+
+  async update<R = any>(id: number, data: Record<string, any>, options: QueryOptions<R> = {}): Promise<R> {
+    try {
+      return await this._updateInternal(id, data, options);
+    } catch (error) {
+      this._handleError(error);
+      throw error;
+    }
   }
 
   async delete(id: number): Promise<void> {
-    return this.deleteInternal(id);
+    try {
+      await this._deleteInternal(id);
+    } catch (error) {
+      this._handleError(error);
+      throw error;
+    }
   }
 
-  protected async paginateInternal<R>(
-    params: PaginationParams<R> = {}
-  ): Promise<PaginatedResult<R>> {
-    const { 
-      page = 1, 
-      limit = 10, 
-      where = {}, 
-      orderBy = {} 
-    } = params;
-
+  // Métodos Internos Protegidos
+  protected async _paginateInternal<R>(params: PaginationParams<R>): Promise<PaginatedResult<R>> {
+    const page = Math.max(1, params.page || 1);
+    const limit = Math.min(params.limit || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
     const skip = (page - 1) * limit;
+    const order = params.order || DEFAULT_ORDER;
 
-    try {
-      const [items, total] = await Promise.all([
-        (this.prisma[this.model] as any).findMany({ 
-          skip, 
-          take: limit, 
-          where, 
-          orderBy 
-        }),
-        (this.prisma[this.model] as any).count({ where })
-      ]);
+    const [total, data] = await Promise.all([
+      (this.prisma[this.model] as any).count({ where: params.where }),
+      (this.prisma[this.model] as any).findMany({
+        skip,
+        take: limit,
+        where: params.where,
+        orderBy: params.orderBy ? { [String(params.orderBy)]: order } : undefined
+      })
+    ]);
 
-      const totalPages = Math.ceil(total / limit);
-
-      return { 
-        items, 
-        total, 
-        page, 
-        limit, 
-        totalPages,
-        hasNext: page < totalPages,
-        hasPrevious: page > 1
-      };
-    } catch (error) {
-      throw this.handleError(error);
-    }
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    };
   }
 
-  protected async findOneInternal<R>(
-    where: Record<string, any>,
-    options: QueryOptions<R> = {}
-  ): Promise<R | null> {
-    try {
-      return await (this.prisma[this.model] as any).findFirst({
-        where,
-        ...options
-      });
-    } catch (error) {
-      throw this.handleError(error);
-    }
+  protected async _findByIdInternal<R>(id: number, options: QueryOptions<R>): Promise<R | null> {
+    return (this.prisma[this.model] as any).findUnique({
+      where: { id },
+      ...options
+    });
   }
 
-  protected async findByIdInternal<R>(
-    id: number,
-    options: QueryOptions<R> = {}
-  ): Promise<R | null> {
-    try {
-      return await (this.prisma[this.model] as any).findUnique({
-        where: { id },
-        ...options
-      });
-    } catch (error) {
-      throw this.handleError(error);
-    }
+  protected async _createInternal<R>(data: Record<string, any>, options: QueryOptions<R>): Promise<R> {
+    return (this.prisma[this.model] as any).create({
+      data,
+      ...options
+    });
   }
 
-  protected async createInternal<R>(
-    data: Record<string, any>,
-    options: QueryOptions<R> = {}
-  ): Promise<R> {
-    try {
-      return await (this.prisma[this.model] as any).create({
-        data,
-        ...options
-      });
-    } catch (error) {
-      throw this.handleError(error);
+  protected async _updateInternal<R>(id: number, data: Record<string, any>, options: QueryOptions<R>): Promise<R> {
+    const exists = await this._findByIdInternal(id, {});
+    if (!exists) {
+      throw AppError.notFound(`${String(this.model)} não encontrado`);
     }
+
+    return (this.prisma[this.model] as any).update({
+      where: { id },
+      data,
+      ...options
+    });
   }
 
-  protected async updateInternal<R>(
-    id: number,
-    data: Record<string, any>,
-    options: QueryOptions<R> = {}
-  ): Promise<R> {
-    try {
-      return await (this.prisma[this.model] as any).update({
-        where: { id },
-        data,
-        ...options
-      });
-    } catch (error) {
-      throw this.handleError(error);
+  protected async _deleteInternal(id: number): Promise<void> {
+    const exists = await this._findByIdInternal(id, {});
+    if (!exists) {
+      throw AppError.notFound(`${String(this.model)} não encontrado`);
     }
+
+    await (this.prisma[this.model] as any).delete({
+      where: { id }
+    });
   }
 
-  protected async deleteInternal(id: number): Promise<void> {
-    try {
-      await (this.prisma[this.model] as any).delete({
-        where: { id }
-      });
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
+  protected _handleError(error: any): never {
+    LoggerService.error(`Erro no ${String(this.model)}Service`, error);
 
-  protected handleError(error: unknown): never {
     if (error instanceof AppError) {
       throw error;
     }
 
-    // Prisma error handling
     if (error && typeof error === 'object' && 'code' in error) {
-      const prismaError = error as { code: string; meta?: { target?: string[] } };
-      
-      switch (prismaError.code) {
-        case 'P2002':
-          throw new AppError(
-            'Registro duplicado encontrado' + 
-            (prismaError.meta?.target ? `: ${prismaError.meta.target.join(', ')}` : ''),
-            409
-          );
-        case 'P2025':
-          throw new AppError('Registro não encontrado', 404);
-        case 'P2003':
-          throw new AppError('Violação de restrição de chave estrangeira', 400);
-        case 'P2014':
-          throw new AppError('Violação de restrição de invalidação', 400);
-        default:
-          console.error('Prisma Error:', error);
-          throw new AppError('Erro interno do servidor', 500);
+      switch (error.code) {
+        case PrismaErrorCodes.UNIQUE_CONSTRAINT:
+          throw AppError.invalidData('Registro duplicado');
+        case PrismaErrorCodes.FOREIGN_KEY_CONSTRAINT:
+          throw AppError.invalidData('Referência inválida');
+        case PrismaErrorCodes.NOT_FOUND:
+          throw AppError.notFound('Registro não encontrado');
+        case PrismaErrorCodes.REQUIRED_FIELD:
+          throw AppError.invalidData('Campos obrigatórios não preenchidos');
       }
     }
 
-    if (error instanceof Error) {
-      console.error('Error:', error);
-      throw new AppError(error.message, 500);
-    }
-
-    console.error('Unexpected Error:', error);
-    throw new AppError('Erro interno do servidor', 500);
+    throw AppError.internal('Erro interno do servidor');
   }
 } 
