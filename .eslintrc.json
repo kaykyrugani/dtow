@@ -1,0 +1,21 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "root": true,
+  "overrides": [
+    {
+      "files": ["*.test.ts"],
+      "env": {
+        "vitest/globals": true
+      },
+      "plugins": ["vitest"],
+      "extends": ["plugin:vitest/recommended"]
+    }
+  ]
+} 

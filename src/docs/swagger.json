@@ -1,0 +1,178 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "OnlyWave API",
+    "description": "API REST para a plataforma de e-commerce OnlyWave",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Servidor de Desenvolvimento"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Usuario": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "nome": { "type": "string" },
+          "email": { "type": "string" },
+          "tipoUsuario": { "type": "string", "enum": ["cliente", "admin"] }
+        }
+      },
+      "Produto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "nome": { "type": "string" },
+          "descricao": { "type": "string" },
+          "preco": { "type": "number" },
+          "estoque": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/cadastro": {
+      "post": {
+        "summary": "Cadastro de usuário",
+        "tags": ["Autenticação"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": { "type": "string" },
+                  "email": { "type": "string" },
+                  "senha": { "type": "string" },
+                  "cpf": { "type": "string" }
+                },
+                "required": ["nome", "email", "senha", "cpf"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuário criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Usuario"
+                }
+              }
+            }
+          },
+          "400": { "description": "Dados inválidos" },
+          "409": { "description": "Email já cadastrado" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login de usuário",
+        "tags": ["Autenticação"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "senha": { "type": "string" }
+                },
+                "required": ["email", "senha"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Credenciais inválidas" }
+        }
+      }
+    },
+    "/produtos": {
+      "get": {
+        "summary": "Lista todos os produtos",
+        "tags": ["Produtos"],
+        "responses": {
+          "200": {
+            "description": "Lista de produtos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Produto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Cria um novo produto",
+        "tags": ["Produtos"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": { "type": "string" },
+                  "descricao": { "type": "string" },
+                  "preco": { "type": "number" },
+                  "estoque": { "type": "integer" }
+                },
+                "required": ["nome", "preco", "estoque"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Produto criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Produto"
+                }
+              }
+            }
+          },
+          "400": { "description": "Dados inválidos" },
+          "401": { "description": "Não autorizado" },
+          "403": { "description": "Acesso negado" }
+        }
+      }
+    }
+  }
+} 

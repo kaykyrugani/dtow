@@ -1,0 +1,130 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Usuario {
+  id         Int         @id @default(autoincrement())
+  nome       String
+  email      String      @unique
+  senha      String
+  cpf        String      @unique
+  tipoUsuario String     @default("cliente")
+  criadoEm   DateTime    @default(now())
+  atualizadoEm DateTime  @updatedAt
+  endereco   Endereco?
+  pedidos    Pedido[]
+  avaliacoes Avaliacao[]
+
+  @@map("usuarios")
+}
+
+model Endereco {
+  id         Int      @id @default(autoincrement())
+  rua        String
+  numero     String
+  complemento String?
+  bairro     String
+  cidade     String
+  estado     String
+  cep        String
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId  Int      @unique
+  criadoEm   DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@map("enderecos")
+}
+
+model Produto {
+  id           Int         @id @default(autoincrement())
+  nome         String
+  descricao    String
+  preco        Float
+  desconto     Float?
+  marca        String
+  categoria    String
+  subcategoria String
+  imagem       String
+  imagens      String
+  tamanhos     String
+  estoque      Int         @default(0)
+  ativo        Boolean     @default(true)
+  criadoEm     DateTime    @default(now())
+  atualizadoEm DateTime    @updatedAt
+  avaliacoes   Avaliacao[]
+  pedidoItems  PedidoItem[]
+
+  @@map("produtos")
+}
+
+model Avaliacao {
+  id         Int      @id @default(autoincrement())
+  nota       Int
+  comentario String
+  data       DateTime @default(now())
+  produto    Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  produtoId  Int
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId  Int
+
+  @@map("avaliacoes")
+}
+
+model Pedido {
+  id            Int         @id @default(autoincrement())
+  status        String
+  pagamento     String
+  valorTotal    Float
+  frete         Float
+  data          DateTime    @default(now())
+  atualizadoEm  DateTime    @updatedAt
+  endereco      String
+  usuario       Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId     Int
+  itens         PedidoItem[]
+  cupom         Cupom?      @relation(fields: [cupomId], references: [id])
+  cupomId       Int?
+
+  @@map("pedidos")
+}
+
+model PedidoItem {
+  id         Int      @id @default(autoincrement())
+  quantidade Int
+  preco      Float
+  tamanho    String
+  produto    Produto  @relation(fields: [produtoId], references: [id])
+  produtoId  Int
+  pedido     Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  pedidoId   Int
+
+  @@map("pedido_items")
+}
+
+model Cupom {
+  id          Int       @id @default(autoincrement())
+  codigo      String    @unique
+  desconto    Float
+  tipo        String    @default("valor") // valor ou percentual
+  valorMinimo Float?
+  expiracao   DateTime
+  usado       Boolean   @default(false)
+  ativo       Boolean   @default(true)
+  criadoEm    DateTime  @default(now())
+  atualizadoEm DateTime @updatedAt
+  pedidos     Pedido[]
+
+  @@map("cupons")
+}
