@@ -251,11 +251,12 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "postgresql://postgres:kayky1012@localhost:5432/onlywave_db"
+        "value": null
       }
     }
   },

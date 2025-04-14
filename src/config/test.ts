@@ -6,42 +6,58 @@ import { AuthService } from '../services/authService';
 import { BaseService } from '../services/BaseService';
 
 export async function setupTestContainer() {
-  const prisma = new PrismaClient();
+  try {
+    const prisma = new PrismaClient();
+    await prisma.$connect();
 
-  // Registra o cliente Prisma
-  container.registerInstance(PrismaClient, prisma);
+    // Registra o cliente Prisma
+    container.registerInstance(PrismaClient, prisma);
 
-  // Registra os repositórios
-  container.registerSingleton('UsuarioRepository', UsuarioRepository);
+    // Registra os repositórios
+    container.registerSingleton('UsuarioRepository', UsuarioRepository);
 
-  // Registra os serviços
-  container.registerSingleton('TokenService', TokenService);
-  container.registerSingleton('AuthService', AuthService);
-  container.registerSingleton('BaseService', BaseService);
+    // Registra os serviços
+    container.registerSingleton('TokenService', TokenService);
+    container.registerSingleton('AuthService', AuthService);
+    container.registerSingleton('BaseService', BaseService);
 
-  return {
-    prisma,
-    container,
-  };
+    return {
+      prisma,
+      container,
+    };
+  } catch (error) {
+    console.error('Erro ao configurar container de teste:', error);
+    throw error;
+  }
 }
 
 export async function clearDatabase(prisma: PrismaClient) {
-  const tables = [
-    'RefreshToken',
-    'PedidoItem',
-    'Pedido',
-    'Avaliacao',
-    'Produto',
-    'Endereco',
-    'Usuario',
-    'Cupom',
-  ];
+  try {
+    const tables = [
+      'RefreshToken',
+      'PedidoItem',
+      'Pedido',
+      'Avaliacao',
+      'Produto',
+      'Endereco',
+      'Usuario',
+      'Cupom',
+    ];
 
-  for (const table of tables) {
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
+    for (const table of tables) {
+      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
+    }
+  } catch (error) {
+    console.error('Erro ao limpar banco de dados:', error);
+    throw error;
   }
 }
 
 export async function closeTestConnection(prisma: PrismaClient) {
-  await prisma.$disconnect();
+  try {
+    await prisma.$disconnect();
+  } catch (error) {
+    console.error('Erro ao fechar conexão com banco de dados:', error);
+    throw error;
+  }
 } 

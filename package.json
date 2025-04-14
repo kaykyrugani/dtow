@@ -18,7 +18,11 @@
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",
     "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix"
+    "lint:fix": "eslint . --ext .ts --fix",
+    "db:setup": "tsx scripts/setup-db.ts",
+    "db:reset": "prisma migrate reset --force",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:test-connection": "tsx scripts/test-connection.ts"
   },
   "keywords": [],
   "author": "",

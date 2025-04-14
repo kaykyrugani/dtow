@@ -8,7 +8,7 @@ export const emailSchema = z.string()
   .min(1, 'Email é obrigatório');
 
 export const senhaSchema = z.string()
-  .min(6, ERROR_MESSAGES[ERROR_CODES.PASSWORD_INVALID])
+  .min(1, 'Senha é obrigatória')
   .refine(validarSenha, ERROR_MESSAGES[ERROR_CODES.PASSWORD_INVALID]);
 
 export const cpfSchema = z.string()

@@ -174,7 +174,7 @@ export class AuthService {
       if (!userId) {
         throw new AppError(
           ERROR_CODES.TOKEN_INVALID,
-          HttpStatusCode.BAD_REQUEST
+          HttpStatusCode.UNAUTHORIZED
         );
       }
 
@@ -182,7 +182,7 @@ export class AuthService {
       await this.usuarioRepository.update(userId, { senha: hashedSenha });
       await this.tokenService.revokePasswordResetToken(token);
 
-      return { mensagem: ERROR_MESSAGES[ERROR_CODES.PASSWORD_INVALID] };
+      return { mensagem: ERROR_MESSAGES[ERROR_CODES.PASSWORD_CHANGED] };
     } catch (error) {
       if (error instanceof AppError) throw error;
       this.handlePrismaError(error);

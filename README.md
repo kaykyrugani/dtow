@@ -1,198 +1,99 @@
-# OnlyWave API
+# OnlyWave Backend
 
-API RESTful desenvolvida com Node.js, Express, TypeScript e Prisma.
+Backend da loja de roupas OnlyWave desenvolvido com Node.js, TypeScript, Express e PostgreSQL.
 
-## 🚀 Tecnologias
+## 🚀 Configuração do Ambiente
 
-- Node.js
-- TypeScript
-- Express
-- Prisma ORM
-- PostgreSQL
-- JWT
-- Zod
-- Vitest
+### Pré-requisitos
 
-## 📋 Pré-requisitos
+- Node.js >= 14
+- PostgreSQL >= 12
+- Redis (opcional)
 
-- Node.js >= 18
-- PostgreSQL >= 14
-- npm ou yarn
+### Instalação
 
-## 🔧 Instalação
-
-1. Clone o repositório:
+1. Clone o repositório
 ```bash
-git clone https://github.com/seu-usuario/onlywave.git
-cd onlywave
+git clone https://github.com/seu-usuario/onlywave-backend.git
+cd onlywave-backend
 ```
 
-2. Instale as dependências:
+2. Instale as dependências
 ```bash
 npm install
 ```
 
-3. Configure as variáveis de ambiente:
+3. Configure as variáveis de ambiente
 ```bash
 cp .env.example .env
 ```
+Edite o arquivo `.env` com suas configurações
 
-4. Configure o banco de dados:
+4. Configure o banco de dados
 ```bash
-npx prisma migrate dev
+npm run db:setup    # Cria os bancos e aplica migrações
+npm run db:seed     # (Opcional) Popula o banco com dados iniciais
 ```
 
-## 🏃‍♂️ Executando
+### Scripts Disponíveis
 
-### Desenvolvimento
-```bash
-npm run dev
-```
+- `npm run dev` - Inicia o servidor em modo desenvolvimento
+- `npm run build` - Compila o projeto
+- `npm run start` - Inicia o servidor em produção
+- `npm test` - Executa os testes
+- `npm run test:coverage` - Executa os testes com cobertura
+- `npm run db:setup` - Configura os bancos de dados
+- `npm run db:reset` - Reseta os bancos de dados
+- `npm run db:test-connection` - Testa a conexão com os bancos
 
-### Produção
-```bash
-npm run build
-npm start
-```
-
-### Testes
-```bash
-npm test           # Executa todos os testes
-npm run test:watch # Executa em modo watch
-npm run test:cov   # Executa com cobertura
-```
-
-## 🏗️ Estrutura do Projeto
+## 📁 Estrutura do Projeto
 
 ```
 src/
-├── config/        # Configurações da aplicação
-├── controllers/   # Controladores
-├── middlewares/   # Middlewares
-├── services/      # Camada de serviços
-├── types/         # Tipos e interfaces
-├── utils/         # Utilitários
-└── tests/         # Testes
+├── @types/         # Definições de tipos
+├── config/         # Configurações
+├── constants/      # Constantes e enums
+├── controllers/    # Controladores
+├── middlewares/    # Middlewares
+├── routes/         # Rotas
+├── services/       # Serviços
+├── utils/          # Utilitários
+└── validators/     # Validadores
 ```
 
-## 🔒 Segurança
+## 🔐 Variáveis de Ambiente
 
-- Autenticação JWT
-- Sanitização de dados
-- Headers de segurança
-- Rate limiting
-- Timeout de requisições
-- Validação de dados com Zod
+| Variável | Descrição | Exemplo |
+|----------|-----------|---------|
+| DATABASE_URL | URL do banco principal | postgresql://user:pass@localhost:5432/db |
+| DATABASE_URL_TEST | URL do banco de teste | postgresql://user:pass@localhost:5432/test_db |
+| JWT_SECRET | Chave para tokens JWT | your_secret_key |
+| REDIS_HOST | Host do Redis | localhost |
+| REDIS_PORT | Porta do Redis | 6379 |
+
+## 🧪 Testes
+
+O projeto usa Vitest para testes. Os testes são divididos em:
+
+- Unitários: `src/tests/unit/`
+- Integração: `src/tests/integration/`
+- E2E: `src/tests/e2e/`
+
+Para executar:
+```bash
+npm test              # Todos os testes
+npm run test:watch    # Modo watch
+npm run test:coverage # Com cobertura
+```
 
 ## 📝 Documentação da API
 
-### Autenticação
-
-Todas as rotas protegidas requerem o header `Authorization: Bearer {token}`.
-
-### Endpoints
-
-#### Usuários
-- `POST /usuarios` - Criar usuário
-- `GET /usuarios` - Listar usuários (requer admin)
-- `GET /usuarios/:id` - Buscar usuário
-- `PUT /usuarios/:id` - Atualizar usuário
-- `DELETE /usuarios/:id` - Deletar usuário
-
-#### Autenticação
-- `POST /auth/login` - Login
-- `POST /auth/refresh` - Refresh token
-
-#### Produtos
-- `GET /produtos` - Listar produtos
-- `POST /produtos` - Criar produto (requer admin)
-- `GET /produtos/:id` - Buscar produto
-- `PUT /produtos/:id` - Atualizar produto (requer admin)
-- `DELETE /produtos/:id` - Deletar produto (requer admin)
-
-### Paginação
-
-Endpoints que retornam listas suportam os seguintes parâmetros:
-
-- `page`: Número da página (default: 1)
-- `limit`: Itens por página (default: 10, max: 100)
-- `orderBy`: Campo para ordenação
-- `order`: Direção da ordenação (asc/desc)
-
-### Erros
-
-A API retorna os seguintes códigos de erro:
-
-- `400` - Dados inválidos
-- `401` - Não autorizado
-- `403` - Proibido
-- `404` - Não encontrado
-- `409` - Conflito
-- `429` - Muitas requisições
-- `500` - Erro interno
+A documentação da API está disponível em `/docs` quando o servidor está rodando.
 
 ## 🤝 Contribuindo
 
 1. Fork o projeto
-2. Crie uma branch (`git checkout -b feature/nova-feature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
-4. Push para a branch (`git push origin feature/nova-feature`)
+2. Crie sua branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
-## 🐳 Docker
-
-1. Construa a imagem
-```bash
-docker build -t onlywave .
-```
-
-2. Execute o container
-```bash
-docker-compose up -d
-```
-
-## 📚 Documentação da API
-
-A documentação completa da API está disponível em:
-
-- Swagger UI: http://localhost:3000/api-docs
-- Documentação dos Testes: [docs/tests.md](docs/tests.md)
-
-## 🚀 Deploy
-
-### Heroku
-1. Instale o Heroku CLI
-2. Login no Heroku
-```bash
-heroku login
-```
-3. Crie uma nova aplicação
-```bash
-heroku create onlywave-api
-```
-4. Configure as variáveis de ambiente
-```bash
-heroku config:set NODE_ENV=production
-heroku config:set JWT_SECRET=sua-chave-secreta
-```
-5. Deploy
-```bash
-git push heroku main
-```
-
-## 📚 Como Contribuir
-
-1. Faça um Fork do projeto
-2. Crie uma Branch para sua Feature (`git checkout -b feature/AmazingFeature`)
-3. Adicione suas mudanças (`git add .`)
-4. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-5. Push para a Branch (`git push origin feature/AmazingFeature`)
-6. Abra um Pull Request
-
-## 📝 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.

@@ -1,36 +1,41 @@
-import { PrismaClient } from '@prisma/client';
-import { execSync } from 'child_process';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import * as dotenv from 'dotenv';
+
+const execAsync = promisify(exec);
 
 async function setupTestDatabase() {
   console.log('🔧 Configurando banco de dados de teste...');
 
   try {
-    // Executa as migrações
-    console.log('📦 Executando migrações...');
-    execSync('npx prisma migrate deploy', { stdio: 'inherit' });
+    // Carregar variáveis de ambiente
+    dotenv.config();
 
-    // Conecta ao banco de dados
-    const prisma = new PrismaClient();
-
-    // Limpa o banco de dados
-    console.log('🧹 Limpando banco de dados...');
-    const tables = [
-      'RefreshToken',
-      'PedidoItem',
-      'Pedido',
-      'Avaliacao',
-      'Produto',
-      'Endereco',
-      'Usuario',
-      'Cupom',
-    ];
-
-    for (const table of tables) {
-      await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE;`);
+    // Verificar variáveis necessárias
+    if (!process.env.DATABASE_URL_TEST) {
+      throw new Error('DATABASE_URL_TEST não está definida!');
     }
 
-    await prisma.$disconnect();
-    console.log('✅ Banco de dados de teste configurado com sucesso!');
+    // Backup da URL original
+    const originalUrl = process.env.DATABASE_URL;
+    
+    try {
+      // Usar URL do banco de teste
+      process.env.DATABASE_URL = process.env.DATABASE_URL_TEST;
+
+      // Gerar cliente Prisma
+      console.log('📦 Gerando Prisma Client...');
+      await execAsync('npx prisma generate');
+
+      // Aplicar migrações
+      console.log('🔄 Aplicando migrações...');
+      await execAsync('npx prisma migrate deploy');
+
+      console.log('✅ Banco de dados de teste configurado com sucesso!');
+    } finally {
+      // Restaurar URL original
+      process.env.DATABASE_URL = originalUrl;
+    }
   } catch (error) {
     console.error('❌ Erro ao configurar banco de dados de teste:', error);
     process.exit(1);

@@ -6,7 +6,7 @@ export const users = {
     email: 'test@example.com',
     senha: 'Test123@',
     nome: 'Test User',
-    cpf: '12345678901',
+    cpf: '12345678909',
     tipoUsuario: TipoUsuario.ADMIN,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date('2024-01-01')
