@@ -10,8 +10,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Usuario {
@@ -28,6 +28,8 @@ model Usuario {
   avaliacoes Avaliacao[]
   refreshTokens RefreshToken[]
 
+  @@index([email])
+  @@index([cpf])
   @@map("usuarios")
 }
 
@@ -67,6 +69,10 @@ model Produto {
   avaliacoes   Avaliacao[]
   pedidoItems  PedidoItem[]
 
+  @@index([categoria])
+  @@index([subcategoria])
+  @@index([marca])
+  @@index([ativo])
   @@map("produtos")
 }
 
@@ -98,6 +104,8 @@ model Pedido {
   cupom         Cupom?      @relation(fields: [cupomId], references: [id])
   cupomId       Int?
 
+  @@index([status])
+  @@index([usuarioId])
   @@map("pedidos")
 }
 

@@ -1,10 +1,9 @@
 import { injectable, inject } from 'tsyringe';
-import jwt, { sign, verify } from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
 import { AppError } from '../utils/AppError';
+import { ERROR_CODES } from '../constants/errorMessages';
 import { HttpStatusCode } from '../constants/httpCodes';
-import { ERROR_MESSAGES } from '../constants/errorMessages';
-import { prisma } from '../database';
+import { PrismaClient } from '@prisma/client';
 
 @injectable()
 export class TokenService {
@@ -13,121 +12,151 @@ export class TokenService {
     private prisma: PrismaClient
   ) {}
 
-  generateAccessToken(userId: number): string {
-    return jwt.sign(
-      { userId },
-      process.env.JWT_SECRET || 'secret',
-      { expiresIn: '15m' }
-    );
-  }
+  private readonly JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
+  private readonly ACCESS_TOKEN_EXPIRY = '15m';
+  private readonly REFRESH_TOKEN_EXPIRY = '7d';
+  private readonly PASSWORD_RESET_TOKEN_EXPIRY = '1h';
 
-  async generateRefreshToken(userId: number): Promise<string> {
-    const token = jwt.sign(
-      { userId },
-      process.env.REFRESH_TOKEN_SECRET || 'refresh_secret',
-      { expiresIn: '7d' }
-    );
-
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-
-    await this.prisma.refreshToken.create({
-      data: {
-        token,
-        userId,
-        expiresAt
-      }
-    });
-
-    return token;
-  }
-
-  async refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+  generateAccessToken(userId: string): string {
     try {
-      const tokenData = await this.prisma.refreshToken.findUnique({
-        where: { token: refreshToken },
-        include: { usuario: true }
+      return jwt.sign({ userId }, this.JWT_SECRET, {
+        expiresIn: this.ACCESS_TOKEN_EXPIRY
       });
-
-      if (!tokenData || tokenData.expiresAt < new Date()) {
-        throw new AppError('TOKEN_EXPIRED', HttpStatusCode.UNAUTHORIZED);
-      }
-
-      // Gerar novo access token
-      const accessToken = this.generateAccessToken(tokenData.userId);
-
-      // Gerar novo refresh token
-      await this.prisma.refreshToken.delete({
-        where: { id: tokenData.id }
-      });
-
-      const newRefreshToken = await this.generateRefreshToken(tokenData.userId);
-
-      return {
-        accessToken,
-        refreshToken: newRefreshToken
-      };
     } catch (error) {
-      if (error instanceof AppError) throw error;
-      throw new AppError('INTERNAL_ERROR', HttpStatusCode.INTERNAL_SERVER_ERROR);
+      throw new AppError(ERROR_CODES.INTERNAL_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async revokeRefreshToken(token: string): Promise<void> {
-    await this.prisma.refreshToken.delete({
-      where: { token }
-    });
-  }
-
-  async revokeAllUserTokens(userId: number): Promise<void> {
-    await this.prisma.refreshToken.deleteMany({
-      where: { userId }
-    });
-  }
-
-  public async generatePasswordResetToken(userId: number): Promise<string> {
-    const token = sign({ userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
-    
-    await this.prisma.passwordResetToken.create({
-      data: {
-        token,
-        userId,
-        expiresAt: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
-      }
-    });
-
-    return token;
-  }
-
-  public async verifyPasswordResetToken(token: string): Promise<number> {
+  async generateRefreshToken(userId: string): Promise<string> {
     try {
-      const decoded = verify(token, process.env.JWT_SECRET!) as { userId: number };
-      
-      const resetToken = await this.prisma.passwordResetToken.findFirst({
-        where: {
+      const token = jwt.sign({ userId }, this.JWT_SECRET, {
+        expiresIn: this.REFRESH_TOKEN_EXPIRY
+      });
+
+      await this.prisma.refreshToken.create({
+        data: {
           token,
-          userId: decoded.userId,
-          used: false,
-          expiresAt: {
-            gt: new Date()
-          }
+          userId,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
         }
       });
 
-      if (!resetToken) {
-        throw new AppError('Token inválido ou expirado', 401);
+      return token;
+    } catch (error) {
+      throw new AppError(ERROR_CODES.INTERNAL_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async generatePasswordResetToken(userId: string): Promise<string> {
+    try {
+      const token = jwt.sign({ userId }, this.JWT_SECRET, {
+        expiresIn: this.PASSWORD_RESET_TOKEN_EXPIRY
+      });
+
+      await this.prisma.passwordResetToken.create({
+        data: {
+          token,
+          userId,
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
+          used: false
+        }
+      });
+
+      return token;
+    } catch (error) {
+      throw new AppError(ERROR_CODES.INTERNAL_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async verifyAccessToken(token: string): Promise<string> {
+    try {
+      const decoded = jwt.verify(token, this.JWT_SECRET) as { userId: string };
+      return decoded.userId;
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new AppError(ERROR_CODES.TOKEN_EXPIRED, HttpStatusCode.UNAUTHORIZED);
+      }
+      throw new AppError(ERROR_CODES.TOKEN_INVALID, HttpStatusCode.UNAUTHORIZED);
+    }
+  }
+
+  async verifyRefreshToken(token: string): Promise<string> {
+    try {
+      const decoded = jwt.verify(token, this.JWT_SECRET) as { userId: string };
+      
+      const storedToken = await this.prisma.refreshToken.findFirst({
+        where: { 
+          token,
+          revoked: false,
+          expiresAt: { gt: new Date() }
+        }
+      });
+
+      if (!storedToken) {
+        throw new AppError(ERROR_CODES.TOKEN_INVALID, HttpStatusCode.UNAUTHORIZED);
       }
 
       return decoded.userId;
     } catch (error) {
-      throw new AppError('Token inválido ou expirado', 401);
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new AppError(ERROR_CODES.TOKEN_EXPIRED, HttpStatusCode.UNAUTHORIZED);
+      }
+      if (error instanceof AppError) throw error;
+      throw new AppError(ERROR_CODES.TOKEN_INVALID, HttpStatusCode.UNAUTHORIZED);
     }
   }
 
-  public async revokePasswordResetToken(token: string): Promise<void> {
-    await this.prisma.passwordResetToken.update({
-      where: { token },
-      data: { used: true }
-    });
+  async verifyPasswordResetToken(token: string): Promise<string> {
+    try {
+      const decoded = jwt.verify(token, this.JWT_SECRET) as { userId: string };
+      
+      const resetToken = await this.prisma.passwordResetToken.findFirst({
+        where: { 
+          token,
+          used: false,
+          expiresAt: { gt: new Date() }
+        }
+      });
+
+      if (!resetToken) {
+        throw new AppError(ERROR_CODES.TOKEN_INVALID, HttpStatusCode.BAD_REQUEST);
+      }
+
+      return decoded.userId;
+    } catch (error) {
+      if (error instanceof jwt.TokenExpiredError) {
+        throw new AppError(ERROR_CODES.TOKEN_EXPIRED, HttpStatusCode.BAD_REQUEST);
+      }
+      if (error instanceof AppError) throw error;
+      throw new AppError(ERROR_CODES.TOKEN_INVALID, HttpStatusCode.BAD_REQUEST);
+    }
+  }
+
+  async revokeRefreshToken(token: string): Promise<void> {
+    try {
+      await this.prisma.refreshToken.update({
+        where: { token },
+        data: { revoked: true }
+      });
+    } catch (error) {
+      throw new AppError(ERROR_CODES.INTERNAL_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async revokePasswordResetToken(token: string): Promise<void> {
+    try {
+      await this.prisma.passwordResetToken.update({
+        where: { token },
+        data: { used: true }
+      });
+    } catch (error) {
+      throw new AppError(ERROR_CODES.INTERNAL_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async refreshAccessToken(refreshToken: string): Promise<{ accessToken: string }> {
+    const userId = await this.verifyRefreshToken(refreshToken);
+    const newAccessToken = this.generateAccessToken(userId);
+    return { accessToken: newAccessToken };
   }
 } 

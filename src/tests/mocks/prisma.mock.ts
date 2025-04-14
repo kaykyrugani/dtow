@@ -1,58 +1,25 @@
-import { PrismaClient } from '@prisma/client';
 import { vi } from 'vitest';
+import { PrismaClient } from '@prisma/client';
 
-type PrismaMethods = {
-  findUnique: ReturnType<typeof vi.fn>;
-  findFirst: ReturnType<typeof vi.fn>;
-  findMany: ReturnType<typeof vi.fn>;
-  create: ReturnType<typeof vi.fn>;
-  update: ReturnType<typeof vi.fn>;
-  delete: ReturnType<typeof vi.fn>;
-  count: ReturnType<typeof vi.fn>;
-  upsert: ReturnType<typeof vi.fn>;
-};
-
-type MockPrisma = {
-  usuario: PrismaMethods;
-  produto: PrismaMethods;
-  pedido: PrismaMethods;
-  $connect: ReturnType<typeof vi.fn>;
-  $disconnect: ReturnType<typeof vi.fn>;
-  $transaction: ReturnType<typeof vi.fn>;
-};
-
-export const mockPrisma: MockPrisma = {
+export const mockPrisma = {
   usuario: {
+    create: vi.fn(),
     findUnique: vi.fn(),
     findFirst: vi.fn(),
-    findMany: vi.fn(),
-    create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
-    count: vi.fn(),
-    upsert: vi.fn()
+    count: vi.fn()
   },
-  produto: {
-    findUnique: vi.fn(),
+  refreshToken: {
+    create: vi.fn(),
     findFirst: vi.fn(),
-    findMany: vi.fn(),
-    create: vi.fn(),
     update: vi.fn(),
-    delete: vi.fn(),
-    count: vi.fn(),
-    upsert: vi.fn()
+    delete: vi.fn()
   },
-  pedido: {
-    findUnique: vi.fn(),
+  passwordResetToken: {
+    create: vi.fn(),
     findFirst: vi.fn(),
-    findMany: vi.fn(),
-    create: vi.fn(),
     update: vi.fn(),
-    delete: vi.fn(),
-    count: vi.fn(),
-    upsert: vi.fn()
-  },
-  $connect: vi.fn(),
-  $disconnect: vi.fn(),
-  $transaction: vi.fn()
-}; 
+    delete: vi.fn()
+  }
+} as unknown as PrismaClient; 
