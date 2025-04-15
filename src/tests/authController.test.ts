@@ -1,4 +1,5 @@
 import { describe, beforeEach, test, expect, vi } from 'vitest';
+import { Request, Response } from 'express';
 import { AuthController } from '../controllers/authController';
 import { AuthService } from '../services/authService';
 import { ZodError } from 'zod';
@@ -14,8 +15,8 @@ vi.mock('../services/authService', () => ({
 }));
 
 describe('AuthController', () => {
-  let mockReq: any;
-  let mockRes: any;
+  let mockReq: Partial<Request>;
+  let mockRes: Partial<Response>;
 
   beforeEach(() => {
     vi.clearAllMocks();

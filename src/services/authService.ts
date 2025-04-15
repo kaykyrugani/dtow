@@ -10,6 +10,10 @@ import { ZodError } from 'zod';
 import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
+type GerarTokenRecuperacaoResult =
+  | { status: 'ok'; token: string }
+  | { status: 'info'; mensagem: string };
+
 @injectable()
 export class AuthService {
   constructor(
@@ -141,24 +145,28 @@ export class AuthService {
     }
   }
 
-  async gerarTokenRecuperacao(email: string) {
+  async gerarTokenRecuperacao(email: string): Promise<GerarTokenRecuperacaoResult> {
     try {
       const validacao = recuperacaoSenhaSchema.safeParse({ email });
       if (!validacao.success) {
         this.handleValidationError(validacao.error);
-        return;
+        return { status: 'info', mensagem: 'Email inválido' };
       }
 
       const usuario = await this.usuarioRepository.findByEmail(validacao.data.email);
       if (!usuario) {
-        return { mensagem: ERROR_MESSAGES[ERROR_CODES.NOT_FOUND] };
+        return { 
+          status: 'info', 
+          mensagem: 'Se o email existir, você receberá as instruções de recuperação' 
+        };
       }
 
       const token = await this.tokenService.generatePasswordResetToken(usuario.id);
-      return { token };
+      return { status: 'ok', token };
     } catch (error) {
       if (error instanceof AppError) throw error;
       this.handlePrismaError(error);
+      return { status: 'info', mensagem: 'Erro ao gerar token de recuperação' };
     }
   }
 

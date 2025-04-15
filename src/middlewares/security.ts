@@ -29,7 +29,41 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true // não conta requisições bem-sucedidas
 });
 
-// Headers de segurança
+// Configuração do Helmet
+const helmetConfig = helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+  crossOriginEmbedderPolicy: true,
+  crossOriginOpenerPolicy: true,
+  crossOriginResourcePolicy: { policy: "same-site" },
+  dnsPrefetchControl: true,
+  frameguard: { action: "deny" },
+  hidePoweredBy: true,
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+  ieNoOpen: true,
+  noSniff: true,
+  originAgentCluster: true,
+  permittedCrossDomainPolicies: { permittedPolicies: "none" },
+  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  xssFilter: true,
+});
+
+// Headers de segurança adicionais
 export const securityHeaders = (req: Request, res: Response, next: NextFunction) => {
   // Remove o header X-Powered-By
   res.removeHeader('X-Powered-By');
@@ -40,7 +74,7 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   
-  // Content Security Policy básica
+  // Content Security Policy mais restritiva
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
     "img-src 'self' data: https:",
@@ -50,59 +84,66 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-ancestors 'none'"
+    "frame-ancestors 'none'",
+    "block-all-mixed-content",
+    "upgrade-insecure-requests"
   ].join('; '));
 
-  // Strict Transport Security
-  if (process.env.NODE_ENV === 'production') {
-    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
-  }
-
   next();
 };
 
-// Proteção contra métodos HTTP não permitidos
+// Lista de métodos HTTP permitidos
+const ALLOWED_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'];
+
+// Middleware para verificar métodos HTTP permitidos
 export const allowedMethods = (req: Request, res: Response, next: NextFunction) => {
-  const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'];
-  
-  if (!allowedMethods.includes(req.method)) {
-    return res.status(405).json({ 
-      erro: 'Método não permitido',
-      allowed: allowedMethods 
+  if (!ALLOWED_METHODS.includes(req.method)) {
+    logger.warn(`Método HTTP não permitido: ${req.method}`, {
+      path: req.path,
+      ip: req.ip
+    });
+    return res.status(HttpStatusCode.METHOD_NOT_ALLOWED).json({
+      status: 'error',
+      message: ERROR_MESSAGES.METHOD_NOT_ALLOWED
     });
   }
-
   next();
 };
 
-// Timeout para requisições longas
+// Middleware de timeout
 export const timeout = (req: Request, res: Response, next: NextFunction) => {
-  res.setTimeout(30000, () => {
-    res.status(408).json({ erro: 'Timeout da requisição' });
-  });
+  const timeoutId = setTimeout(() => {
+    logger.warn('Timeout na requisição', {
+      path: req.path,
+      ip: req.ip
+    });
+    res.status(HttpStatusCode.REQUEST_TIMEOUT).json({
+      status: 'error',
+      message: ERROR_MESSAGES.REQUEST_TIMEOUT
+    });
+  }, 30000);
+
+  req.on('end', () => clearTimeout(timeoutId));
   next();
 };
 
+// Aplica todos os middlewares de segurança
 export function applySecurityMiddleware(app: Express) {
-  // Headers de segurança básicos
-  app.use(helmet());
+  // Aplica o Helmet
+  app.use(helmetConfig);
 
-  // Headers específicos
-  app.use(helmet.noSniff());
-  app.use(helmet.xssFilter());
-  app.use(helmet.hidePoweredBy());
-  app.use(helmet.frameguard({ action: 'deny' }));
+  // Aplica headers de segurança personalizados
+  app.use(securityHeaders);
 
-  // Rate limiting global
-  app.use(limiter);
+  // Aplica rate limiting
+  app.use('/api/auth', authLimiter);
+  app.use('/api', limiter);
 
-  // Rate limiting específico para autenticação
-  app.use('/auth/login', authLimiter);
-  app.use('/auth/register', authLimiter);
+  // Aplica verificação de métodos HTTP
+  app.use(allowedMethods);
 
-  // Configurações adicionais de segurança
-  app.disable('x-powered-by');
-  app.set('trust proxy', 1);
-  
-  logger.info('Middlewares de segurança configurados');
+  // Aplica timeout
+  app.use(timeout);
+
+  logger.info('Middlewares de segurança aplicados com sucesso');
 } 

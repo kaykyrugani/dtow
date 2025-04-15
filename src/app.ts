@@ -9,25 +9,38 @@ import { applySecurityMiddleware } from './middlewares/security'
 import logger from './utils/logger'
 import './config/container'
 
-const app = express()
+// Função para criar a aplicação (útil para testes)
+export function createApp() {
+  const app = express()
 
-// Middlewares básicos
-app.use(cors())
-app.use(express.json())
+  // Middlewares básicos
+  app.use(cors())
+  app.use(express.json())
 
-// Middlewares de segurança
-applySecurityMiddleware(app)
+  // Middlewares de segurança
+  applySecurityMiddleware(app)
 
-// Documentação Swagger
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+  // Documentação Swagger
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
-// Rotas da API
-app.use('/api', router)
+  // Rota de health check para testes
+  app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+  });
 
-// Middleware de tratamento de erros
-app.use(errorHandler)
+  // Rotas da API
+  app.use('/api', router)
 
-// Log de inicialização
-logger.info('Aplicação inicializada com sucesso')
+  // Middleware de tratamento de erros
+  app.use(errorHandler)
+
+  // Log de inicialização
+  logger.info('Aplicação inicializada com sucesso')
+
+  return app;
+}
+
+// Cria a aplicação para uso normal
+const app = createApp();
 
 export { app } 

@@ -1,25 +1,26 @@
 import { vi } from 'vitest';
-import { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '@prisma/client';
+import { mockDeep, DeepMockProxy } from 'vitest-mock-extended';
 
-export const mockPrisma = {
+export type MockPrismaClient = DeepMockProxy<PrismaClient>;
+
+export const mockPrisma = mockDeep<PrismaClient>({
   usuario: {
     create: vi.fn(),
     findUnique: vi.fn(),
-    findFirst: vi.fn(),
+    findMany: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
-    count: vi.fn()
   },
-  refreshToken: {
+  produto: {
     create: vi.fn(),
-    findFirst: vi.fn(),
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
     update: vi.fn(),
-    delete: vi.fn()
+    delete: vi.fn(),
   },
-  passwordResetToken: {
+  pedido: {
     create: vi.fn(),
-    findFirst: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn()
+    findMany: vi.fn(),
   }
-} as unknown as PrismaClient; 
+}) as MockPrismaClient; 

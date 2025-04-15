@@ -1,0 +1,13 @@
+import { z } from 'zod'
+
+export const createProductSchema = z.object({
+  nome: z.string().min(3).max(255),
+  descricao: z.string().min(10).max(1000),
+  preco: z.number().positive(),
+  estoque: z.number().int().positive(),
+  imagem: z.string().url(),
+  categoria: z.string().min(3).max(50),
+  subcategoria: z.string().min(3).max(50).optional()
+})
+
+export const updateProductSchema = createProductSchema.partial() 

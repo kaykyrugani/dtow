@@ -14,13 +14,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserType {
+  ADMIN
+  CLIENTE
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentType {
+  CREDIT_CARD
+  PIX
+  BANK_SLIP
+}
+
+enum AddressType {
+  RESIDENCIAL
+  COMERCIAL
+}
+
 model Usuario {
   id         Int         @id @default(autoincrement())
   nome       String
   email      String      @unique
   senha      String
   cpf        String      @unique
-  tipoUsuario String     @default("cliente")
+  tipoUsuario UserType   @default(CLIENTE)
   criadoEm   DateTime    @default(now())
   atualizadoEm DateTime  @updatedAt
   endereco   Endereco?
@@ -34,19 +58,22 @@ model Usuario {
 }
 
 model Endereco {
-  id         Int      @id @default(autoincrement())
-  rua        String
-  numero     String
-  complemento String?
-  bairro     String
-  cidade     String
-  estado     String
-  cep        String
-  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  usuarioId  Int      @unique
-  criadoEm   DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
+  id           Int         @id @default(autoincrement())
+  rua          String
+  numero       String
+  complemento  String?
+  bairro       String
+  cidade       String
+  estado       String
+  cep          String
+  tipo         AddressType @default(RESIDENCIAL)
+  principal    Boolean     @default(false)
+  usuario      Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId    Int
+  criadoEm     DateTime    @default(now())
+  atualizadoEm DateTime    @updatedAt
 
+  @@index([usuarioId])
   @@map("enderecos")
 }
 
@@ -91,8 +118,8 @@ model Avaliacao {
 
 model Pedido {
   id            Int         @id @default(autoincrement())
-  status        String
-  pagamento     String
+  status        OrderStatus @default(PENDING)
+  pagamento     PaymentType
   valorTotal    Float
   frete         Float
   data          DateTime    @default(now())

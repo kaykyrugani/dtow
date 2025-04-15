@@ -1,71 +1,56 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { AuthService } from '../services/authService';
 import { ZodError } from 'zod';
-import { RequestHandler } from 'express';
+import { container } from 'tsyringe';
 
 export class AuthController {
-  static cadastrar: RequestHandler = async (req, res) => {
-    try {
-      const { usuario, token } = await AuthService.cadastrar(req.body);
-      return res.status(201).json({ usuario, token });
-    } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({
-          erro: 'Dados inválidos',
-          detalhes: error.errors
-        });
-      }
-      if (error instanceof Error) {
-        return res.status(400).json({ erro: error.message });
-      }
-      return res.status(500).json({ erro: 'Erro interno do servidor' });
-    }
-  };
+  private static authService = container.resolve(AuthService);
 
-  static login: RequestHandler = async (req, res) => {
+  static async cadastrar(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const resultado = await AuthService.login(req.body);
-      return res.json(resultado);
+      const result = await AuthController.authService.cadastrar(req.body);
+      res.status(201).json(result);
     } catch (error) {
-      if (error instanceof ZodError) {
-        return res.status(400).json({
-          erro: 'Dados inválidos',
-          detalhes: error.errors
-        });
-      }
-      if (error instanceof Error) {
-        return res.status(400).json({ erro: error.message });
-      }
-      return res.status(500).json({ erro: 'Erro interno do servidor' });
+      next(error);
     }
-  };
+  }
 
-  static recuperarSenha: RequestHandler = async (req, res) => {
+  static async login(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = await AuthController.authService.login(req.body);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async recuperarSenha(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email } = req.body;
-      const token = await AuthService.gerarTokenRecuperacao(email);
+      const result = await AuthController.authService.gerarTokenRecuperacao(email);
       
-      // Em produção, você enviaria o token por email
-      // Por enquanto, retornamos o token diretamente
-      return res.json({ 
-        mensagem: 'Se o email existir, você receberá as instruções de recuperação',
-        token // Remover em produção
-      });
+      if (result.status === 'ok') {
+        // Em produção, você enviaria o token por email
+        // Por enquanto, retornamos o token diretamente
+        res.json({ 
+          mensagem: 'Se o email existir, você receberá as instruções de recuperação',
+          token: result.token // Remover em produção
+        });
+      } else {
+        res.json({ mensagem: result.mensagem });
+      }
     } catch (error) {
-      return res.status(500).json({ erro: 'Erro interno do servidor' });
+      next(error);
     }
-  };
+  }
 
-  static alterarSenha: RequestHandler = async (req, res) => {
+  static async alterarSenha(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { token, novaSenha } = req.body;
-      await AuthService.alterarSenha(token, novaSenha);
-      return res.json({ mensagem: 'Senha alterada com sucesso' });
+      const result = await AuthController.authService.alterarSenha(token, novaSenha);
+      res.json(result);
     } catch (error) {
-      if (error instanceof Error) {
-        return res.status(400).json({ erro: error.message });
-      }
-      return res.status(500).json({ erro: 'Erro interno do servidor' });
+      next(error);
     }
-  };
+  }
 } 

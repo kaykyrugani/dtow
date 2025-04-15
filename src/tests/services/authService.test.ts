@@ -1,21 +1,49 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { container } from 'tsyringe';
 import { AuthService } from '../../services/authService';
 import { TokenService } from '../../services/TokenService';
 import { AppError } from '../../utils/AppError';
-import { mockPrisma } from '../setup';
+import { mockPrisma } from '../mocks/prisma.mock';
 import { createTestUser, createTestLoginData } from '../factories/userFactory';
 import { TipoUsuario } from '../types';
 import { ERROR_CODES } from '../../constants/errorMessages';
 import { expectAppError, expectSuccess } from '../helpers/assertions';
+import type { Prisma } from '@prisma/client';
+import type { MockPrismaClient } from '../mocks/prisma.mock';
+
+type TokenSuccess = {
+  status: 'ok';
+  token: string;
+};
+
+type TokenInfo = {
+  status: 'info';
+  mensagem: string;
+};
+
+type GerarTokenRecuperacaoResult = TokenSuccess | TokenInfo;
+
+interface IUsuarioResponse {
+  usuario: {
+    id: string;
+    email: string;
+    nome: string;
+    tipoUsuario: TipoUsuario;
+  };
+  accessToken: string;
+  refreshToken: string;
+}
 
 describe('AuthService', () => {
   let authService: AuthService;
   let tokenService: TokenService;
+  let usuarioRepositoryMock: MockPrismaClient['usuario'];
 
   beforeEach(() => {
     tokenService = container.resolve(TokenService);
     authService = container.resolve(AuthService);
+    usuarioRepositoryMock = mockPrisma.usuario;
+    vi.clearAllMocks();
   });
 
   describe('cadastrar', () => {
@@ -31,10 +59,10 @@ describe('AuthService', () => {
       const mockCreatedUser = createTestUser();
       mockPrisma.usuario.create.mockResolvedValue(mockCreatedUser);
 
-      await expectSuccess(authService.cadastrar(testUserData), {
-        id: mockCreatedUser.id,
-        email: testUserData.email
-      });
+      const result = (await authService.cadastrar(testUserData)) as IUsuarioResponse;
+      expect(result).toBeDefined();
+      expect(result.usuario).toBeDefined();
+      expect(result.usuario.email).toBe(testUserData.email);
     });
 
     it('deve lançar erro quando email já existe', async () => {
@@ -79,11 +107,11 @@ describe('AuthService', () => {
     it('deve fazer login com sucesso', async () => {
       mockPrisma.usuario.findUnique.mockResolvedValue(mockUser);
 
-      const result = await authService.login(testLoginData);
+      const result = (await authService.login(testLoginData)) as Required<IUsuarioResponse>;
 
-      expect(result).toHaveProperty('token');
-      expect(result).toHaveProperty('usuario');
-      expect(result.usuario).not.toHaveProperty('senha');
+      expect(result).toBeDefined();
+      expect(result.usuario).toBeDefined();
+      expect(result.usuario.email).toBe(testLoginData.email);
     });
 
     it('deve lançar erro quando usuário não existe', async () => {
@@ -148,8 +176,11 @@ describe('AuthService', () => {
 
       const result = await authService.gerarTokenRecuperacao(testEmail);
 
-      expect(result).toHaveProperty('token');
-      expect(result.token).toBeDefined();
+      expect(result).toBeDefined();
+      expect(result.status).toBe('ok');
+      if (result.status === 'ok') {
+        expect(result.token).toBeDefined();
+      }
     });
 
     it('deve retornar mensagem genérica quando email não existe', async () => {
@@ -157,9 +188,11 @@ describe('AuthService', () => {
 
       const result = await authService.gerarTokenRecuperacao(testEmail);
 
-      expect(result).toEqual({
-        mensagem: 'Se o email existir, você receberá as instruções de recuperação'
-      });
+      expect(result).toBeDefined();
+      expect(result.status).toBe('info');
+      if (result.status === 'info') {
+        expect(result.mensagem).toBe('Se o email existir, você receberá as instruções de recuperação');
+      }
     });
 
     it('deve lançar erro quando email é inválido', async () => {

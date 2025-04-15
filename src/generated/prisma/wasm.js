@@ -227,7 +227,24 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.UserType = exports.$Enums.UserType = {
+  ADMIN: 'ADMIN',
+  CLIENTE: 'CLIENTE'
+};
 
+exports.OrderStatus = exports.$Enums.OrderStatus = {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  SHIPPED: 'SHIPPED',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED'
+};
+
+exports.PaymentType = exports.$Enums.PaymentType = {
+  CREDIT_CARD: 'CREDIT_CARD',
+  PIX: 'PIX',
+  BANK_SLIP: 'BANK_SLIP'
+};
 
 exports.Prisma.ModelName = {
   Usuario: 'Usuario',

@@ -55,6 +55,51 @@ export type Cupom = $Result.DefaultSelection<Prisma.$CupomPayload>
 export type RefreshToken = $Result.DefaultSelection<Prisma.$RefreshTokenPayload>
 
 /**
+ * Enums
+ */
+export namespace $Enums {
+  export const UserType: {
+  ADMIN: 'ADMIN',
+  CLIENTE: 'CLIENTE'
+};
+
+export type UserType = (typeof UserType)[keyof typeof UserType]
+
+
+export const OrderStatus: {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+  SHIPPED: 'SHIPPED',
+  DELIVERED: 'DELIVERED',
+  CANCELLED: 'CANCELLED'
+};
+
+export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
+
+
+export const PaymentType: {
+  CREDIT_CARD: 'CREDIT_CARD',
+  PIX: 'PIX',
+  BANK_SLIP: 'BANK_SLIP'
+};
+
+export type PaymentType = (typeof PaymentType)[keyof typeof PaymentType]
+
+}
+
+export type UserType = $Enums.UserType
+
+export const UserType: typeof $Enums.UserType
+
+export type OrderStatus = $Enums.OrderStatus
+
+export const OrderStatus: typeof $Enums.OrderStatus
+
+export type PaymentType = $Enums.PaymentType
+
+export const PaymentType: typeof $Enums.PaymentType
+
+/**
  * ##  Prisma Client ʲˢ
  *
  * Type-safe database client for TypeScript & Node.js
@@ -1682,7 +1727,7 @@ export namespace Prisma {
     email: string | null
     senha: string | null
     cpf: string | null
-    tipoUsuario: string | null
+    tipoUsuario: $Enums.UserType | null
     criadoEm: Date | null
     atualizadoEm: Date | null
   }
@@ -1693,7 +1738,7 @@ export namespace Prisma {
     email: string | null
     senha: string | null
     cpf: string | null
-    tipoUsuario: string | null
+    tipoUsuario: $Enums.UserType | null
     criadoEm: Date | null
     atualizadoEm: Date | null
   }
@@ -1845,7 +1890,7 @@ export namespace Prisma {
     email: string
     senha: string
     cpf: string
-    tipoUsuario: string
+    tipoUsuario: $Enums.UserType
     criadoEm: Date
     atualizadoEm: Date
     _count: UsuarioCountAggregateOutputType | null
@@ -1943,7 +1988,7 @@ export namespace Prisma {
       email: string
       senha: string
       cpf: string
-      tipoUsuario: string
+      tipoUsuario: $Enums.UserType
       criadoEm: Date
       atualizadoEm: Date
     }, ExtArgs["result"]["usuario"]>
@@ -2378,7 +2423,7 @@ export namespace Prisma {
     readonly email: FieldRef<"Usuario", 'String'>
     readonly senha: FieldRef<"Usuario", 'String'>
     readonly cpf: FieldRef<"Usuario", 'String'>
-    readonly tipoUsuario: FieldRef<"Usuario", 'String'>
+    readonly tipoUsuario: FieldRef<"Usuario", 'UserType'>
     readonly criadoEm: FieldRef<"Usuario", 'DateTime'>
     readonly atualizadoEm: FieldRef<"Usuario", 'DateTime'>
   }
@@ -6481,8 +6526,8 @@ export namespace Prisma {
 
   export type PedidoMinAggregateOutputType = {
     id: number | null
-    status: string | null
-    pagamento: string | null
+    status: $Enums.OrderStatus | null
+    pagamento: $Enums.PaymentType | null
     valorTotal: number | null
     frete: number | null
     data: Date | null
@@ -6494,8 +6539,8 @@ export namespace Prisma {
 
   export type PedidoMaxAggregateOutputType = {
     id: number | null
-    status: string | null
-    pagamento: string | null
+    status: $Enums.OrderStatus | null
+    pagamento: $Enums.PaymentType | null
     valorTotal: number | null
     frete: number | null
     data: Date | null
@@ -6664,8 +6709,8 @@ export namespace Prisma {
 
   export type PedidoGroupByOutputType = {
     id: number
-    status: string
-    pagamento: string
+    status: $Enums.OrderStatus
+    pagamento: $Enums.PaymentType
     valorTotal: number
     frete: number
     data: Date
@@ -6779,8 +6824,8 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
-      status: string
-      pagamento: string
+      status: $Enums.OrderStatus
+      pagamento: $Enums.PaymentType
       valorTotal: number
       frete: number
       data: Date
@@ -7215,8 +7260,8 @@ export namespace Prisma {
    */
   interface PedidoFieldRefs {
     readonly id: FieldRef<"Pedido", 'Int'>
-    readonly status: FieldRef<"Pedido", 'String'>
-    readonly pagamento: FieldRef<"Pedido", 'String'>
+    readonly status: FieldRef<"Pedido", 'OrderStatus'>
+    readonly pagamento: FieldRef<"Pedido", 'PaymentType'>
     readonly valorTotal: FieldRef<"Pedido", 'Float'>
     readonly frete: FieldRef<"Pedido", 'Float'>
     readonly data: FieldRef<"Pedido", 'DateTime'>
@@ -11288,6 +11333,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'UserType'
+   */
+  export type EnumUserTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserType'>
+    
+
+
+  /**
+   * Reference to a field of type 'UserType[]'
+   */
+  export type ListEnumUserTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserType[]'>
+    
+
+
+  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -11320,6 +11379,34 @@ export namespace Prisma {
    */
   export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
+
+
+  /**
+   * Reference to a field of type 'OrderStatus'
+   */
+  export type EnumOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'OrderStatus[]'
+   */
+  export type ListEnumOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'PaymentType'
+   */
+  export type EnumPaymentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentType'>
+    
+
+
+  /**
+   * Reference to a field of type 'PaymentType[]'
+   */
+  export type ListEnumPaymentTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PaymentType[]'>
+    
   /**
    * Deep Input Types
    */
@@ -11334,7 +11421,7 @@ export namespace Prisma {
     email?: StringFilter<"Usuario"> | string
     senha?: StringFilter<"Usuario"> | string
     cpf?: StringFilter<"Usuario"> | string
-    tipoUsuario?: StringFilter<"Usuario"> | string
+    tipoUsuario?: EnumUserTypeFilter<"Usuario"> | $Enums.UserType
     criadoEm?: DateTimeFilter<"Usuario"> | Date | string
     atualizadoEm?: DateTimeFilter<"Usuario"> | Date | string
     endereco?: XOR<EnderecoNullableScalarRelationFilter, EnderecoWhereInput> | null
@@ -11367,7 +11454,7 @@ export namespace Prisma {
     NOT?: UsuarioWhereInput | UsuarioWhereInput[]
     nome?: StringFilter<"Usuario"> | string
     senha?: StringFilter<"Usuario"> | string
-    tipoUsuario?: StringFilter<"Usuario"> | string
+    tipoUsuario?: EnumUserTypeFilter<"Usuario"> | $Enums.UserType
     criadoEm?: DateTimeFilter<"Usuario"> | Date | string
     atualizadoEm?: DateTimeFilter<"Usuario"> | Date | string
     endereco?: XOR<EnderecoNullableScalarRelationFilter, EnderecoWhereInput> | null
@@ -11401,7 +11488,7 @@ export namespace Prisma {
     email?: StringWithAggregatesFilter<"Usuario"> | string
     senha?: StringWithAggregatesFilter<"Usuario"> | string
     cpf?: StringWithAggregatesFilter<"Usuario"> | string
-    tipoUsuario?: StringWithAggregatesFilter<"Usuario"> | string
+    tipoUsuario?: EnumUserTypeWithAggregatesFilter<"Usuario"> | $Enums.UserType
     criadoEm?: DateTimeWithAggregatesFilter<"Usuario"> | Date | string
     atualizadoEm?: DateTimeWithAggregatesFilter<"Usuario"> | Date | string
   }
@@ -11673,8 +11760,8 @@ export namespace Prisma {
     OR?: PedidoWhereInput[]
     NOT?: PedidoWhereInput | PedidoWhereInput[]
     id?: IntFilter<"Pedido"> | number
-    status?: StringFilter<"Pedido"> | string
-    pagamento?: StringFilter<"Pedido"> | string
+    status?: EnumOrderStatusFilter<"Pedido"> | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFilter<"Pedido"> | $Enums.PaymentType
     valorTotal?: FloatFilter<"Pedido"> | number
     frete?: FloatFilter<"Pedido"> | number
     data?: DateTimeFilter<"Pedido"> | Date | string
@@ -11708,8 +11795,8 @@ export namespace Prisma {
     AND?: PedidoWhereInput | PedidoWhereInput[]
     OR?: PedidoWhereInput[]
     NOT?: PedidoWhereInput | PedidoWhereInput[]
-    status?: StringFilter<"Pedido"> | string
-    pagamento?: StringFilter<"Pedido"> | string
+    status?: EnumOrderStatusFilter<"Pedido"> | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFilter<"Pedido"> | $Enums.PaymentType
     valorTotal?: FloatFilter<"Pedido"> | number
     frete?: FloatFilter<"Pedido"> | number
     data?: DateTimeFilter<"Pedido"> | Date | string
@@ -11745,8 +11832,8 @@ export namespace Prisma {
     OR?: PedidoScalarWhereWithAggregatesInput[]
     NOT?: PedidoScalarWhereWithAggregatesInput | PedidoScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"Pedido"> | number
-    status?: StringWithAggregatesFilter<"Pedido"> | string
-    pagamento?: StringWithAggregatesFilter<"Pedido"> | string
+    status?: EnumOrderStatusWithAggregatesFilter<"Pedido"> | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeWithAggregatesFilter<"Pedido"> | $Enums.PaymentType
     valorTotal?: FloatWithAggregatesFilter<"Pedido"> | number
     frete?: FloatWithAggregatesFilter<"Pedido"> | number
     data?: DateTimeWithAggregatesFilter<"Pedido"> | Date | string
@@ -11970,7 +12057,7 @@ export namespace Prisma {
     email: string
     senha: string
     cpf: string
-    tipoUsuario?: string
+    tipoUsuario?: $Enums.UserType
     criadoEm?: Date | string
     atualizadoEm?: Date | string
     endereco?: EnderecoCreateNestedOneWithoutUsuarioInput
@@ -11985,7 +12072,7 @@ export namespace Prisma {
     email: string
     senha: string
     cpf: string
-    tipoUsuario?: string
+    tipoUsuario?: $Enums.UserType
     criadoEm?: Date | string
     atualizadoEm?: Date | string
     endereco?: EnderecoUncheckedCreateNestedOneWithoutUsuarioInput
@@ -11999,7 +12086,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     senha?: StringFieldUpdateOperationsInput | string
     cpf?: StringFieldUpdateOperationsInput | string
-    tipoUsuario?: StringFieldUpdateOperationsInput | string
+    tipoUsuario?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     endereco?: EnderecoUpdateOneWithoutUsuarioNestedInput
@@ -12014,7 +12101,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     senha?: StringFieldUpdateOperationsInput | string
     cpf?: StringFieldUpdateOperationsInput | string
-    tipoUsuario?: StringFieldUpdateOperationsInput | string
+    tipoUsuario?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     endereco?: EnderecoUncheckedUpdateOneWithoutUsuarioNestedInput
@@ -12029,7 +12116,7 @@ export namespace Prisma {
     email: string
     senha: string
     cpf: string
-    tipoUsuario?: string
+    tipoUsuario?: $Enums.UserType
     criadoEm?: Date | string
     atualizadoEm?: Date | string
   }
@@ -12039,7 +12126,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     senha?: StringFieldUpdateOperationsInput | string
     cpf?: StringFieldUpdateOperationsInput | string
-    tipoUsuario?: StringFieldUpdateOperationsInput | string
+    tipoUsuario?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -12050,7 +12137,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     senha?: StringFieldUpdateOperationsInput | string
     cpf?: StringFieldUpdateOperationsInput | string
-    tipoUsuario?: StringFieldUpdateOperationsInput | string
+    tipoUsuario?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -12339,8 +12426,8 @@ export namespace Prisma {
   }
 
   export type PedidoCreateInput = {
-    status: string
-    pagamento: string
+    status?: $Enums.OrderStatus
+    pagamento: $Enums.PaymentType
     valorTotal: number
     frete: number
     data?: Date | string
@@ -12353,8 +12440,8 @@ export namespace Prisma {
 
   export type PedidoUncheckedCreateInput = {
     id?: number
-    status: string
-    pagamento: string
+    status?: $Enums.OrderStatus
+    pagamento: $Enums.PaymentType
     valorTotal: number
     frete: number
     data?: Date | string
@@ -12366,8 +12453,8 @@ export namespace Prisma {
   }
 
   export type PedidoUpdateInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    pagamento?: StringFieldUpdateOperationsInput | string
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     valorTotal?: FloatFieldUpdateOperationsInput | number
     frete?: FloatFieldUpdateOperationsInput | number
     data?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12380,8 +12467,8 @@ export namespace Prisma {
 
   export type PedidoUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
-    status?: StringFieldUpdateOperationsInput | string
-    pagamento?: StringFieldUpdateOperationsInput | string
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     valorTotal?: FloatFieldUpdateOperationsInput | number
     frete?: FloatFieldUpdateOperationsInput | number
     data?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12394,8 +12481,8 @@ export namespace Prisma {
 
   export type PedidoCreateManyInput = {
     id?: number
-    status: string
-    pagamento: string
+    status?: $Enums.OrderStatus
+    pagamento: $Enums.PaymentType
     valorTotal: number
     frete: number
     data?: Date | string
@@ -12406,8 +12493,8 @@ export namespace Prisma {
   }
 
   export type PedidoUpdateManyMutationInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    pagamento?: StringFieldUpdateOperationsInput | string
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     valorTotal?: FloatFieldUpdateOperationsInput | number
     frete?: FloatFieldUpdateOperationsInput | number
     data?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12417,8 +12504,8 @@ export namespace Prisma {
 
   export type PedidoUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
-    status?: StringFieldUpdateOperationsInput | string
-    pagamento?: StringFieldUpdateOperationsInput | string
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     valorTotal?: FloatFieldUpdateOperationsInput | number
     frete?: FloatFieldUpdateOperationsInput | number
     data?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12663,6 +12750,13 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
+  export type EnumUserTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserType | EnumUserTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.UserType[] | ListEnumUserTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserType[] | ListEnumUserTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserTypeFilter<$PrismaModel> | $Enums.UserType
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -12782,6 +12876,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
     _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type EnumUserTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserType | EnumUserTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.UserType[] | ListEnumUserTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserType[] | ListEnumUserTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserTypeWithAggregatesFilter<$PrismaModel> | $Enums.UserType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserTypeFilter<$PrismaModel>
+    _max?: NestedEnumUserTypeFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -13084,6 +13188,20 @@ export namespace Prisma {
     usuarioId?: SortOrder
   }
 
+  export type EnumOrderStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.OrderStatus | EnumOrderStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.OrderStatus[] | ListEnumOrderStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OrderStatus[] | ListEnumOrderStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumOrderStatusFilter<$PrismaModel> | $Enums.OrderStatus
+  }
+
+  export type EnumPaymentTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentType | EnumPaymentTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentTypeFilter<$PrismaModel> | $Enums.PaymentType
+  }
+
   export type IntNullableFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
     in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
@@ -13153,6 +13271,26 @@ export namespace Prisma {
     frete?: SortOrder
     usuarioId?: SortOrder
     cupomId?: SortOrder
+  }
+
+  export type EnumOrderStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.OrderStatus | EnumOrderStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.OrderStatus[] | ListEnumOrderStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OrderStatus[] | ListEnumOrderStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumOrderStatusWithAggregatesFilter<$PrismaModel> | $Enums.OrderStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumOrderStatusFilter<$PrismaModel>
+    _max?: NestedEnumOrderStatusFilter<$PrismaModel>
+  }
+
+  export type EnumPaymentTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentType | EnumPaymentTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentTypeWithAggregatesFilter<$PrismaModel> | $Enums.PaymentType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPaymentTypeFilter<$PrismaModel>
+    _max?: NestedEnumPaymentTypeFilter<$PrismaModel>
   }
 
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -13363,6 +13501,10 @@ export namespace Prisma {
 
   export type StringFieldUpdateOperationsInput = {
     set?: string
+  }
+
+  export type EnumUserTypeFieldUpdateOperationsInput = {
+    set?: $Enums.UserType
   }
 
   export type DateTimeFieldUpdateOperationsInput = {
@@ -13657,6 +13799,14 @@ export namespace Prisma {
     connect?: PedidoItemWhereUniqueInput | PedidoItemWhereUniqueInput[]
   }
 
+  export type EnumOrderStatusFieldUpdateOperationsInput = {
+    set?: $Enums.OrderStatus
+  }
+
+  export type EnumPaymentTypeFieldUpdateOperationsInput = {
+    set?: $Enums.PaymentType
+  }
+
   export type UsuarioUpdateOneRequiredWithoutPedidosNestedInput = {
     create?: XOR<UsuarioCreateWithoutPedidosInput, UsuarioUncheckedCreateWithoutPedidosInput>
     connectOrCreate?: UsuarioCreateOrConnectWithoutPedidosInput
@@ -13820,6 +13970,13 @@ export namespace Prisma {
     not?: NestedStringFilter<$PrismaModel> | string
   }
 
+  export type NestedEnumUserTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserType | EnumUserTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.UserType[] | ListEnumUserTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserType[] | ListEnumUserTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserTypeFilter<$PrismaModel> | $Enums.UserType
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -13873,6 +14030,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
     _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type NestedEnumUserTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.UserType | EnumUserTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.UserType[] | ListEnumUserTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.UserType[] | ListEnumUserTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumUserTypeWithAggregatesFilter<$PrismaModel> | $Enums.UserType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumUserTypeFilter<$PrismaModel>
+    _max?: NestedEnumUserTypeFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -13987,6 +14154,40 @@ export namespace Prisma {
     _max?: NestedBoolFilter<$PrismaModel>
   }
 
+  export type NestedEnumOrderStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.OrderStatus | EnumOrderStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.OrderStatus[] | ListEnumOrderStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OrderStatus[] | ListEnumOrderStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumOrderStatusFilter<$PrismaModel> | $Enums.OrderStatus
+  }
+
+  export type NestedEnumPaymentTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentType | EnumPaymentTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentTypeFilter<$PrismaModel> | $Enums.PaymentType
+  }
+
+  export type NestedEnumOrderStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.OrderStatus | EnumOrderStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.OrderStatus[] | ListEnumOrderStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.OrderStatus[] | ListEnumOrderStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumOrderStatusWithAggregatesFilter<$PrismaModel> | $Enums.OrderStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumOrderStatusFilter<$PrismaModel>
+    _max?: NestedEnumOrderStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumPaymentTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.PaymentType | EnumPaymentTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.PaymentType[] | ListEnumPaymentTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumPaymentTypeWithAggregatesFilter<$PrismaModel> | $Enums.PaymentType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumPaymentTypeFilter<$PrismaModel>
+    _max?: NestedEnumPaymentTypeFilter<$PrismaModel>
+  }
+
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
     in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
@@ -14034,8 +14235,8 @@ export namespace Prisma {
   }
 
   export type PedidoCreateWithoutUsuarioInput = {
-    status: string
-    pagamento: string
+    status?: $Enums.OrderStatus
+    pagamento: $Enums.PaymentType
     valorTotal: number
     frete: number
     data?: Date | string
@@ -14047,8 +14248,8 @@ export namespace Prisma {
 
   export type PedidoUncheckedCreateWithoutUsuarioInput = {
     id?: number
-    status: string
-    pagamento: string
+    status?: $Enums.OrderStatus
+    pagamento: $Enums.PaymentType
     valorTotal: number
     frete: number
     data?: Date | string
@@ -14175,8 +14376,8 @@ export namespace Prisma {
     OR?: PedidoScalarWhereInput[]
     NOT?: PedidoScalarWhereInput | PedidoScalarWhereInput[]
     id?: IntFilter<"Pedido"> | number
-    status?: StringFilter<"Pedido"> | string
-    pagamento?: StringFilter<"Pedido"> | string
+    status?: EnumOrderStatusFilter<"Pedido"> | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFilter<"Pedido"> | $Enums.PaymentType
     valorTotal?: FloatFilter<"Pedido"> | number
     frete?: FloatFilter<"Pedido"> | number
     data?: DateTimeFilter<"Pedido"> | Date | string
@@ -14247,7 +14448,7 @@ export namespace Prisma {
     email: string
     senha: string
     cpf: string
-    tipoUsuario?: string
+    tipoUsuario?: $Enums.UserType
     criadoEm?: Date | string
     atualizadoEm?: Date | string
     pedidos?: PedidoCreateNestedManyWithoutUsuarioInput
@@ -14261,7 +14462,7 @@ export namespace Prisma {
     email: string
     senha: string
     cpf: string
-    tipoUsuario?: string
+    tipoUsuario?: $Enums.UserType
     criadoEm?: Date | string
     atualizadoEm?: Date | string
     pedidos?: PedidoUncheckedCreateNestedManyWithoutUsuarioInput
@@ -14290,7 +14491,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     senha?: StringFieldUpdateOperationsInput | string
     cpf?: StringFieldUpdateOperationsInput | string
-    tipoUsuario?: StringFieldUpdateOperationsInput | string
+    tipoUsuario?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     pedidos?: PedidoUpdateManyWithoutUsuarioNestedInput
@@ -14304,7 +14505,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     senha?: StringFieldUpdateOperationsInput | string
     cpf?: StringFieldUpdateOperationsInput | string
-    tipoUsuario?: StringFieldUpdateOperationsInput | string
+    tipoUsuario?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     pedidos?: PedidoUncheckedUpdateManyWithoutUsuarioNestedInput
@@ -14453,7 +14654,7 @@ export namespace Prisma {
     email: string
     senha: string
     cpf: string
-    tipoUsuario?: string
+    tipoUsuario?: $Enums.UserType
     criadoEm?: Date | string
     atualizadoEm?: Date | string
     endereco?: EnderecoCreateNestedOneWithoutUsuarioInput
@@ -14467,7 +14668,7 @@ export namespace Prisma {
     email: string
     senha: string
     cpf: string
-    tipoUsuario?: string
+    tipoUsuario?: $Enums.UserType
     criadoEm?: Date | string
     atualizadoEm?: Date | string
     endereco?: EnderecoUncheckedCreateNestedOneWithoutUsuarioInput
@@ -14544,7 +14745,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     senha?: StringFieldUpdateOperationsInput | string
     cpf?: StringFieldUpdateOperationsInput | string
-    tipoUsuario?: StringFieldUpdateOperationsInput | string
+    tipoUsuario?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     endereco?: EnderecoUpdateOneWithoutUsuarioNestedInput
@@ -14558,7 +14759,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     senha?: StringFieldUpdateOperationsInput | string
     cpf?: StringFieldUpdateOperationsInput | string
-    tipoUsuario?: StringFieldUpdateOperationsInput | string
+    tipoUsuario?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     endereco?: EnderecoUncheckedUpdateOneWithoutUsuarioNestedInput
@@ -14571,7 +14772,7 @@ export namespace Prisma {
     email: string
     senha: string
     cpf: string
-    tipoUsuario?: string
+    tipoUsuario?: $Enums.UserType
     criadoEm?: Date | string
     atualizadoEm?: Date | string
     endereco?: EnderecoCreateNestedOneWithoutUsuarioInput
@@ -14585,7 +14786,7 @@ export namespace Prisma {
     email: string
     senha: string
     cpf: string
-    tipoUsuario?: string
+    tipoUsuario?: $Enums.UserType
     criadoEm?: Date | string
     atualizadoEm?: Date | string
     endereco?: EnderecoUncheckedCreateNestedOneWithoutUsuarioInput
@@ -14669,7 +14870,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     senha?: StringFieldUpdateOperationsInput | string
     cpf?: StringFieldUpdateOperationsInput | string
-    tipoUsuario?: StringFieldUpdateOperationsInput | string
+    tipoUsuario?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     endereco?: EnderecoUpdateOneWithoutUsuarioNestedInput
@@ -14683,7 +14884,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     senha?: StringFieldUpdateOperationsInput | string
     cpf?: StringFieldUpdateOperationsInput | string
-    tipoUsuario?: StringFieldUpdateOperationsInput | string
+    tipoUsuario?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     endereco?: EnderecoUncheckedUpdateOneWithoutUsuarioNestedInput
@@ -14786,8 +14987,8 @@ export namespace Prisma {
   }
 
   export type PedidoCreateWithoutItensInput = {
-    status: string
-    pagamento: string
+    status?: $Enums.OrderStatus
+    pagamento: $Enums.PaymentType
     valorTotal: number
     frete: number
     data?: Date | string
@@ -14799,8 +15000,8 @@ export namespace Prisma {
 
   export type PedidoUncheckedCreateWithoutItensInput = {
     id?: number
-    status: string
-    pagamento: string
+    status?: $Enums.OrderStatus
+    pagamento: $Enums.PaymentType
     valorTotal: number
     frete: number
     data?: Date | string
@@ -14875,8 +15076,8 @@ export namespace Prisma {
   }
 
   export type PedidoUpdateWithoutItensInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    pagamento?: StringFieldUpdateOperationsInput | string
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     valorTotal?: FloatFieldUpdateOperationsInput | number
     frete?: FloatFieldUpdateOperationsInput | number
     data?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14888,8 +15089,8 @@ export namespace Prisma {
 
   export type PedidoUncheckedUpdateWithoutItensInput = {
     id?: IntFieldUpdateOperationsInput | number
-    status?: StringFieldUpdateOperationsInput | string
-    pagamento?: StringFieldUpdateOperationsInput | string
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     valorTotal?: FloatFieldUpdateOperationsInput | number
     frete?: FloatFieldUpdateOperationsInput | number
     data?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -14900,8 +15101,8 @@ export namespace Prisma {
   }
 
   export type PedidoCreateWithoutCupomInput = {
-    status: string
-    pagamento: string
+    status?: $Enums.OrderStatus
+    pagamento: $Enums.PaymentType
     valorTotal: number
     frete: number
     data?: Date | string
@@ -14913,8 +15114,8 @@ export namespace Prisma {
 
   export type PedidoUncheckedCreateWithoutCupomInput = {
     id?: number
-    status: string
-    pagamento: string
+    status?: $Enums.OrderStatus
+    pagamento: $Enums.PaymentType
     valorTotal: number
     frete: number
     data?: Date | string
@@ -14955,7 +15156,7 @@ export namespace Prisma {
     email: string
     senha: string
     cpf: string
-    tipoUsuario?: string
+    tipoUsuario?: $Enums.UserType
     criadoEm?: Date | string
     atualizadoEm?: Date | string
     endereco?: EnderecoCreateNestedOneWithoutUsuarioInput
@@ -14969,7 +15170,7 @@ export namespace Prisma {
     email: string
     senha: string
     cpf: string
-    tipoUsuario?: string
+    tipoUsuario?: $Enums.UserType
     criadoEm?: Date | string
     atualizadoEm?: Date | string
     endereco?: EnderecoUncheckedCreateNestedOneWithoutUsuarioInput
@@ -14998,7 +15199,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     senha?: StringFieldUpdateOperationsInput | string
     cpf?: StringFieldUpdateOperationsInput | string
-    tipoUsuario?: StringFieldUpdateOperationsInput | string
+    tipoUsuario?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     endereco?: EnderecoUpdateOneWithoutUsuarioNestedInput
@@ -15012,7 +15213,7 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     senha?: StringFieldUpdateOperationsInput | string
     cpf?: StringFieldUpdateOperationsInput | string
-    tipoUsuario?: StringFieldUpdateOperationsInput | string
+    tipoUsuario?: EnumUserTypeFieldUpdateOperationsInput | $Enums.UserType
     criadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     atualizadoEm?: DateTimeFieldUpdateOperationsInput | Date | string
     endereco?: EnderecoUncheckedUpdateOneWithoutUsuarioNestedInput
@@ -15022,8 +15223,8 @@ export namespace Prisma {
 
   export type PedidoCreateManyUsuarioInput = {
     id?: number
-    status: string
-    pagamento: string
+    status?: $Enums.OrderStatus
+    pagamento: $Enums.PaymentType
     valorTotal: number
     frete: number
     data?: Date | string
@@ -15049,8 +15250,8 @@ export namespace Prisma {
   }
 
   export type PedidoUpdateWithoutUsuarioInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    pagamento?: StringFieldUpdateOperationsInput | string
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     valorTotal?: FloatFieldUpdateOperationsInput | number
     frete?: FloatFieldUpdateOperationsInput | number
     data?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15062,8 +15263,8 @@ export namespace Prisma {
 
   export type PedidoUncheckedUpdateWithoutUsuarioInput = {
     id?: IntFieldUpdateOperationsInput | number
-    status?: StringFieldUpdateOperationsInput | string
-    pagamento?: StringFieldUpdateOperationsInput | string
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     valorTotal?: FloatFieldUpdateOperationsInput | number
     frete?: FloatFieldUpdateOperationsInput | number
     data?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15075,8 +15276,8 @@ export namespace Prisma {
 
   export type PedidoUncheckedUpdateManyWithoutUsuarioInput = {
     id?: IntFieldUpdateOperationsInput | number
-    status?: StringFieldUpdateOperationsInput | string
-    pagamento?: StringFieldUpdateOperationsInput | string
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     valorTotal?: FloatFieldUpdateOperationsInput | number
     frete?: FloatFieldUpdateOperationsInput | number
     data?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15226,8 +15427,8 @@ export namespace Prisma {
 
   export type PedidoCreateManyCupomInput = {
     id?: number
-    status: string
-    pagamento: string
+    status?: $Enums.OrderStatus
+    pagamento: $Enums.PaymentType
     valorTotal: number
     frete: number
     data?: Date | string
@@ -15237,8 +15438,8 @@ export namespace Prisma {
   }
 
   export type PedidoUpdateWithoutCupomInput = {
-    status?: StringFieldUpdateOperationsInput | string
-    pagamento?: StringFieldUpdateOperationsInput | string
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     valorTotal?: FloatFieldUpdateOperationsInput | number
     frete?: FloatFieldUpdateOperationsInput | number
     data?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15250,8 +15451,8 @@ export namespace Prisma {
 
   export type PedidoUncheckedUpdateWithoutCupomInput = {
     id?: IntFieldUpdateOperationsInput | number
-    status?: StringFieldUpdateOperationsInput | string
-    pagamento?: StringFieldUpdateOperationsInput | string
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     valorTotal?: FloatFieldUpdateOperationsInput | number
     frete?: FloatFieldUpdateOperationsInput | number
     data?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -15263,8 +15464,8 @@ export namespace Prisma {
 
   export type PedidoUncheckedUpdateManyWithoutCupomInput = {
     id?: IntFieldUpdateOperationsInput | number
-    status?: StringFieldUpdateOperationsInput | string
-    pagamento?: StringFieldUpdateOperationsInput | string
+    status?: EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+    pagamento?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     valorTotal?: FloatFieldUpdateOperationsInput | number
     frete?: FloatFieldUpdateOperationsInput | number
     data?: DateTimeFieldUpdateOperationsInput | Date | string
