@@ -1,0 +1,126 @@
+groups:
+  - name: onlywave
+    rules:
+      # Alertas de Pagamento
+      - alert: PaymentSuccessRateLow
+        expr: rate(onlywave_payment_success_total[5m]) / rate(onlywave_payment_success_total[5m] + onlywave_payment_failure_total[5m]) < 0.9
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Taxa de sucesso de pagamento abaixo de 90%"
+          description: "A taxa de sucesso de pagamento está em {{ $value | humanizePercentage }} nos últimos 5 minutos"
+
+      # Alertas de Webhook
+      - alert: WebhookFailureRateHigh
+        expr: rate(onlywave_webhook_failures_total[5m]) / rate(onlywave_webhook_processing_duration_seconds_count[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Alta taxa de falha em webhooks"
+          description: "Mais de 5% dos webhooks falharam nos últimos 5 minutos"
+
+      - alert: WebhookQueueSizeHigh
+        expr: onlywave_webhook_queue_size > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Fila de webhooks muito grande"
+          description: "A fila de webhooks tem {{ $value }} itens pendentes"
+
+      # Alertas de Infraestrutura
+      - alert: HighCPUUsage
+        expr: rate(node_cpu_seconds_total{mode="idle"}[5m]) < 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alto uso de CPU"
+          description: "CPU está com {{ $value | humanizePercentage }} de uso nos últimos 5 minutos"
+
+      - alert: HighMemoryUsage
+        expr: node_memory_usage_bytes / node_memory_total_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alto uso de memória"
+          description: "Memória está com {{ $value | humanizePercentage }} de uso"
+
+      # Alertas de Segurança
+      - alert: HighAuthFailures
+        expr: rate(onlywave_auth_failures_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Alto número de falhas de autenticação"
+          description: "{{ $value }} falhas de autenticação por minuto nos últimos 5 minutos"
+
+      - alert: HighAuthAttemptsByIP
+        expr: rate(onlywave_auth_attempts_by_ip[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Muitas tentativas de autenticação por IP"
+          description: "IP {{ $labels.ip }} fez {{ $value }} tentativas de autenticação por minuto"
+
+      # Novos Alertas de Frequência Acumulada
+      - alert: HighErrorAccumulation
+        expr: sum(increase(onlywave_payment_failure_total[15m])) > 200
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Alto acúmulo de erros"
+          description: "{{ $value }} erros acumulados nos últimos 15 minutos"
+
+      - alert: HighUnauthorizedRequests
+        expr: sum(increase(onlywave_unauthorized_requests_total[15m])) > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alto número de requisições não autorizadas"
+          description: "{{ $value }} tentativas não autorizadas nos últimos 15 minutos"
+
+      # Alertas de Ausência de Eventos
+      - alert: NoWebhooksReceived
+        expr: rate(onlywave_webhook_processing_duration_seconds_count[10m]) == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Nenhum webhook recebido"
+          description: "Não foram recebidos webhooks nos últimos 10 minutos"
+
+      - alert: NoPaymentsProcessed
+        expr: rate(onlywave_payment_success_total[15m]) == 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Nenhum pagamento processado"
+          description: "Não foram processados pagamentos nos últimos 15 minutos"
+
+      # Alertas de Segurança Avançados
+      - alert: HighAuthFailuresByCountry
+        expr: sum by (country) (rate(onlywave_auth_failures_total[5m])) > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alto número de falhas de autenticação por país"
+          description: "País {{ $labels.country }} com {{ $value }} falhas de autenticação por minuto"
+
+      - alert: SuspiciousIPActivity
+        expr: sum by (ip) (rate(onlywave_unauthorized_requests_total[5m])) > 20
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Atividade suspeita por IP"
+          description: "IP {{ $labels.ip }} com {{ $value }} requisições não autorizadas por minuto" 

@@ -1,26 +1,26 @@
 import { z } from 'zod';
+import { PaymentType } from '../../../generated/prisma';
 
 // Definição do PaymentType alinhada com o Mercado Pago
-export type PaymentType = 'CREDIT_CARD' | 'PIX' | 'BANK_SLIP';
 export type MercadoPagoPaymentType = 'credit_card' | 'pix' | 'bank_transfer';
 
-// Schema para criação de preferência
+// Schema para criação de preferência de pagamento
 export const createPreferenceSchema = z.object({
   pedidoId: z.string(),
   descricao: z.string(),
-  valor: z.number(),
-  paymentType: z.enum(['CREDIT_CARD', 'PIX', 'BANK_SLIP']),
+  valor: z.number().positive(),
+  formaPagamento: z.nativeEnum(PaymentType),
   comprador: z.object({
     nome: z.string(),
     email: z.string().email(),
     cpf: z.string()
   }),
-  parcelas: z.number().optional()
+  parcelas: z.number().int().min(1).max(12).optional()
 });
 
-// Schema para webhook alinhado com a API do Mercado Pago
+// Schema para webhook
 export const webhookSchema = z.object({
-  action: z.enum(['payment.created', 'payment.updated', 'payment.cancelled']),
+  action: z.string(),
   data: z.object({
     id: z.string()
   })
@@ -28,9 +28,13 @@ export const webhookSchema = z.object({
 
 // Schema para reembolso
 export const refundSchema = z.object({
-  reason: z.string(),
-  amount: z.number().optional()
+  amount: z.number().positive().optional()
 });
+
+// Tipos inferidos dos schemas
+export type CreatePreferenceDTO = z.infer<typeof createPreferenceSchema>;
+export type WebhookDTO = z.infer<typeof webhookSchema>;
+export type RefundDTO = z.infer<typeof refundSchema>;
 
 // Interfaces de resposta
 export interface PaymentPreferenceResponse {
@@ -69,22 +73,9 @@ export interface PaymentPreferenceDTO {
   parcelas?: number;
 }
 
-// Interface do webhook alinhada com a API do Mercado Pago
-export interface WebhookDTO {
-  action: 'payment.created' | 'payment.updated' | 'payment.cancelled';
-  data: {
-    id: string;
-  };
-}
-
-export interface RefundDTO {
-  reason: string;
-  amount?: number;
-}
-
 // Mapeamento de tipos de pagamento
-export const paymentTypeMap: Record<PaymentType, MercadoPagoPaymentType> = {
+export const paymentTypeMap: Record<PaymentType, string> = {
   CREDIT_CARD: 'credit_card',
   PIX: 'pix',
-  BANK_SLIP: 'bank_transfer'
+  BANK_SLIP: 'bank_slip'
 }; 

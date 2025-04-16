@@ -5,6 +5,7 @@ import { AppError } from '../errors/AppError';
 /**
  * Middleware para verificar a assinatura do webhook do Mercado Pago
  * Valida o header X-Hub-Signature para garantir que a requisição é autêntica
+ * Usa SHA256 para maior segurança
  */
 export const verifyWebhookSignature = (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -22,11 +23,11 @@ export const verifyWebhookSignature = (req: Request, res: Response, next: NextFu
       throw new AppError('Configuração de webhook não encontrada', 500);
     }
     
-    // Calcula a assinatura esperada
+    // Calcula a assinatura esperada usando SHA256
     const payload = JSON.stringify(req.body);
-    const hmac = crypto.createHmac('sha1', webhookSecret);
+    const hmac = crypto.createHmac('sha256', webhookSecret);
     hmac.update(payload);
-    const calculatedSignature = `sha1=${hmac.digest('hex')}`;
+    const calculatedSignature = `sha256=${hmac.digest('hex')}`;
     
     // Compara a assinatura recebida com a calculada
     if (signature !== calculatedSignature) {

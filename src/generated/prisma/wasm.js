@@ -17,12 +17,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.6.0
- * Query Engine version: f676762280b54cd07c770017ed3711ddde35f37a
+ * Prisma Client JS version: 5.22.0
+ * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
  */
 Prisma.prismaVersion = {
-  client: "6.6.0",
-  engine: "f676762280b54cd07c770017ed3711ddde35f37a"
+  client: "5.22.0",
+  engine: "605197351a3c8bdd595af2d2a9bc3025bca48ea2"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -48,6 +48,11 @@ In case this error is unexpected for you, please report it in https://pris.ly/pr
 Prisma.PrismaClientValidationError = () => {
   const runtimeName = getRuntime().prettyName;
   throw new Error(`PrismaClientValidationError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
+In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
+)}
+Prisma.NotFoundError = () => {
+  const runtimeName = getRuntime().prettyName;
+  throw new Error(`NotFoundError is unable to run in this browser environment, or has been bundled for the browser (running in ${runtimeName}).
 In case this error is unexpected for you, please report it in https://pris.ly/prisma-prisma-bug-report`,
 )}
 Prisma.Decimal = Decimal
@@ -117,6 +122,17 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.UserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  password: 'password',
+  role: 'role',
+  twoFactorSecret: 'twoFactorSecret',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.UsuarioScalarFieldEnum = {
   id: 'id',
   nome: 'nome',
@@ -137,6 +153,8 @@ exports.Prisma.EnderecoScalarFieldEnum = {
   cidade: 'cidade',
   estado: 'estado',
   cep: 'cep',
+  tipo: 'tipo',
+  principal: 'principal',
   usuarioId: 'usuarioId',
   criadoEm: 'criadoEm',
   atualizadoEm: 'atualizadoEm'
@@ -213,9 +231,51 @@ exports.Prisma.RefreshTokenScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.WebhookLogScalarFieldEnum = {
+  id: 'id',
+  paymentId: 'paymentId',
+  processedAt: 'processedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PaymentScalarFieldEnum = {
+  id: 'id',
+  paymentId: 'paymentId',
+  externalReference: 'externalReference',
+  status: 'status',
+  paymentType: 'paymentType',
+  paymentMethod: 'paymentMethod',
+  amount: 'amount',
+  currency: 'currency',
+  payerEmail: 'payerEmail',
+  payerName: 'payerName',
+  payerDocument: 'payerDocument',
+  installments: 'installments',
+  processedAt: 'processedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.AuditLogScalarFieldEnum = {
+  id: 'id',
+  action: 'action',
+  userId: 'userId',
+  entityId: 'entityId',
+  entityType: 'entityType',
+  details: 'details',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.JsonNullValueInput = {
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -227,9 +287,20 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
+};
 exports.UserType = exports.$Enums.UserType = {
   ADMIN: 'ADMIN',
   CLIENTE: 'CLIENTE'
+};
+
+exports.AddressType = exports.$Enums.AddressType = {
+  RESIDENCIAL: 'RESIDENCIAL',
+  COMERCIAL: 'COMERCIAL'
 };
 
 exports.OrderStatus = exports.$Enums.OrderStatus = {
@@ -247,6 +318,7 @@ exports.PaymentType = exports.$Enums.PaymentType = {
 };
 
 exports.Prisma.ModelName = {
+  User: 'User',
   Usuario: 'Usuario',
   Endereco: 'Endereco',
   Produto: 'Produto',
@@ -254,7 +326,10 @@ exports.Prisma.ModelName = {
   Pedido: 'Pedido',
   PedidoItem: 'PedidoItem',
   Cupom: 'Cupom',
-  RefreshToken: 'RefreshToken'
+  RefreshToken: 'RefreshToken',
+  WebhookLog: 'WebhookLog',
+  Payment: 'Payment',
+  AuditLog: 'AuditLog'
 };
 
 /**
@@ -274,7 +349,7 @@ class PrismaClient {
         } else {
           message = 'PrismaClient is unable to run in this browser environment, or has been bundled for the browser (running in `' + runtime.prettyName + '`).'
         }
-
+        
         message += `
 If this is unexpected, please open an issue: https://pris.ly/prisma-prisma-bug-report`
 

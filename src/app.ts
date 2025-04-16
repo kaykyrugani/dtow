@@ -19,7 +19,7 @@ import { sanitizeInput } from './middlewares/sanitizer'
 import { metricsMiddleware } from './middlewares/metrics.middleware'
 import { MetricsService } from './services/metrics.service'
 import { RedisService } from './services/redis.service'
-import metricsRoutes from './routes/metrics.routes'
+import metricsRouter from './routes/metrics.routes'
 import { apiMetricsMiddleware, databaseMetricsMiddleware, cacheMetricsMiddleware } from './middlewares/performance.middleware'
 import { config } from './config'
 import {
@@ -31,6 +31,7 @@ import {
   loggingMiddleware,
   notFoundMiddleware,
 } from './middlewares'
+import { httpMetricsMiddleware } from './metrics/prometheus'
 
 // Validar variáveis de ambiente
 const env = validateEnv()
@@ -113,6 +114,7 @@ export function createApp() {
   app.use(apiMetricsMiddleware)
   app.use(databaseMetricsMiddleware)
   app.use(cacheMetricsMiddleware)
+  app.use(httpMetricsMiddleware)
 
   // Rota de health check para testes
   app.get('/health', (req: Request, res: Response) => {
@@ -128,7 +130,7 @@ export function createApp() {
   app.use('/api', router)
 
   // Rotas de métricas
-  app.use('/api/metrics', metricsRoutes)
+  app.use('/metrics', metricsRouter)
 
   // Middleware de tratamento de erros
   app.use(errorHandler)
@@ -136,13 +138,6 @@ export function createApp() {
   // Inicialização do Redis
   cacheService.connect().catch((error: Error) => {
     logger.error('Erro ao inicializar Redis:', error)
-  })
-
-  // Métricas do Prometheus
-  app.get('/metrics', async (req, res) => {
-    const metricsService = MetricsService.getInstance()
-    res.set('Content-Type', metricsService.getMetricsContentType())
-    res.end(await metricsService.getMetrics())
   })
 
   // Inicialização do Redis

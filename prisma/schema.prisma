@@ -80,7 +80,7 @@ model Endereco {
   tipo         AddressType @default(RESIDENCIAL)
   principal    Boolean     @default(false)
   usuario      Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  usuarioId    Int
+  usuarioId    Int         @unique
   criadoEm     DateTime    @default(now())
   atualizadoEm DateTime    @updatedAt
 
@@ -187,4 +187,59 @@ model RefreshToken {
 
   @@index([userId])
   @@index([token])
+}
+
+model WebhookLog {
+  id          String   @id @default(uuid())
+  paymentId   String   @unique
+  processedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([paymentId])
+  @@index([processedAt])
+  @@map("webhook_logs")
+}
+
+model Payment {
+  id              String   @id @default(uuid())
+  paymentId       String   @unique
+  externalReference String?
+  status          String
+  paymentType     String
+  paymentMethod   String?
+  amount          Float
+  currency        String   @default("BRL")
+  payerEmail      String?
+  payerName       String?
+  payerDocument   String?
+  installments    Int?
+  processedAt     DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([paymentId])
+  @@index([externalReference])
+  @@index([status])
+  @@index([processedAt])
+  @@map("payments")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  action      String
+  userId      String?
+  entityId    String?
+  entityType  String?
+  details     Json
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([action])
+  @@index([userId])
+  @@index([entityId])
+  @@index([entityType])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

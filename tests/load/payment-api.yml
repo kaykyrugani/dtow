@@ -1,0 +1,98 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 20
+      name: "Aumento gradual de carga"
+    - duration: 120
+      arrivalRate: 20
+      name: "Carga constante"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Accept: "application/json"
+  variables:
+    token: ""
+    paymentId: ""
+    preferenceId: ""
+
+scenarios:
+  - name: "Fluxo de pagamento completo"
+    flow:
+      # Login para obter token
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "admin@onlywave.com"
+            password: "Admin@123"
+          capture:
+            - json: "$.token"
+              as: "token"
+            - json: "$.refreshToken"
+              as: "refreshToken"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      
+      # Criar preferência de pagamento
+      - post:
+          url: "/api/payments/preferences"
+          json:
+            pedidoId: "PED-{{ $randomString() }}"
+            descricao: "Teste de carga - Pedido {{ $randomString() }}"
+            valor: 100.00
+            parcelas: 1
+            paymentType: "CREDIT_CARD"
+            comprador:
+              nome: "Cliente Teste"
+              email: "cliente@teste.com"
+              cpf: "12345678900"
+          headers:
+            Authorization: "Bearer {{ token }}"
+          capture:
+            - json: "$.id"
+              as: "preferenceId"
+      
+      # Verificar status da preferência
+      - get:
+          url: "/api/payments/preferences/{{ preferenceId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      
+      # Simular webhook de pagamento aprovado
+      - post:
+          url: "/api/payments/webhook"
+          json:
+            action: "payment.updated"
+            data:
+              id: "{{ $randomString() }}"
+              status: "approved"
+              external_reference: "PED-{{ $randomString() }}"
+              payment_type_id: "credit_card"
+              payment_method_id: "master"
+              transaction_amount: 100.00
+              installments: 1
+              payer:
+                email: "cliente@teste.com"
+                identification:
+                  number: "12345678900"
+          headers:
+            X-Hub-Signature: "sha256=1234567890abcdef"
+      
+      # Verificar status do pagamento
+      - get:
+          url: "/api/payments/status/{{ paymentId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      
+      # Simular reembolso
+      - post:
+          url: "/api/payments/refund/{{ paymentId }}"
+          headers:
+            Authorization: "Bearer {{ token }}"
+      
+      # Verificar status após reembolso
+      - get:
+          url: "/api/payments/status/{{ paymentId }}"
+          headers:
+            Authorization: "Bearer {{ token }}" 

@@ -33,6 +33,22 @@ enum PaymentType {
   BANK_SLIP
 }
 
+enum AddressType {
+  RESIDENCIAL
+  COMERCIAL
+}
+
+model User {
+  id              String   @id @default(uuid())
+  name            String
+  email           String   @unique
+  password        String
+  role            String   @default("user")
+  twoFactorSecret String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 model Usuario {
   id            Int            @id @default(autoincrement())
   nome          String
@@ -44,12 +60,8 @@ model Usuario {
   atualizadoEm  DateTime       @updatedAt
   endereco      Endereco?
   pedidos       Pedido[]
-  avaliacoesEnviadas Avaliacao[]  @relation("Usuario")
-  avaliacoesRevisadas Avaliacao[] @relation("Reviewer")
+  avaliacoes    Avaliacao[]
   refreshTokens RefreshToken[]
-  twoFactorSecret      String?
-  twoFactorEnabled     Boolean   @default(false)
-  twoFactorBackupCodes String[]
 
   @@index([email])
   @@index([cpf])
@@ -57,7 +69,7 @@ model Usuario {
 }
 
 model Endereco {
-  id           Int      @id @default(autoincrement())
+  id           Int         @id @default(autoincrement())
   rua          String
   numero       String
   complemento  String?
@@ -65,11 +77,14 @@ model Endereco {
   cidade       String
   estado       String
   cep          String
-  usuario      Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  usuarioId    Int      @unique
-  criadoEm     DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
+  tipo         AddressType @default(RESIDENCIAL)
+  principal    Boolean     @default(false)
+  usuario      Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId    Int         @unique
+  criadoEm     DateTime    @default(now())
+  atualizadoEm DateTime    @updatedAt
 
+  @@index([usuarioId])
   @@map("enderecos")
 }
 
@@ -100,24 +115,16 @@ model Produto {
 }
 
 model Avaliacao {
-  id              String    @id @default(uuid())
-  nota            Int
-  comentario      String
-  status          String    @default("PENDING") // PENDING, APPROVED, REJECTED
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  reviewedBy      String?
-  reviewedAt      DateTime?
-  rejectionReason String?
-  produtoId       String
-  usuarioId       String
-  produto         Produto   @relation(fields: [produtoId], references: [id])
-  usuario         Usuario   @relation(fields: [usuarioId], references: [id])
-  reviewer        Usuario?  @relation("Reviewer", fields: [reviewedBy], references: [id])
+  id         Int      @id @default(autoincrement())
+  nota       Int
+  comentario String
+  data       DateTime @default(now())
+  produto    Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  produtoId  Int
+  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  usuarioId  Int
 
-  @@index([produtoId])
-  @@index([usuarioId])
-  @@index([reviewedBy])
+  @@map("avaliacoes")
 }
 
 model Pedido {
@@ -180,4 +187,59 @@ model RefreshToken {
 
   @@index([userId])
   @@index([token])
+}
+
+model WebhookLog {
+  id          String   @id @default(uuid())
+  paymentId   String   @unique
+  processedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([paymentId])
+  @@index([processedAt])
+  @@map("webhook_logs")
+}
+
+model Payment {
+  id                String   @id @default(uuid())
+  paymentId         String   @unique
+  externalReference String?
+  status            String
+  paymentType       String
+  paymentMethod     String?
+  amount            Float
+  currency          String   @default("BRL")
+  payerEmail        String?
+  payerName         String?
+  payerDocument     String?
+  installments      Int?
+  processedAt       DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([paymentId])
+  @@index([externalReference])
+  @@index([status])
+  @@index([processedAt])
+  @@map("payments")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  action     String
+  userId     String?
+  entityId   String?
+  entityType String?
+  details    Json
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([action])
+  @@index([userId])
+  @@index([entityId])
+  @@index([entityType])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

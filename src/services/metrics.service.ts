@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Registry, Counter, Histogram } from 'prom-client';
 import { logger } from '../config/logger';
+import { AlertSeverity } from './AlertService';
 
 export class MetricsService {
   private static instance: MetricsService;
@@ -11,6 +12,7 @@ export class MetricsService {
   private static cacheHits: Counter;
   private static cacheMisses: Counter;
   private static cacheOperations: Histogram;
+  private static alertCount: Counter;
 
   private constructor() {
     if (!MetricsService.registry) {
@@ -61,6 +63,14 @@ export class MetricsService {
         help: 'Duração das operações de cache em segundos',
         labelNames: ['service', 'operation'],
         buckets: [0.01, 0.05, 0.1, 0.5, 1],
+        registers: [MetricsService.registry]
+      });
+
+      // Métricas de alertas
+      MetricsService.alertCount = new Counter({
+        name: 'alert_count_total',
+        help: 'Total de alertas disparados',
+        labelNames: ['name', 'severity'],
         registers: [MetricsService.registry]
       });
     }
@@ -123,5 +133,9 @@ export class MetricsService {
 
   public static observeCacheOperation(service: string, operation: string, duration: number): void {
     MetricsService.cacheOperations.observe({ service, operation }, duration / 1000);
+  }
+
+  public static incrementAlertCount(name: string, severity: AlertSeverity): void {
+    MetricsService.alertCount.inc({ name, severity });
   }
 } 

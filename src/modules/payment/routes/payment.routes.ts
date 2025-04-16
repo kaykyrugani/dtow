@@ -15,6 +15,18 @@ const paymentController = PaymentController.getInstance();
  * tags:
  *   name: Pagamentos
  *   description: Endpoints para gerenciamento de pagamentos via Mercado Pago
+ * 
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *     webhookSignature:
+ *       type: apiKey
+ *       in: header
+ *       name: X-Hub-Signature
+ *       description: Assinatura HMAC-SHA256 do payload
  */
 
 /**
@@ -22,7 +34,11 @@ const paymentController = PaymentController.getInstance();
  * /payment/preference:
  *   post:
  *     summary: Cria uma preferência de pagamento
- *     description: Cria uma preferência de pagamento no Mercado Pago e retorna a URL de checkout
+ *     description: |
+ *       Cria uma preferência de pagamento no Mercado Pago.
+ *       - Rate limit: 100 requisições por 15 minutos
+ *       - Validação de dados via Zod
+ *       - Registro automático no histórico de pagamentos
  *     tags: [Pagamentos]
  *     requestBody:
  *       required: true
@@ -39,21 +55,17 @@ const paymentController = PaymentController.getInstance();
  *             properties:
  *               pedidoId:
  *                 type: string
- *                 description: ID único do pedido
- *                 example: "ped_123456"
+ *                 description: ID do pedido
  *               descricao:
  *                 type: string
- *                 description: Descrição do produto/serviço
- *                 example: "Curso de TypeScript"
+ *                 description: Descrição do pagamento
  *               valor:
  *                 type: number
- *                 description: Valor em centavos
- *                 example: 10000
+ *                 description: Valor do pagamento (deve ser positivo)
  *               formaPagamento:
  *                 type: string
- *                 enum: [credit_card, pix, bolbradesco]
- *                 description: Método de pagamento
- *                 example: "pix"
+ *                 enum: [CREDIT_CARD, PIX, BANK_SLIP]
+ *                 description: Forma de pagamento
  *               comprador:
  *                 type: object
  *                 required:
@@ -63,14 +75,16 @@ const paymentController = PaymentController.getInstance();
  *                 properties:
  *                   nome:
  *                     type: string
- *                     example: "João Silva"
  *                   email:
  *                     type: string
  *                     format: email
- *                     example: "joao@email.com"
  *                   cpf:
  *                     type: string
- *                     example: "12345678900"
+ *               parcelas:
+ *                 type: integer
+ *                 minimum: 1
+ *                 maximum: 12
+ *                 description: Número de parcelas (opcional)
  *     responses:
  *       200:
  *         description: Preferência criada com sucesso
@@ -81,59 +95,27 @@ const paymentController = PaymentController.getInstance();
  *               properties:
  *                 id:
  *                   type: string
- *                   example: "123456789"
+ *                   description: ID da preferência no Mercado Pago
  *                 init_point:
  *                   type: string
- *                   example: "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=123456789"
+ *                   description: URL para iniciar o pagamento
  *                 valorOriginal:
  *                   type: number
- *                   example: 10000
+ *                   description: Valor original do pagamento
  *                 valorFinal:
  *                   type: number
- *                   example: 9500
+ *                   description: Valor final após descontos
  *                 desconto:
  *                   type: number
- *                   example: 500
+ *                   description: Valor do desconto aplicado
  *       400:
  *         description: Dados inválidos
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Dados inválidos"
  *       401:
  *         description: Não autorizado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Token inválido"
  *       429:
  *         description: Muitas requisições
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Muitas requisições, tente novamente mais tarde"
  *       500:
- *         description: Erro interno
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Erro ao criar preferência de pagamento"
+ *         description: Erro interno do servidor
  */
 paymentRouter.post(
   '/preference',
@@ -146,9 +128,16 @@ paymentRouter.post(
  * @swagger
  * /payment/webhook:
  *   post:
- *     summary: Recebe notificações de pagamento
- *     description: Endpoint para receber webhooks do Mercado Pago sobre atualizações de pagamento
+ *     summary: Recebe notificações de webhook do Mercado Pago
+ *     description: |
+ *       Processa notificações de webhook do Mercado Pago.
+ *       - Rate limit: 200 requisições por 15 minutos
+ *       - Validação de assinatura HMAC-SHA256
+ *       - Verificação de idempotência
+ *       - Registro automático no histórico
  *     tags: [Pagamentos]
+ *     security:
+ *       - webhookSignature: []
  *     requestBody:
  *       required: true
  *       content:
@@ -161,69 +150,22 @@ paymentRouter.post(
  *             properties:
  *               action:
  *                 type: string
- *                 enum: [payment.created, payment.updated]
  *                 description: Tipo de ação do webhook
- *                 example: "payment.updated"
  *               data:
  *                 type: object
- *                 required:
- *                   - id
  *                 properties:
  *                   id:
  *                     type: string
- *                     description: ID do pagamento no Mercado Pago
- *                     example: "123456789"
+ *                     description: ID do pagamento
  *     responses:
  *       200:
  *         description: Webhook processado com sucesso
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *       400:
- *         description: Dados inválidos
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Dados inválidos"
  *       401:
  *         description: Assinatura inválida
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Assinatura do webhook inválida"
  *       429:
  *         description: Muitas requisições
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Muitas requisições, tente novamente mais tarde"
  *       500:
- *         description: Erro interno
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Erro ao processar webhook"
+ *         description: Erro interno do servidor
  */
 paymentRouter.post(
   '/webhook',
@@ -240,8 +182,13 @@ paymentRouter.use(authMiddleware);
  * @swagger
  * /payment/refund/{paymentId}:
  *   post:
- *     summary: Realiza reembolso de pagamento
- *     description: Processa o reembolso de um pagamento, total ou parcial
+ *     summary: Processa reembolso de um pagamento
+ *     description: |
+ *       Processa o reembolso de um pagamento.
+ *       - Rate limit: 50 requisições por 15 minutos
+ *       - Requer autenticação de administrador
+ *       - Validação de status do pagamento
+ *       - Registro automático no histórico
  *     tags: [Pagamentos]
  *     security:
  *       - bearerAuth: []
@@ -251,8 +198,7 @@ paymentRouter.use(authMiddleware);
  *         required: true
  *         schema:
  *           type: string
- *         description: ID do pagamento a ser reembolsado
- *         example: "123456789"
+ *         description: ID do pagamento
  *     requestBody:
  *       required: true
  *       content:
@@ -262,8 +208,7 @@ paymentRouter.use(authMiddleware);
  *             properties:
  *               amount:
  *                 type: number
- *                 description: Valor do reembolso em centavos (opcional)
- *                 example: 5000
+ *                 description: Valor do reembolso (opcional, deve ser positivo)
  *     responses:
  *       200:
  *         description: Reembolso processado com sucesso
@@ -272,72 +217,24 @@ paymentRouter.use(authMiddleware);
  *             schema:
  *               type: object
  *               properties:
- *                 id:
- *                   type: string
- *                   example: "123456789"
  *                 status:
  *                   type: string
- *                   example: "refunded"
+ *                   enum: [refunded]
+ *                 amount:
+ *                   type: number
+ *                   description: Valor reembolsado
  *       400:
- *         description: Dados inválidos
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Valor do reembolso inválido"
+ *         description: Pagamento não aprovado ou já reembolsado
  *       401:
  *         description: Não autorizado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Token inválido"
  *       403:
- *         description: Acesso negado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Acesso negado. Apenas administradores podem realizar reembolsos"
+ *         description: Acesso negado (não é administrador)
  *       404:
  *         description: Pagamento não encontrado
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Pagamento não encontrado"
  *       429:
  *         description: Muitas requisições
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Muitas requisições, tente novamente mais tarde"
  *       500:
- *         description: Erro interno
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Erro ao processar reembolso"
+ *         description: Erro interno do servidor
  */
 paymentRouter.post(
   '/refund/:paymentId',

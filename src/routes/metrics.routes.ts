@@ -1,14 +1,11 @@
 import { Router } from 'express';
-import { MetricsService } from '../services/metrics.service';
-import { authMiddleware } from '../middlewares/auth.middleware';
+import { metricsRoute } from '../metrics/prometheus';
+import { ensureAuthenticated } from '../middlewares/auth.middleware';
 
-const router = Router();
-const metricsService = MetricsService.getInstance();
+const metricsRouter = Router();
 
-// Rota protegida que requer autenticação de admin
-router.get('/metrics', authMiddleware, (req, res) => {
-  res.set('Content-Type', metricsService.getContentType());
-  res.end(metricsService.getMetrics());
-});
+// Rota para expor métricas do Prometheus
+// Protegida por autenticação para evitar acesso não autorizado
+metricsRouter.get('/', ensureAuthenticated, metricsRoute);
 
-export default router; 
+export default metricsRouter; 

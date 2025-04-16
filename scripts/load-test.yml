@@ -1,0 +1,56 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 50
+      name: "Aumento gradual de carga"
+    - duration: 300
+      arrivalRate: 50
+      name: "Carga sustentada"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Authorization: "Bearer YOUR_TEST_TOKEN"
+
+scenarios:
+  - name: "Fluxo de Pagamento"
+    flow:
+      - post:
+          url: "/api/payment/preference"
+          json:
+            amount: 100
+            description: "Teste de carga"
+            paymentType: "CREDIT_CARD"
+            installments: 1
+            comprador:
+              nome: "Test User"
+              email: "test@example.com"
+              cpf: "12345678900"
+          capture:
+            json: "$.id"
+            as: "preferenceId"
+          expect:
+            - statusCode: 200
+      - think: 2
+      - get:
+          url: "/api/payment/status/{{preferenceId}}"
+          expect:
+            - statusCode: 200
+
+  - name: "Fluxo de Autenticação"
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "test@example.com"
+            password: "test123"
+          expect:
+            - statusCode: 200
+      - think: 1
+      - post:
+          url: "/api/auth/refresh"
+          json:
+            refreshToken: "{{$processEnvironment.REFRESH_TOKEN}}"
+          expect:
+            - statusCode: 200 
