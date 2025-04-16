@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bem-vindo à OnlyWave!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #0066cc;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .feature {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #666;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #0066cc;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Bem-vindo à OnlyWave!</h1>
+        </div>
+        <div class="content">
+            <p>Olá {{nome}},</p>
+            <p>Seja bem-vindo à OnlyWave! Estamos muito felizes em ter você conosco.</p>
+            
+            <div class="features">
+                <div class="feature">
+                    <h3>🎁 Cupom de Boas-vindas</h3>
+                    <p>Use o código <strong>{{cupomBoasVindas}}</strong> e ganhe {{descontoBoasVindas}}% de desconto em sua primeira compra!</p>
+                </div>
+                <div class="feature">
+                    <h3>🚀 Comece Agora</h3>
+                    <p>Explore nossa coleção de produtos exclusivos.</p>
+                </div>
+            </div>
+
+            <p>Para começar a usar sua conta, clique no botão abaixo:</p>
+            <a href="{{linkLogin}}" class="button">Acessar Minha Conta</a>
+            
+            <p>Se precisar de ajuda, nossa equipe está sempre à disposição.</p>
+            <p>Atenciosamente,<br>Equipe OnlyWave</p>
+        </div>
+        <div class="footer">
+            <p>Este é um email automático, por favor não responda.</p>
+            <p>© 2025 OnlyWave. Todos os direitos reservados.</p>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,43 +1,68 @@
-import { ERROR_CODES, ERROR_MESSAGES, ErrorCodeKey, getErrorMessage } from '../constants/errorMessages';
+import { getErrorMessage, ERROR_CODES } from '../constants/errorMessages';
 
 export class AppError extends Error {
-  public readonly statusCode: number;
-  public readonly code: string;
-  public readonly details?: any;
-
-  constructor(code: ErrorCodeKey, statusCode: number, details?: any) {
-    super(getErrorMessage(code));
+  constructor(
+    public statusCode: number,
+    public code: string,
+    message: string
+  ) {
+    super(message);
     this.name = 'AppError';
-    this.code = ERROR_CODES[code];
-    this.statusCode = statusCode;
-    this.details = details;
   }
 
-  static notFound(details?: any) {
-    return new AppError('NOT_FOUND', 404, details);
+  static notFound(message?: string): AppError {
+    return new AppError(
+      404,
+      ERROR_CODES.NOT_FOUND,
+      message || getErrorMessage(ERROR_CODES.NOT_FOUND)
+    );
   }
 
-  static unauthorized(details?: any) {
-    return new AppError('UNAUTHORIZED', 401, details);
+  static unauthorized(message?: string): AppError {
+    return new AppError(
+      401,
+      ERROR_CODES.UNAUTHORIZED,
+      message || getErrorMessage(ERROR_CODES.UNAUTHORIZED)
+    );
   }
 
-  static validationError(details?: any) {
-    return new AppError('VALIDATION_ERROR', 400, details);
+  static validationError(message?: string): AppError {
+    return new AppError(
+      400,
+      ERROR_CODES.VALIDATION_ERROR,
+      message || getErrorMessage(ERROR_CODES.VALIDATION_ERROR)
+    );
   }
 
-  static internal(details?: any) {
-    return new AppError('INTERNAL_ERROR', 500, details);
+  static internal(message?: string): AppError {
+    return new AppError(
+      500,
+      ERROR_CODES.INTERNAL_ERROR,
+      message || getErrorMessage(ERROR_CODES.INTERNAL_ERROR)
+    );
   }
 
-  static conflict(details?: any) {
-    return new AppError('DUPLICATE_ENTRY', 409, details);
+  static conflict(message?: string): AppError {
+    return new AppError(
+      409,
+      ERROR_CODES.DUPLICATE_ENTRY,
+      message || getErrorMessage(ERROR_CODES.DUPLICATE_ENTRY)
+    );
   }
 
-  static tokenExpired(details?: any) {
-    return new AppError('TOKEN_EXPIRED', 401, details);
+  static tokenExpired(message?: string): AppError {
+    return new AppError(
+      401,
+      ERROR_CODES.TOKEN_EXPIRED,
+      message || getErrorMessage(ERROR_CODES.TOKEN_EXPIRED)
+    );
   }
 
-  static tokenInvalid(details?: any) {
-    return new AppError('TOKEN_INVALID', 401, details);
+  static tokenInvalid(message?: string): AppError {
+    return new AppError(
+      401,
+      ERROR_CODES.TOKEN_INVALID,
+      message || getErrorMessage(ERROR_CODES.TOKEN_INVALID)
+    );
   }
 } 

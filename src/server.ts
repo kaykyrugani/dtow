@@ -1,14 +1,39 @@
-import dotenv from 'dotenv';
-import { app } from './app';
-import logger from './utils/logger';
+import 'express-async-errors';
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import { authRoutes } from './modules/admin/routes/auth.routes';
+import { AppError } from './errors/AppError';
 
-// Configuração do dotenv
-dotenv.config();
+const app = express();
 
-// Configuração da porta
-const PORT = process.env.PORT || 3000;
+app.use(helmet());
+app.use(cors());
+app.use(express.json());
 
-// Inicialização do servidor
+// Routes
+app.use('/auth', authRoutes);
+
+// Error handling
+app.use((err: Error, request: express.Request, response: express.Response, _: express.NextFunction) => {
+  if (err instanceof AppError) {
+    return response.status(err.statusCode).json({
+      status: 'error',
+      message: err.message
+    });
+  }
+
+  console.error(err);
+
+  return response.status(500).json({
+    status: 'error',
+    message: 'Internal server error'
+  });
+});
+
+const PORT = process.env.PORT || 3333;
+
 app.listen(PORT, () => {
-  logger.info(`Servidor rodando na porta ${PORT} em modo ${process.env.NODE_ENV}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 }); 

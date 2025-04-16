@@ -7,7 +7,10 @@ export const createProductSchema = z.object({
   estoque: z.number().int().positive(),
   imagem: z.string().url(),
   categoria: z.string().min(3).max(50),
-  subcategoria: z.string().min(3).max(50).optional()
+  subcategoria: z.string().min(3).max(50).optional(),
+  marca: z.string().min(1).max(100),
+  imagens: z.string(),
+  tamanhos: z.string()
 })
 
 export const updateProductSchema = createProductSchema.partial() 

@@ -38,6 +38,17 @@ enum AddressType {
   COMERCIAL
 }
 
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  password      String
+  role          String    @default("user")
+  twoFactorSecret String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
 model Usuario {
   id         Int         @id @default(autoincrement())
   nome       String

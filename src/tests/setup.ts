@@ -8,6 +8,7 @@ import { TokenService } from '../services/TokenService';
 import { PrismaClient } from '@prisma/client';
 import { mockDeep } from 'vitest-mock-extended';
 import { UsuarioRepository } from '../repositories/UsuarioRepository';
+import { prisma } from '../config/database';
 
 // Mock do TokenService
 export const tokenServiceMock = {
@@ -58,6 +59,14 @@ afterEach(() => {
 
 afterAll(() => {
   container.dispose();
+});
+
+beforeAll(async () => {
+  await prisma.$connect();
+});
+
+afterAll(async () => {
+  await prisma.$disconnect();
 });
 
 // Helpers para testes

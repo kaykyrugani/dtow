@@ -1,0 +1,17 @@
+{
+  "production": {
+    "MP_ACCESS_TOKEN": "APP_USR-0000000000000000-000000-00000000000000000000000000000000-000000000",
+    "WEBHOOK_SECRET": "seu_segredo_de_webhook_producao",
+    "WEBHOOK_URL": "https://api.seudominio.com/payment/webhook"
+  },
+  "staging": {
+    "MP_ACCESS_TOKEN": "APP_USR-0000000000000000-000000-00000000000000000000000000000000-000000000",
+    "WEBHOOK_SECRET": "seu_segredo_de_webhook_staging",
+    "WEBHOOK_URL": "https://staging.seudominio.com/payment/webhook"
+  },
+  "development": {
+    "MP_ACCESS_TOKEN": "TEST-0000000000000000-000000-00000000000000000000000000000000-000000000",
+    "WEBHOOK_SECRET": "seu_segredo_de_webhook_development",
+    "WEBHOOK_URL": "http://localhost:3000/payment/webhook"
+  }
+} 

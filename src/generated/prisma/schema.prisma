@@ -44,8 +44,12 @@ model Usuario {
   atualizadoEm  DateTime       @updatedAt
   endereco      Endereco?
   pedidos       Pedido[]
-  avaliacoes    Avaliacao[]
+  avaliacoesEnviadas Avaliacao[]  @relation("Usuario")
+  avaliacoesRevisadas Avaliacao[] @relation("Reviewer")
   refreshTokens RefreshToken[]
+  twoFactorSecret      String?
+  twoFactorEnabled     Boolean   @default(false)
+  twoFactorBackupCodes String[]
 
   @@index([email])
   @@index([cpf])
@@ -96,16 +100,24 @@ model Produto {
 }
 
 model Avaliacao {
-  id         Int      @id @default(autoincrement())
-  nota       Int
-  comentario String
-  data       DateTime @default(now())
-  produto    Produto  @relation(fields: [produtoId], references: [id], onDelete: Cascade)
-  produtoId  Int
-  usuario    Usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  usuarioId  Int
+  id              String    @id @default(uuid())
+  nota            Int
+  comentario      String
+  status          String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  rejectionReason String?
+  produtoId       String
+  usuarioId       String
+  produto         Produto   @relation(fields: [produtoId], references: [id])
+  usuario         Usuario   @relation(fields: [usuarioId], references: [id])
+  reviewer        Usuario?  @relation("Reviewer", fields: [reviewedBy], references: [id])
 
-  @@map("avaliacoes")
+  @@index([produtoId])
+  @@index([usuarioId])
+  @@index([reviewedBy])
 }
 
 model Pedido {

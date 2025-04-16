@@ -1,29 +1,21 @@
 import { Router } from 'express';
 import { ReviewController } from '../controllers/review.controller';
-import { authMiddleware } from '../../../middlewares/auth.middleware';
-import { validateSchema } from '../../../middlewares/validateSchema';
-import {
-  createReviewSchema,
-  updateReviewSchema,
-  deleteReviewSchema,
-  getReviewByIdSchema,
-  getReviewsByProductSchema,
-  getReviewsByUserSchema
-} from '../schemas/review.schema';
+import { ensureAuthenticated } from '../../../shared/middlewares/ensureAuthenticated';
+import { ensureAdmin } from '../../../shared/middlewares/ensureAdmin';
+import { cacheMiddleware } from '../../../middlewares/cache.middleware';
 
 const reviewRouter = Router();
 
-// Rotas públicas
-reviewRouter.get('/produto/:produtoId', ReviewController.findByProductId);
-reviewRouter.get('/usuario/:usuarioId', ReviewController.findByUserId);
-reviewRouter.get('/:id', ReviewController.findById);
+// Rotas públicas com cache
+reviewRouter.get('/products/:produtoId/reviews', cacheMiddleware(1800), ReviewController.getProductReviews);
 
-// Middleware de autenticação
-reviewRouter.use(authMiddleware());
+// Rotas protegidas (sem cache)
+reviewRouter.post('/products/:produtoId/reviews', ensureAuthenticated, ReviewController.createReview);
+reviewRouter.put('/reviews/:reviewId', ensureAuthenticated, ReviewController.updateReview);
+reviewRouter.delete('/reviews/:reviewId', ensureAuthenticated, ReviewController.deleteReview);
 
-// Rotas protegidas
-reviewRouter.post('/', validateSchema(createReviewSchema), ReviewController.create);
-reviewRouter.put('/:id', validateSchema(updateReviewSchema), ReviewController.update);
-reviewRouter.delete('/:id', validateSchema(deleteReviewSchema), ReviewController.delete);
+// Rotas de administrador (sem cache)
+reviewRouter.get('/admin/reviews', ensureAdmin, ReviewController.getAllReviews);
+reviewRouter.put('/admin/reviews/:reviewId/status', ensureAdmin, ReviewController.updateReviewStatus);
 
-export { reviewRouter }; 
+export default reviewRouter; 

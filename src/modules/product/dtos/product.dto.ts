@@ -5,7 +5,7 @@ export interface CreateProductDTO {
   desconto?: number;
   marca: string;
   categoria: string;
-  subcategoria: string;
+  subcategoria?: string;
   imagem: string;
   imagens: string;
   tamanhos: string;

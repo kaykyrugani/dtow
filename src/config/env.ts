@@ -7,40 +7,36 @@ const setupLogger = createLogger({
   transports: [new transports.Console()]
 });
 
-export const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test'])
-    .default('development')
-    .describe('Ambiente da aplicação'),
-    
-  REDIS_HOST: z.string()
-    .min(1, 'REDIS_HOST não pode estar vazio')
-    .default('localhost')
-    .describe('Host do Redis'),
-    
-  REDIS_PORT: z.coerce
-    .number()
-    .int('Porta deve ser um número inteiro')
-    .min(1, 'Porta inválida')
-    .max(65535, 'Porta inválida')
-    .default(6379)
-    .describe('Porta do Redis'),
-    
-  LOGTAIL_API_KEY: z.string()
-    .optional()
-    .describe('API Key do Logtail (opcional em development)')
-    .refine(
-      (val) => process.env.NODE_ENV !== 'production' || (val && val.length > 0),
-      'LOGTAIL_API_KEY é obrigatório em produção'
-    ),
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  DATABASE_URL: z.string(),
+  JWT_SECRET: z.string(),
+  REDIS_HOST: z.string(),
+  REDIS_PORT: z.number(),
+  LOGTAIL_API_KEY: z.string().optional(),
+  SMTP_HOST: z.string(),
+  SMTP_PORT: z.number(),
+  SMTP_SECURE: z.boolean().default(false),
+  SMTP_USER: z.string(),
+  SMTP_PASS: z.string(),
+  SMTP_FROM: z.string().default('noreply@onlywave.com.br'),
+  LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly']).default('info')
+});
 
-  JWT_SECRET: z.string()
-    .min(32, 'JWT_SECRET deve ter pelo menos 32 caracteres')
-    .default('development_jwt_secret_key_min_32_chars')
-    .describe('Chave secreta para JWT'),
-
-  DATABASE_URL: z.string()
-    .min(1, 'DATABASE_URL não pode estar vazio')
-    .describe('URL de conexão com o banco de dados')
+export const env = envSchema.parse({
+  NODE_ENV: process.env.NODE_ENV,
+  DATABASE_URL: process.env.DATABASE_URL,
+  JWT_SECRET: process.env.JWT_SECRET,
+  REDIS_HOST: process.env.REDIS_HOST,
+  REDIS_PORT: Number(process.env.REDIS_PORT),
+  LOGTAIL_API_KEY: process.env.LOGTAIL_API_KEY,
+  SMTP_HOST: process.env.SMTP_HOST,
+  SMTP_PORT: Number(process.env.SMTP_PORT),
+  SMTP_SECURE: process.env.SMTP_SECURE === 'true',
+  SMTP_USER: process.env.SMTP_USER,
+  SMTP_PASS: process.env.SMTP_PASS,
+  SMTP_FROM: process.env.SMTP_FROM,
+  LOG_LEVEL: process.env.LOG_LEVEL
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
@@ -62,4 +58,4 @@ export function validateEnv(): EnvConfig {
 }
 
 // Exporta o objeto env já validado
-export const env = validateEnv(); 
+export const config = validateEnv(); 

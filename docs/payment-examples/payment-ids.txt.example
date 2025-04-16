@@ -1,0 +1,15 @@
+# Arquivo de exemplo para processamento em lote
+# Um ID por linha
+# Linhas vazias e comentários são ignorados
+
+# Pagamentos aprovados
+123456789
+987654321
+
+# Pagamentos pendentes
+456789123
+789123456
+
+# Pagamentos rejeitados
+321654987
+654987321 

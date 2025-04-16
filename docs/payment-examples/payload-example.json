@@ -1,0 +1,86 @@
+{
+  "webhook_examples": {
+    "payment_created": {
+      "action": "payment.created",
+      "data": {
+        "id": "1234567890",
+        "status": "pending",
+        "status_detail": "pending",
+        "transaction_details": {
+          "net_received_amount": 0,
+          "total_paid_amount": 0,
+          "transaction_id": null,
+          "payment_method_id": null,
+          "payment_type_id": null,
+          "installments": 0
+        },
+        "external_reference": "ORDER-123456"
+      }
+    },
+    "payment_updated_approved": {
+      "action": "payment.updated",
+      "data": {
+        "id": "1234567890",
+        "status": "approved",
+        "status_detail": "accredited",
+        "transaction_details": {
+          "net_received_amount": 1000,
+          "total_paid_amount": 1000,
+          "transaction_id": "1234567890",
+          "payment_method_id": "credit_card",
+          "payment_type_id": "credit_card",
+          "installments": 1
+        },
+        "external_reference": "ORDER-123456"
+      }
+    },
+    "payment_updated_rejected": {
+      "action": "payment.updated",
+      "data": {
+        "id": "1234567890",
+        "status": "rejected",
+        "status_detail": "cc_rejected_other_reason",
+        "transaction_details": {
+          "net_received_amount": 0,
+          "total_paid_amount": 0,
+          "transaction_id": null,
+          "payment_method_id": "credit_card",
+          "payment_type_id": "credit_card",
+          "installments": 0
+        },
+        "external_reference": "ORDER-123456"
+      }
+    },
+    "payment_updated_refunded": {
+      "action": "payment.updated",
+      "data": {
+        "id": "1234567890",
+        "status": "refunded",
+        "status_detail": "refunded",
+        "transaction_details": {
+          "net_received_amount": 0,
+          "total_paid_amount": 0,
+          "transaction_id": "1234567890",
+          "payment_method_id": "credit_card",
+          "payment_type_id": "credit_card",
+          "installments": 1
+        },
+        "external_reference": "ORDER-123456"
+      }
+    }
+  },
+  "preference_example": {
+    "pedidoId": "ORDER-123456",
+    "descricao": "Pedido #123456 - OnlyWave",
+    "valor": 1000,
+    "formaPagamento": "credit_card",
+    "comprador": {
+      "nome": "João da Silva",
+      "email": "joao.silva@email.com",
+      "cpf": "12345678900"
+    }
+  },
+  "refund_example": {
+    "amount": 1000
+  }
+} 

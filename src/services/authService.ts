@@ -19,7 +19,7 @@ export class AuthService {
   constructor(
     @inject('UsuarioRepository')
     private usuarioRepository: UsuarioRepository,
-    @inject(TokenService)
+    @inject('TokenService')
     private tokenService: TokenService
   ) {}
 
@@ -58,14 +58,6 @@ export class AuthService {
           );
       }
     }
-    
-    if (error instanceof Error) {
-      throw new AppError(
-        ERROR_CODES.INTERNAL_ERROR,
-        HttpStatusCode.INTERNAL_SERVER_ERROR,
-        { message: error.message }
-      );
-    }
 
     throw new AppError(
       ERROR_CODES.INTERNAL_ERROR,
@@ -75,145 +67,151 @@ export class AuthService {
 
   async cadastrar(data: unknown) {
     try {
-      const validacao = registerSchema.safeParse(data);
-      if (!validacao.success) {
-        this.handleValidationError(validacao.error);
-        return;
-      }
-
-      const { senha, ...resto } = validacao.data;
-      const hashedSenha = await bcrypt.hash(senha, 12);
+      const validatedData = registerSchema.parse(data);
+      
+      const hashedPassword = await bcrypt.hash(validatedData.senha, 10);
       
       const usuario = await this.usuarioRepository.create({
-        ...resto,
-        senha: hashedSenha
+        ...validatedData,
+        senha: hashedPassword
       });
-
-      const accessToken = this.tokenService.generateAccessToken(usuario.id);
-      const refreshToken = await this.tokenService.generateRefreshToken(usuario.id);
-
-      const { senha: _, ...usuarioSemSenha } = usuario;
-
+      
+      const { senha, ...usuarioSemSenha } = usuario;
+      
       return {
         usuario: usuarioSemSenha,
-        accessToken,
-        refreshToken
+        mensagem: 'Usuário cadastrado com sucesso'
       };
     } catch (error) {
-      if (error instanceof AppError) throw error;
-      this.handlePrismaError(error);
+      if (error instanceof ZodError) {
+        this.handleValidationError(error);
+      } else if (error instanceof PrismaClientKnownRequestError) {
+        this.handlePrismaError(error);
+      } else {
+        throw error;
+      }
     }
   }
 
   async login(data: unknown) {
     try {
-      const validacao = loginSchema.safeParse(data);
-      if (!validacao.success) {
-        this.handleValidationError(validacao.error);
-        return;
-      }
-
-      const usuario = await this.usuarioRepository.findByEmailWithPassword(validacao.data.email);
+      const validatedData = loginSchema.parse(data);
+      
+      const usuario = await this.usuarioRepository.findByEmailWithPassword(validatedData.email);
+      
       if (!usuario) {
         throw new AppError(
           ERROR_CODES.INVALID_CREDENTIALS,
           HttpStatusCode.UNAUTHORIZED
         );
       }
-
-      const senhaCorreta = await bcrypt.compare(validacao.data.senha, usuario.senha);
-      if (!senhaCorreta) {
+      
+      const senhaValida = await bcrypt.compare(validatedData.senha, usuario.senha);
+      
+      if (!senhaValida) {
         throw new AppError(
           ERROR_CODES.INVALID_CREDENTIALS,
           HttpStatusCode.UNAUTHORIZED
         );
       }
-
+      
+      const { senha, ...usuarioSemSenha } = usuario;
+      
       const accessToken = this.tokenService.generateAccessToken(usuario.id);
       const refreshToken = await this.tokenService.generateRefreshToken(usuario.id);
-
-      const { senha: _, ...usuarioSemSenha } = usuario;
       
       return {
         usuario: usuarioSemSenha,
         accessToken,
-        refreshToken
+        refreshToken,
+        mensagem: 'Login realizado com sucesso'
       };
     } catch (error) {
-      if (error instanceof AppError) throw error;
-      this.handlePrismaError(error);
+      if (error instanceof ZodError) {
+        this.handleValidationError(error);
+      } else if (error instanceof AppError) {
+        throw error;
+      } else {
+        throw new AppError(
+          ERROR_CODES.INTERNAL_ERROR,
+          HttpStatusCode.INTERNAL_SERVER_ERROR
+        );
+      }
     }
   }
 
   async gerarTokenRecuperacao(email: string): Promise<GerarTokenRecuperacaoResult> {
     try {
-      const validacao = recuperacaoSenhaSchema.safeParse({ email });
-      if (!validacao.success) {
-        this.handleValidationError(validacao.error);
-        return { status: 'info', mensagem: 'Email inválido' };
-      }
-
-      const usuario = await this.usuarioRepository.findByEmail(validacao.data.email);
+      const validatedData = recuperacaoSenhaSchema.parse({ email });
+      
+      const usuario = await this.usuarioRepository.findByEmail(validatedData.email);
+      
       if (!usuario) {
-        return { 
-          status: 'info', 
-          mensagem: 'Se o email existir, você receberá as instruções de recuperação' 
+        // Por segurança, não informamos se o email existe ou não
+        return {
+          status: 'info',
+          mensagem: 'Se o email existir, você receberá as instruções de recuperação'
         };
       }
-
+      
       const token = await this.tokenService.generatePasswordResetToken(usuario.id);
-      return { status: 'ok', token };
+      
+      // Em produção, enviar email com o token
+      // Por enquanto, retornamos o token diretamente
+      
+      return {
+        status: 'ok',
+        token
+      };
     } catch (error) {
-      if (error instanceof AppError) throw error;
-      this.handlePrismaError(error);
-      return { status: 'info', mensagem: 'Erro ao gerar token de recuperação' };
+      if (error instanceof ZodError) {
+        this.handleValidationError(error);
+      } else {
+        throw new AppError(
+          ERROR_CODES.INTERNAL_ERROR,
+          HttpStatusCode.INTERNAL_SERVER_ERROR
+        );
+      }
     }
   }
 
   async alterarSenha(token: string, novaSenha: string) {
     try {
-      const validacao = alteracaoSenhaSchema.safeParse({ token, novaSenha });
-      if (!validacao.success) {
-        this.handleValidationError(validacao.error);
-        return;
-      }
-
-      const userId = await this.tokenService.verifyPasswordResetToken(token);
-      if (!userId) {
+      const validatedData = alteracaoSenhaSchema.parse({ token, novaSenha });
+      
+      const userId = await this.tokenService.verifyPasswordResetToken(validatedData.token);
+      
+      const hashedPassword = await bcrypt.hash(validatedData.novaSenha, 10);
+      
+      await this.usuarioRepository.update(userId, { senha: hashedPassword });
+      
+      // Revogar o token de recuperação
+      await this.tokenService.revokePasswordResetToken(validatedData.token);
+      
+      return {
+        mensagem: 'Senha alterada com sucesso'
+      };
+    } catch (error) {
+      if (error instanceof ZodError) {
+        this.handleValidationError(error);
+      } else if (error instanceof AppError) {
+        throw error;
+      } else {
         throw new AppError(
-          ERROR_CODES.TOKEN_INVALID,
-          HttpStatusCode.UNAUTHORIZED
+          ERROR_CODES.INTERNAL_ERROR,
+          HttpStatusCode.INTERNAL_SERVER_ERROR
         );
       }
-
-      const hashedSenha = await bcrypt.hash(validacao.data.novaSenha, 12);
-      await this.usuarioRepository.update(userId, { senha: hashedSenha });
-      await this.tokenService.revokePasswordResetToken(token);
-
-      return { mensagem: ERROR_MESSAGES[ERROR_CODES.PASSWORD_CHANGED] };
-    } catch (error) {
-      if (error instanceof AppError) throw error;
-      this.handlePrismaError(error);
     }
   }
 
   async logout(refreshToken: string) {
-    try {
-      await this.tokenService.revokeRefreshToken(refreshToken);
-      return { mensagem: 'Logout realizado com sucesso' };
-    } catch (error) {
-      if (error instanceof AppError) throw error;
-      this.handlePrismaError(error);
-    }
+    await this.tokenService.revokeRefreshToken(refreshToken);
+    return { mensagem: 'Logout realizado com sucesso' };
   }
 
   async refresh(refreshToken: string) {
-    try {
-      const result = await this.tokenService.refreshAccessToken(refreshToken);
-      return result;
-    } catch (error) {
-      if (error instanceof AppError) throw error;
-      this.handlePrismaError(error);
-    }
+    const { accessToken } = await this.tokenService.refreshAccessToken(refreshToken);
+    return { accessToken };
   }
 }

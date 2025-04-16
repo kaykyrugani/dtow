@@ -1,42 +1,39 @@
 import { Router } from 'express';
-import { AddressController } from '../controllers/AddressController';
+import { AddressController } from '../controllers/address.controller';
 import { authMiddleware } from '../../../middlewares/auth.middleware';
-import { validateSchema } from '../../../middlewares/validateSchema';
-import { enderecoSchema, consultaCepSchema } from '../dtos/EnderecoDTO';
+import { validateSchema } from '../../../middlewares/validateSchema.middleware';
+import { createAddressSchema, updateAddressSchema } from '../dtos/address.dto';
 
 const addressRouter = Router();
+const addressController = new AddressController();
 
-// Rota pública para consulta de CEP
-addressRouter.get(
-  '/cep/:cep',
-  validateSchema(consultaCepSchema),
-  AddressController.consultarCep
-);
+// Rota pública para busca de CEP
+addressRouter.get('/search/:cep', addressController.searchByCep);
 
 // Rotas protegidas
-addressRouter.use(authMiddleware());
+addressRouter.use(authMiddleware);
 
-// Criar endereço
+// Listar endereços do usuário
+addressRouter.get('/', addressController.listByUserId);
+
+// Criar novo endereço
 addressRouter.post(
   '/',
-  validateSchema(enderecoSchema),
-  AddressController.criar
+  validateSchema(createAddressSchema),
+  addressController.create
 );
 
 // Atualizar endereço
 addressRouter.put(
   '/:id',
-  validateSchema(enderecoSchema),
-  AddressController.atualizar
+  validateSchema(updateAddressSchema),
+  addressController.update
 );
 
 // Deletar endereço
-addressRouter.delete('/:id', AddressController.deletar);
+addressRouter.delete('/:id', addressController.delete);
 
-// Buscar endereço por ID
-addressRouter.get('/:id', AddressController.buscarPorId);
-
-// Listar endereços por usuário
-addressRouter.get('/usuario/:usuarioId', AddressController.listarPorUsuario);
+// Definir endereço como principal
+addressRouter.patch('/:id/primary', addressController.setPrimary);
 
 export { addressRouter }; 

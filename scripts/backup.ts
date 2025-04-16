@@ -1,74 +1,70 @@
 import { exec } from 'child_process';
+import { S3 } from 'aws-sdk';
 import { promisify } from 'util';
-import { join } from 'path';
-import { mkdirSync, existsSync } from 'fs';
-import { LoggerService } from '../src/utils/LoggerService';
+import { config } from 'dotenv';
+import { logger } from '../src/utils/logger';
+
+config();
 
 const execAsync = promisify(exec);
+const s3 = new S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION
+});
 
-const BACKUP_DIR = join(__dirname, '../backups');
-const DB_URL = process.env.DATABASE_URL || '';
-
-if (!DB_URL) {
-  throw new Error('DATABASE_URL não definida');
-}
-
-// Extrai informações da conexão da DATABASE_URL
-const dbInfo = new URL(DB_URL.replace('postgresql://', 'http://'));
-const DB_NAME = dbInfo.pathname.slice(1);
-const DB_USER = dbInfo.username;
-const DB_PASS = dbInfo.password;
-const DB_HOST = dbInfo.hostname;
-const DB_PORT = dbInfo.port;
-
-async function createBackup() {
+async function backup() {
   try {
-    // Cria diretório de backup se não existir
-    if (!existsSync(BACKUP_DIR)) {
-      mkdirSync(BACKUP_DIR, { recursive: true });
-    }
-
-    const date = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `backup-${date}.sql`;
-    const filepath = join(BACKUP_DIR, filename);
-
-    // Comando pg_dump com credenciais do ambiente
-    const command = [
-      'PGPASSWORD=' + DB_PASS,
-      'pg_dump',
-      `-h ${DB_HOST}`,
-      `-p ${DB_PORT}`,
-      `-U ${DB_USER}`,
-      `-F p`, // Formato plain text
-      `-f ${filepath}`,
-      DB_NAME
-    ].join(' ');
-
-    const { stdout, stderr } = await execAsync(command);
-
-    if (stderr) {
-      LoggerService.warn('Avisos durante backup:', stderr);
-    }
-
-    LoggerService.info('Backup criado com sucesso:', {
-      file: filepath,
-      size: (await execAsync(`stat -f %z ${filepath}`)).stdout.trim()
-    });
-
-    // Limpa backups antigos (mantém últimos 7)
-    const { stdout: files } = await execAsync(`ls -t ${BACKUP_DIR}/backup-*.sql`);
-    const oldFiles = files.split('\n').filter(Boolean).slice(7);
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `backup-${timestamp}.sql`;
     
-    for (const file of oldFiles) {
-      await execAsync(`rm ${file}`);
-      LoggerService.info('Backup antigo removido:', { file });
+    logger.info('Iniciando backup do banco de dados...');
+
+    // Backup do PostgreSQL
+    await execAsync(`pg_dump -U ${process.env.DB_USER} -d ${process.env.DB_NAME} > ${filename}`);
+    
+    logger.info('Backup local criado com sucesso');
+
+    // Upload para S3
+    await s3.upload({
+      Bucket: process.env.BACKUP_BUCKET!,
+      Key: filename,
+      Body: require('fs').createReadStream(filename)
+    }).promise();
+    
+    logger.info('Backup enviado para S3 com sucesso');
+
+    // Limpar arquivo local
+    require('fs').unlinkSync(filename);
+    
+    logger.info('Arquivo local removido');
+
+    // Limpar backups antigos (manter últimos 7 dias)
+    const { Contents } = await s3.listObjects({
+      Bucket: process.env.BACKUP_BUCKET!
+    }).promise();
+
+    if (Contents) {
+      const oldBackups = Contents
+        .filter(obj => obj.Key!.startsWith('backup-'))
+        .sort((a, b) => b.LastModified!.getTime() - a.LastModified!.getTime())
+        .slice(7);
+
+      for (const backup of oldBackups) {
+        await s3.deleteObject({
+          Bucket: process.env.BACKUP_BUCKET!,
+          Key: backup.Key!
+        }).promise();
+        
+        logger.info(`Backup antigo removido: ${backup.Key}`);
+      }
     }
 
+    logger.info('Processo de backup concluído com sucesso');
   } catch (error) {
-    LoggerService.error('Erro ao criar backup:', error);
+    logger.error('Erro durante o processo de backup:', error);
     process.exit(1);
   }
 }
 
-// Executa backup
-createBackup(); 
+backup(); 
