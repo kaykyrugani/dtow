@@ -14,10 +14,21 @@ import { metricsConfig } from './config/metrics.config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ThrottlerModuleOptions } from '@nestjs/throttler';
 import { validationSchema } from './config/env.validation';
-import { RedisModule } from '@nestjs-modules/ioredis';
-import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { RedisModule } from '@nestjs/redis';
+import { PrometheusModule } from '@nestjs/prometheus';
 import { MetricsModule } from './metrics/metrics.module';
 import { swaggerConfig } from './config/swagger.config';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { typeOrmConfig } from './config/typeorm.config';
+import { jwtConfig } from './config/jwt.config';
+import { JwtStrategy } from './config/passport.config';
+import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { prometheusConfig } from './config/prometheus.config';
+import { WinstonModule } from 'nest-winston';
+import { winstonConfig } from './config/winston.config';
+import { rateLimitConfig } from './config/rate-limit.config';
 
 @Module({
   imports: [
@@ -41,20 +52,13 @@ import { swaggerConfig } from './config/swagger.config';
       },
     }),
     TypeOrmModule.forRootAsync({
-      useFactory: (configService: ConfigService): TypeOrmModuleOptions => ({
-        type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: parseInt(configService.get('DB_PORT') || '5432', 10),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_DATABASE'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get('NODE_ENV') !== 'production',
-        logging: configService.get('NODE_ENV') !== 'production',
-      }),
+      imports: [ConfigModule],
+      useFactory: () => typeOrmConfig,
       inject: [ConfigService],
     }),
     RedisModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: () => redisConfig,
       useFactory: (configService: ConfigService) => ({
         config: {
           url: `redis://${configService.get('redis.host')}:${configService.get('redis.port')}`,
@@ -64,24 +68,8 @@ import { swaggerConfig } from './config/swagger.config';
       }),
       inject: [ConfigService],
     }),
-    ThrottlerModule.forRootAsync({
-      useFactory: (configService: ConfigService): ThrottlerModuleOptions => ({
-        throttlers: [
-          {
-            ttl: parseInt(configService.get('THROTTLE_TTL') || '60', 10),
-            limit: parseInt(configService.get('THROTTLE_LIMIT') || '100', 10),
-          },
-        ],
-      }),
-      inject: [ConfigService],
-    }),
-    CacheModule.registerAsync({
-      useFactory: (configService: ConfigService) => ({
-        ttl: parseInt(configService.get('CACHE_TTL') || '3600', 10),
-        max: parseInt(configService.get('CACHE_MAX') || '100', 10),
-      }),
-      inject: [ConfigService],
-    }),
+    ThrottlerModule.forRoot(rateLimitConfig),
+    CacheModule.register(cacheConfig),
     PrometheusModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         enabled: configService.get('metrics.enabled'),
@@ -91,6 +79,16 @@ import { swaggerConfig } from './config/swagger.config';
     }),
     PaymentModule,
     MetricsModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: () => jwtConfig,
+      inject: [ConfigService],
+    }),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    UsersModule,
+    AuthModule,
+    WinstonModule.forRoot(winstonConfig),
   ],
+  providers: [JwtStrategy],
 })
 export class AppModule {}

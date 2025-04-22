@@ -28,13 +28,13 @@ export class RedisService {
       port,
       password,
       db,
-      retryStrategy: (times) => {
+      retryStrategy: times => {
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
     });
 
-    this.client.on('error', (error) => {
+    this.client.on('error', error => {
       this.logger.error('Redis connection error', error.message);
       this.metricsService.recordError('redis_connection');
     });

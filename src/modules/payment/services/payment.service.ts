@@ -102,7 +102,7 @@ export class PaymentService {
     const start = Date.now();
     try {
       this.logger.log('Processando webhook', webhook);
-      
+
       // Validação do webhook
       if (!this.validateWebhook(webhook)) {
         this.metricsService.recordError('webhook_validation');

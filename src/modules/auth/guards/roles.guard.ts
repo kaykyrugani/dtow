@@ -1,18 +1,22 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from '../decorators/roles.decorator';
-import { MetricsService } from '../../../services/metrics.service';
-import { LoggerService } from '../../../services/logger.service';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { MetricsService } from '../../../modules/metrics/metrics.service';
+import { LoggerService } from '../../../logging/logger.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
+    private jwtService: JwtService,
+    private configService: ConfigService,
+    private metricsService: MetricsService,
     private logger: LoggerService,
   ) {}
 
-  canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>('roles', [
       context.getHandler(),
       context.getClass(),
     ]);
@@ -21,27 +25,39 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const { user } = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest();
+    const token = this.extractTokenFromHeader(request);
 
-    if (!user) {
-      MetricsService.incrementAuthFailure();
-      this.logger.error('Usuário não encontrado na requisição');
-      return false;
+    if (!token) {
+      this.metricsService.recordMetric('auth_role_validation', 1, { status: 'failure' });
+      throw new UnauthorizedException('Token não fornecido');
     }
 
-    const hasRole = requiredRoles.some(role => user.role === role);
-
-    if (!hasRole) {
-      MetricsService.incrementAuthFailure();
-      this.logger.error('Usuário sem permissão', {
-        userId: user.id,
-        requiredRole: requiredRoles,
-        userRole: user.role,
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>('JWT_SECRET'),
       });
-      return false;
-    }
 
-    MetricsService.incrementAuthSuccess();
-    return true;
+      request.user = payload;
+
+      const hasRole = requiredRoles.some(role => payload.role === role);
+
+      if (!hasRole) {
+        this.metricsService.recordMetric('auth_role_validation', 1, { status: 'failure' });
+        throw new UnauthorizedException('Permissão insuficiente');
+      }
+
+      this.metricsService.recordMetric('auth_role_validation', 1, { status: 'success' });
+      return true;
+    } catch (error) {
+      this.metricsService.recordMetric('auth_role_validation', 1, { status: 'error' });
+      this.logger.error('Erro na validação de roles', { error: error.message });
+      throw new UnauthorizedException('Token inválido');
+    }
+  }
+
+  private extractTokenFromHeader(request: any): string | undefined {
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 }

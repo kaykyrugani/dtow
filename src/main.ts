@@ -2,16 +2,20 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { MetricsService } from './services/metrics.service';
-import helmet from 'helmet';
+import * as helmet from 'helmet';
 import { ConfigService } from '@nestjs/config';
 import { LoggerService } from './logging/logger.service';
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
-import compression from 'compression';
+import * as compression from 'compression';
 import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from './config/winston.config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { initSentry } from './config/sentry.config';
+import { swaggerConfig } from './config/swagger.config';
+import { helmetConfig } from './config/helmet.config';
+import { corsConfig } from './config/cors.config';
+import { compressionConfig } from './config/compression.config';
 
 // Extendendo a interface Request para incluir requestId
 declare global {
@@ -37,14 +41,9 @@ async function bootstrap() {
   }
 
   // Configuração de segurança
-  app.use(helmet());
-  app.enableCors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  });
-  app.use(compression());
+  app.use(helmet(helmetConfig));
+  app.enableCors(corsConfig);
+  app.use(compression(compressionConfig));
 
   // Configuração de validação global
   app.useGlobalPipes(
@@ -56,15 +55,8 @@ async function bootstrap() {
   );
 
   // Configuração do Swagger
-  const config = new DocumentBuilder()
-    .setTitle(configService.get('swagger.title'))
-    .setDescription(configService.get('swagger.description'))
-    .setVersion(configService.get('swagger.version'))
-    .addTag(configService.get('swagger.tag'))
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(configService.get('swagger.path'), app, document);
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api', app, document);
 
   // Middleware de métricas
   app.use((req: Request, res: Response, next: NextFunction) => {
@@ -109,7 +101,7 @@ async function bootstrap() {
   await app.listen(port);
   logger.log(`Application is running on: http://localhost:${port}`);
   logger.log(
-    `Swagger documentation is available at: http://localhost:${port}/${configService.get('swagger.path')}`,
+    `Swagger documentation is available at: http://localhost:${port}/api`,
   );
 }
 

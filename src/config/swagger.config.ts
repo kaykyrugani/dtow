@@ -21,10 +21,9 @@ export const setupSwagger = (app: INestApplication) => {
   SwaggerModule.setup(configService.get<string>('SWAGGER_PATH') || 'api', app, document);
 };
 
-export const swaggerConfig = registerAs('swagger', () => ({
-  title: process.env.SWAGGER_TITLE || 'API de Pagamentos',
-  description: process.env.SWAGGER_DESCRIPTION || 'API para processamento de pagamentos',
-  version: process.env.SWAGGER_VERSION || '1.0',
-  tag: process.env.SWAGGER_TAG || 'payments',
-  path: process.env.SWAGGER_PATH || 'api',
-}));
+export const swaggerConfig = new DocumentBuilder()
+  .setTitle('OnlyWave API')
+  .setDescription('API do backend da aplicação OnlyWave')
+  .setVersion('1.0')
+  .addBearerAuth()
+  .build();

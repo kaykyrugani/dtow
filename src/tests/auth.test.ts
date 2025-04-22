@@ -159,4 +159,4 @@ describe('AuthService', () => {
         .toThrow(new AppError('Token inválido', 400));
     });
   });
-}); }); 
+}); 
