@@ -18,13 +18,13 @@ describe('Auth Module', () => {
         data: {
           email: 'test@example.com',
           password,
-          name: 'Test User'
-        }
+          name: 'Test User',
+        },
       });
 
       const result = await authService.login({
         email: 'test@example.com',
-        password: 'validPassword123'
+        password: 'validPassword123',
       });
 
       expect(result).toHaveProperty('token');
@@ -35,8 +35,8 @@ describe('Auth Module', () => {
       await expect(
         authService.login({
           email: 'test@example.com',
-          password: 'wrongPassword'
-        })
+          password: 'wrongPassword',
+        }),
       ).rejects.toThrow('Invalid credentials');
     });
   });
@@ -47,8 +47,8 @@ describe('Auth Module', () => {
         data: {
           email: 'test@example.com',
           password: await hash('password123', 10),
-          name: 'Test User'
-        }
+          name: 'Test User',
+        },
       });
 
       const result = await authService.generate2FASecret(user.id);
@@ -56,4 +56,4 @@ describe('Auth Module', () => {
       expect(result).toHaveProperty('qrCode');
     });
   });
-}); 
+});

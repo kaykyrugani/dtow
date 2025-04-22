@@ -17,7 +17,7 @@ export const databaseMetricsMiddleware = (req: Request, res: Response, next: Nex
     MetricsService.observeDatabaseQueryDuration(
       req.method,
       req.path.split('/')[1] || 'unknown',
-      duration
+      duration,
     );
   });
 
@@ -60,14 +60,14 @@ export const apiMetricsMiddleware = (req: Request, res: Response, next: NextFunc
     MetricsService.incrementHttpRequests({
       method: req.method,
       path: req.path,
-      status: res.statusCode
+      status: res.statusCode,
     });
 
     MetricsService.observeHttpDuration({
       method: req.method,
       path: req.path,
       status: res.statusCode,
-      duration
+      duration,
     });
 
     // Registrar erros HTTP
@@ -75,10 +75,10 @@ export const apiMetricsMiddleware = (req: Request, res: Response, next: NextFunc
       MetricsService.incrementHttpRequestErrors({
         method: req.method,
         path: req.path,
-        status: res.statusCode
+        status: res.statusCode,
       });
     }
   });
 
   next();
-}; 
+};

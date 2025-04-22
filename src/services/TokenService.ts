@@ -9,7 +9,7 @@ import { PrismaClient } from '@prisma/client';
 export class TokenService {
   constructor(
     @inject('PrismaClient')
-    private prisma: PrismaClient
+    private prisma: PrismaClient,
   ) {}
 
   private readonly JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
@@ -20,7 +20,7 @@ export class TokenService {
   generateAccessToken(userId: string): string {
     try {
       return jwt.sign({ userId }, this.JWT_SECRET, {
-        expiresIn: this.ACCESS_TOKEN_EXPIRY
+        expiresIn: this.ACCESS_TOKEN_EXPIRY,
       });
     } catch (error) {
       throw new AppError(ERROR_CODES.INTERNAL_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR);
@@ -30,15 +30,15 @@ export class TokenService {
   async generateRefreshToken(userId: string): Promise<string> {
     try {
       const token = jwt.sign({ userId }, this.JWT_SECRET, {
-        expiresIn: this.REFRESH_TOKEN_EXPIRY
+        expiresIn: this.REFRESH_TOKEN_EXPIRY,
       });
 
       await this.prisma.refreshToken.create({
         data: {
           token,
           userId,
-          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
-        }
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        },
       });
 
       return token;
@@ -50,7 +50,7 @@ export class TokenService {
   async generatePasswordResetToken(userId: string): Promise<string> {
     try {
       const token = jwt.sign({ userId }, this.JWT_SECRET, {
-        expiresIn: this.PASSWORD_RESET_TOKEN_EXPIRY
+        expiresIn: this.PASSWORD_RESET_TOKEN_EXPIRY,
       });
 
       await this.prisma.passwordResetToken.create({
@@ -58,8 +58,8 @@ export class TokenService {
           token,
           userId,
           expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
-          used: false
-        }
+          used: false,
+        },
       });
 
       return token;
@@ -83,13 +83,13 @@ export class TokenService {
   async verifyRefreshToken(token: string): Promise<string> {
     try {
       const decoded = jwt.verify(token, this.JWT_SECRET) as { userId: string };
-      
+
       const storedToken = await this.prisma.refreshToken.findFirst({
-        where: { 
+        where: {
           token,
           revoked: false,
-          expiresAt: { gt: new Date() }
-        }
+          expiresAt: { gt: new Date() },
+        },
       });
 
       if (!storedToken) {
@@ -109,13 +109,13 @@ export class TokenService {
   async verifyPasswordResetToken(token: string): Promise<string> {
     try {
       const decoded = jwt.verify(token, this.JWT_SECRET) as { userId: string };
-      
+
       const resetToken = await this.prisma.passwordResetToken.findFirst({
-        where: { 
+        where: {
           token,
           used: false,
-          expiresAt: { gt: new Date() }
-        }
+          expiresAt: { gt: new Date() },
+        },
       });
 
       if (!resetToken) {
@@ -136,7 +136,7 @@ export class TokenService {
     try {
       await this.prisma.refreshToken.update({
         where: { token },
-        data: { revoked: true }
+        data: { revoked: true },
       });
     } catch (error) {
       throw new AppError(ERROR_CODES.INTERNAL_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR);
@@ -147,7 +147,7 @@ export class TokenService {
     try {
       await this.prisma.passwordResetToken.update({
         where: { token },
-        data: { used: true }
+        data: { used: true },
       });
     } catch (error) {
       throw new AppError(ERROR_CODES.INTERNAL_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR);
@@ -159,4 +159,4 @@ export class TokenService {
     const newAccessToken = this.generateAccessToken(userId);
     return { accessToken: newAccessToken };
   }
-} 
+}

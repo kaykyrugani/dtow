@@ -17,31 +17,20 @@ export abstract class BaseRepository<T> implements IRepository<T> {
     if (error instanceof Error && 'code' in error) {
       const prismaError = error as PrismaError;
       const meta = prismaError.meta as PrismaErrorMeta;
-      
+
       switch (prismaError.code) {
         case 'P2002':
-          throw new AppError(
-            ERROR_CODES.DUPLICATE_ENTRY,
-            HttpStatusCode.CONFLICT,
-            { field: Array.isArray(meta?.target) ? meta.target[0] : 'campo' }
-          );
+          throw new AppError(ERROR_CODES.DUPLICATE_ENTRY, HttpStatusCode.CONFLICT, {
+            field: Array.isArray(meta?.target) ? meta.target[0] : 'campo',
+          });
         case 'P2025':
-          throw new AppError(
-            ERROR_CODES.NOT_FOUND,
-            HttpStatusCode.NOT_FOUND
-          );
+          throw new AppError(ERROR_CODES.NOT_FOUND, HttpStatusCode.NOT_FOUND);
         default:
-          throw new AppError(
-            ERROR_CODES.INTERNAL_ERROR,
-            HttpStatusCode.INTERNAL_SERVER_ERROR
-          );
+          throw new AppError(ERROR_CODES.INTERNAL_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR);
       }
     }
 
-    throw new AppError(
-      ERROR_CODES.INTERNAL_ERROR,
-      HttpStatusCode.INTERNAL_SERVER_ERROR
-    );
+    throw new AppError(ERROR_CODES.INTERNAL_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR);
   }
 
   async findAll<R = T>(params: PaginationParams<R> = {}): Promise<{ data: T[]; total: number }> {
@@ -51,11 +40,11 @@ export abstract class BaseRepository<T> implements IRepository<T> {
           skip: params.skip,
           take: params.take,
           orderBy: params.orderBy,
-          where: params.where
+          where: params.where,
         }),
         (this.prisma[this.modelName as keyof PrismaClient] as any).count({
-          where: params.where
-        })
+          where: params.where,
+        }),
       ]);
 
       return { data, total };
@@ -68,7 +57,7 @@ export abstract class BaseRepository<T> implements IRepository<T> {
     try {
       const result = await (this.prisma[this.modelName as keyof PrismaClient] as any).findUnique({
         where: { id },
-        ...options
+        ...options,
       });
 
       return result;
@@ -81,7 +70,7 @@ export abstract class BaseRepository<T> implements IRepository<T> {
     try {
       const result = await (this.prisma[this.modelName as keyof PrismaClient] as any).create({
         data,
-        ...options
+        ...options,
       });
 
       return result;
@@ -95,7 +84,7 @@ export abstract class BaseRepository<T> implements IRepository<T> {
       const result = await (this.prisma[this.modelName as keyof PrismaClient] as any).update({
         where: { id },
         data,
-        ...options
+        ...options,
       });
 
       return result;
@@ -107,10 +96,10 @@ export abstract class BaseRepository<T> implements IRepository<T> {
   async delete(id: string): Promise<void> {
     try {
       await (this.prisma[this.modelName as keyof PrismaClient] as any).delete({
-        where: { id }
+        where: { id },
       });
     } catch (error) {
       this.handleError(error);
     }
   }
-} 
+}

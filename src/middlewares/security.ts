@@ -12,9 +12,9 @@ const limiter = rateLimit({
   max: 100, // limite de 100 requisições por windowMs
   message: {
     status: 'error',
-    message: ERROR_MESSAGES.RATE_LIMIT_EXCEEDED
+    message: ERROR_MESSAGES.RATE_LIMIT_EXCEEDED,
   },
-  statusCode: HttpStatusCode.TOO_MANY_REQUESTS
+  statusCode: HttpStatusCode.TOO_MANY_REQUESTS,
 });
 
 // Rate limiter específico para autenticação
@@ -23,10 +23,10 @@ const authLimiter = rateLimit({
   max: 5, // limite de 5 tentativas por hora
   message: {
     status: 'error',
-    message: ERROR_MESSAGES.AUTH_LIMIT_EXCEEDED
+    message: ERROR_MESSAGES.AUTH_LIMIT_EXCEEDED,
   },
   statusCode: HttpStatusCode.TOO_MANY_REQUESTS,
-  skipSuccessfulRequests: true // não conta requisições bem-sucedidas
+  skipSuccessfulRequests: true, // não conta requisições bem-sucedidas
 });
 
 // Configuração do Helmet
@@ -36,7 +36,7 @@ const helmetConfig = helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
+      imgSrc: ["'self'", 'data:', 'https:'],
       connectSrc: ["'self'"],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
@@ -46,9 +46,9 @@ const helmetConfig = helmet({
   },
   crossOriginEmbedderPolicy: true,
   crossOriginOpenerPolicy: true,
-  crossOriginResourcePolicy: { policy: "same-site" },
+  crossOriginResourcePolicy: { policy: 'same-site' },
   dnsPrefetchControl: true,
-  frameguard: { action: "deny" },
+  frameguard: { action: 'deny' },
   hidePoweredBy: true,
   hsts: {
     maxAge: 31536000,
@@ -58,8 +58,8 @@ const helmetConfig = helmet({
   ieNoOpen: true,
   noSniff: true,
   originAgentCluster: true,
-  permittedCrossDomainPolicies: { permittedPolicies: "none" },
-  referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+  permittedCrossDomainPolicies: { permittedPolicies: 'none' },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   xssFilter: true,
 });
 
@@ -73,21 +73,24 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  
+
   // Content Security Policy mais restritiva
-  res.setHeader('Content-Security-Policy', [
-    "default-src 'self'",
-    "img-src 'self' data: https:",
-    "style-src 'self' 'unsafe-inline'",
-    "script-src 'self'",
-    "font-src 'self'",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    "frame-ancestors 'none'",
-    "block-all-mixed-content",
-    "upgrade-insecure-requests"
-  ].join('; '));
+  res.setHeader(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "img-src 'self' data: https:",
+      "style-src 'self' 'unsafe-inline'",
+      "script-src 'self'",
+      "font-src 'self'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      'block-all-mixed-content',
+      'upgrade-insecure-requests',
+    ].join('; '),
+  );
 
   next();
 };
@@ -100,11 +103,11 @@ export const allowedMethods = (req: Request, res: Response, next: NextFunction) 
   if (!ALLOWED_METHODS.includes(req.method)) {
     logger.warn(`Método HTTP não permitido: ${req.method}`, {
       path: req.path,
-      ip: req.ip
+      ip: req.ip,
     });
     return res.status(HttpStatusCode.METHOD_NOT_ALLOWED).json({
       status: 'error',
-      message: ERROR_MESSAGES.METHOD_NOT_ALLOWED
+      message: ERROR_MESSAGES.METHOD_NOT_ALLOWED,
     });
   }
   next();
@@ -115,11 +118,11 @@ export const timeout = (req: Request, res: Response, next: NextFunction) => {
   const timeoutId = setTimeout(() => {
     logger.warn('Timeout na requisição', {
       path: req.path,
-      ip: req.ip
+      ip: req.ip,
     });
     res.status(HttpStatusCode.REQUEST_TIMEOUT).json({
       status: 'error',
-      message: ERROR_MESSAGES.REQUEST_TIMEOUT
+      message: ERROR_MESSAGES.REQUEST_TIMEOUT,
     });
   }, 30000);
 
@@ -146,4 +149,4 @@ export function applySecurityMiddleware(app: Express) {
   app.use(timeout);
 
   logger.info('Middlewares de segurança aplicados com sucesso');
-} 
+}

@@ -13,7 +13,7 @@ describe('Address Integration Tests', () => {
       nome: 'Test User',
       email: 'test@example.com',
       senha: 'password123',
-      cpf: '12345678900'
+      cpf: '12345678900',
     });
     userId = user.id;
     token = generateAuthToken(user);
@@ -21,10 +21,10 @@ describe('Address Integration Tests', () => {
 
   afterAll(async () => {
     await prisma.endereco.deleteMany({
-      where: { usuarioId: userId }
+      where: { usuarioId: userId },
     });
     await prisma.usuario.delete({
-      where: { id: userId }
+      where: { id: userId },
     });
   });
 
@@ -40,7 +40,7 @@ describe('Address Integration Tests', () => {
           complemento: 'Apto 1',
           bairro: 'Centro',
           cidade: 'São Paulo',
-          estado: 'SP'
+          estado: 'SP',
         });
 
       expect(response.status).toBe(201);
@@ -57,24 +57,22 @@ describe('Address Integration Tests', () => {
           numero: '',
           bairro: '',
           cidade: '',
-          estado: ''
+          estado: '',
         });
 
       expect(response.status).toBe(400);
     });
 
     it('deve retornar erro ao criar endereço sem autenticação', async () => {
-      const response = await request(app)
-        .post('/addresses')
-        .send({
-          cep: '12345678',
-          rua: 'Rua Teste',
-          numero: '123',
-          complemento: 'Apto 1',
-          bairro: 'Centro',
-          cidade: 'São Paulo',
-          estado: 'SP'
-        });
+      const response = await request(app).post('/addresses').send({
+        cep: '12345678',
+        rua: 'Rua Teste',
+        numero: '123',
+        complemento: 'Apto 1',
+        bairro: 'Centro',
+        cidade: 'São Paulo',
+        estado: 'SP',
+      });
 
       expect(response.status).toBe(401);
     });
@@ -82,17 +80,14 @@ describe('Address Integration Tests', () => {
 
   describe('GET /addresses', () => {
     it('deve listar endereços do usuário com sucesso', async () => {
-      const response = await request(app)
-        .get('/addresses')
-        .set('Authorization', `Bearer ${token}`);
+      const response = await request(app).get('/addresses').set('Authorization', `Bearer ${token}`);
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
     });
 
     it('deve retornar erro ao listar endereços sem autenticação', async () => {
-      const response = await request(app)
-        .get('/addresses');
+      const response = await request(app).get('/addresses');
 
       expect(response.status).toBe(401);
     });
@@ -111,8 +106,8 @@ describe('Address Integration Tests', () => {
           bairro: 'Centro',
           cidade: 'São Paulo',
           estado: 'SP',
-          usuarioId: userId
-        }
+          usuarioId: userId,
+        },
       });
       addressId = address.id;
     });
@@ -128,7 +123,7 @@ describe('Address Integration Tests', () => {
           complemento: 'Apto 2',
           bairro: 'Jardim',
           cidade: 'Rio de Janeiro',
-          estado: 'RJ'
+          estado: 'RJ',
         });
 
       expect(response.status).toBe(200);
@@ -146,24 +141,22 @@ describe('Address Integration Tests', () => {
           complemento: 'Apto 2',
           bairro: 'Jardim',
           cidade: 'Rio de Janeiro',
-          estado: 'RJ'
+          estado: 'RJ',
         });
 
       expect(response.status).toBe(404);
     });
 
     it('deve retornar erro ao atualizar endereço sem autenticação', async () => {
-      const response = await request(app)
-        .put(`/addresses/${addressId}`)
-        .send({
-          cep: '87654321',
-          rua: 'Rua Nova',
-          numero: '456',
-          complemento: 'Apto 2',
-          bairro: 'Jardim',
-          cidade: 'Rio de Janeiro',
-          estado: 'RJ'
-        });
+      const response = await request(app).put(`/addresses/${addressId}`).send({
+        cep: '87654321',
+        rua: 'Rua Nova',
+        numero: '456',
+        complemento: 'Apto 2',
+        bairro: 'Jardim',
+        cidade: 'Rio de Janeiro',
+        estado: 'RJ',
+      });
 
       expect(response.status).toBe(401);
     });
@@ -182,8 +175,8 @@ describe('Address Integration Tests', () => {
           bairro: 'Centro',
           cidade: 'São Paulo',
           estado: 'SP',
-          usuarioId: userId
-        }
+          usuarioId: userId,
+        },
       });
       addressId = address.id;
     });
@@ -205,10 +198,9 @@ describe('Address Integration Tests', () => {
     });
 
     it('deve retornar erro ao deletar endereço sem autenticação', async () => {
-      const response = await request(app)
-        .delete(`/addresses/${addressId}`);
+      const response = await request(app).delete(`/addresses/${addressId}`);
 
       expect(response.status).toBe(401);
     });
   });
-}); 
+});

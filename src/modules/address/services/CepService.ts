@@ -31,27 +31,21 @@ export class CepService {
 
       // Valida o formato do CEP
       if (cepLimpo.length !== 8) {
-        throw new AppError(
-          ERROR_CODES.VALIDATION_ERROR,
-          HttpStatusCode.BAD_REQUEST,
-          { message: 'CEP deve conter exatamente 8 dígitos' }
-        );
+        throw new AppError(ERROR_CODES.VALIDATION_ERROR, HttpStatusCode.BAD_REQUEST, {
+          message: 'CEP deve conter exatamente 8 dígitos',
+        });
       }
 
       // Faz a requisição para o ViaCEP
-      const response = await axios.get<ViaCepResponse>(
-        `${this.VIA_CEP_URL}/${cepLimpo}/json/`
-      );
+      const response = await axios.get<ViaCepResponse>(`${this.VIA_CEP_URL}/${cepLimpo}/json/`);
 
       const data = response.data;
 
       // Verifica se o CEP existe
       if (data.erro) {
-        throw new AppError(
-          ERROR_CODES.VALIDATION_ERROR,
-          HttpStatusCode.BAD_REQUEST,
-          { message: 'CEP não encontrado' }
-        );
+        throw new AppError(ERROR_CODES.VALIDATION_ERROR, HttpStatusCode.BAD_REQUEST, {
+          message: 'CEP não encontrado',
+        });
       }
 
       logger.info(`CEP ${cepLimpo} consultado com sucesso`);
@@ -61,7 +55,7 @@ export class CepService {
         logradouro: data.logradouro,
         bairro: data.bairro,
         cidade: data.localidade,
-        uf: data.uf
+        uf: data.uf,
       };
     } catch (error) {
       logger.error(`Erro ao consultar CEP ${cep}: ${error}`);
@@ -70,11 +64,9 @@ export class CepService {
         throw error;
       }
 
-      throw new AppError(
-        ERROR_CODES.INTERNAL_ERROR,
-        HttpStatusCode.INTERNAL_SERVER_ERROR,
-        { message: 'Erro ao consultar CEP' }
-      );
+      throw new AppError(ERROR_CODES.INTERNAL_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR, {
+        message: 'Erro ao consultar CEP',
+      });
     }
   }
-} 
+}

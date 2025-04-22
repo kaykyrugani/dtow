@@ -4,7 +4,7 @@ export class AppError extends Error {
   constructor(
     public statusCode: number,
     public code: string,
-    message: string
+    message: string,
   ) {
     super(message);
     this.name = 'AppError';
@@ -14,7 +14,7 @@ export class AppError extends Error {
     return new AppError(
       404,
       ERROR_CODES.NOT_FOUND,
-      message || getErrorMessage(ERROR_CODES.NOT_FOUND)
+      message || getErrorMessage(ERROR_CODES.NOT_FOUND),
     );
   }
 
@@ -22,7 +22,7 @@ export class AppError extends Error {
     return new AppError(
       401,
       ERROR_CODES.UNAUTHORIZED,
-      message || getErrorMessage(ERROR_CODES.UNAUTHORIZED)
+      message || getErrorMessage(ERROR_CODES.UNAUTHORIZED),
     );
   }
 
@@ -30,7 +30,7 @@ export class AppError extends Error {
     return new AppError(
       400,
       ERROR_CODES.VALIDATION_ERROR,
-      message || getErrorMessage(ERROR_CODES.VALIDATION_ERROR)
+      message || getErrorMessage(ERROR_CODES.VALIDATION_ERROR),
     );
   }
 
@@ -38,7 +38,7 @@ export class AppError extends Error {
     return new AppError(
       500,
       ERROR_CODES.INTERNAL_ERROR,
-      message || getErrorMessage(ERROR_CODES.INTERNAL_ERROR)
+      message || getErrorMessage(ERROR_CODES.INTERNAL_ERROR),
     );
   }
 
@@ -46,7 +46,7 @@ export class AppError extends Error {
     return new AppError(
       409,
       ERROR_CODES.DUPLICATE_ENTRY,
-      message || getErrorMessage(ERROR_CODES.DUPLICATE_ENTRY)
+      message || getErrorMessage(ERROR_CODES.DUPLICATE_ENTRY),
     );
   }
 
@@ -54,7 +54,7 @@ export class AppError extends Error {
     return new AppError(
       401,
       ERROR_CODES.TOKEN_EXPIRED,
-      message || getErrorMessage(ERROR_CODES.TOKEN_EXPIRED)
+      message || getErrorMessage(ERROR_CODES.TOKEN_EXPIRED),
     );
   }
 
@@ -62,7 +62,7 @@ export class AppError extends Error {
     return new AppError(
       401,
       ERROR_CODES.TOKEN_INVALID,
-      message || getErrorMessage(ERROR_CODES.TOKEN_INVALID)
+      message || getErrorMessage(ERROR_CODES.TOKEN_INVALID),
     );
   }
-} 
+}

@@ -22,5 +22,5 @@ export const mockPrisma = mockDeep<PrismaClient>({
   pedido: {
     create: vi.fn(),
     findMany: vi.fn(),
-  }
-}) as MockPrismaClient; 
+  },
+}) as MockPrismaClient;

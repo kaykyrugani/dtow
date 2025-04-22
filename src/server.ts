@@ -5,6 +5,10 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { authRoutes } from './modules/admin/routes/auth.routes';
 import { AppError } from './errors/AppError';
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { LoggerService } from './services/logger.service';
+import { ConfigService } from '@nestjs/config';
 
 const app = express();
 
@@ -16,24 +20,39 @@ app.use(express.json());
 app.use('/auth', authRoutes);
 
 // Error handling
-app.use((err: Error, request: express.Request, response: express.Response, _: express.NextFunction) => {
-  if (err instanceof AppError) {
-    return response.status(err.statusCode).json({
+app.use(
+  (err: Error, request: express.Request, response: express.Response, _: express.NextFunction) => {
+    if (err instanceof AppError) {
+      return response.status(err.statusCode).json({
+        status: 'error',
+        message: err.message,
+      });
+    }
+
+    const logger = new LoggerService();
+    logger.error('Erro interno do servidor', err.stack, 'ErrorHandler');
+
+    return response.status(500).json({
       status: 'error',
-      message: err.message
+      message: 'Internal server error',
     });
+  },
+);
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  const logger = app.get(LoggerService);
+
+  const PORT = configService.get<number>('PORT', 3000);
+
+  try {
+    await app.listen(PORT);
+    logger.log(`🚀 Server running on port ${PORT}`, 'Bootstrap');
+  } catch (err) {
+    logger.error('Failed to start server', err.stack, 'Bootstrap');
+    process.exit(1);
   }
+}
 
-  console.error(err);
-
-  return response.status(500).json({
-    status: 'error',
-    message: 'Internal server error'
-  });
-});
-
-const PORT = process.env.PORT || 3333;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-}); 
+bootstrap();

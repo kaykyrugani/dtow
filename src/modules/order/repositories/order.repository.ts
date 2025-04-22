@@ -11,7 +11,7 @@ export class OrderRepository {
   }
 
   async create(data: CreateOrderDTO, userId: number): Promise<Pedido> {
-    return this.prisma.$transaction(async (prisma) => {
+    return this.prisma.$transaction(async prisma => {
       // Criar o pedido
       const order = await prisma.pedido.create({
         data: {
@@ -20,7 +20,7 @@ export class OrderRepository {
           status: 'PENDING',
           pagamento: data.pagamento,
           valorTotal: 0, // Será atualizado após criar os itens
-          frete: 15.00, // Valor fixo por enquanto
+          frete: 15.0, // Valor fixo por enquanto
           endereco: data.endereco,
           itens: {
             create: data.items.map(item => ({
@@ -46,7 +46,7 @@ export class OrderRepository {
       for (const item of order.itens) {
         const preco = item.produto.preco;
         const subtotal = preco * item.quantidade;
-        
+
         await prisma.pedidoItem.update({
           where: { id: item.id },
           data: { preco },
@@ -57,10 +57,11 @@ export class OrderRepository {
 
       // Aplicar desconto do cupom se existir
       if (order.cupom) {
-        const desconto = order.cupom.tipo === 'percentual'
-          ? (total * order.cupom.desconto) / 100
-          : order.cupom.desconto;
-        
+        const desconto =
+          order.cupom.tipo === 'percentual'
+            ? (total * order.cupom.desconto) / 100
+            : order.cupom.desconto;
+
         total -= desconto;
       }
 
@@ -94,7 +95,11 @@ export class OrderRepository {
     });
   }
 
-  async findByUserId(userId: number, page: number = 1, limit: number = 10): Promise<{ pedidos: Pedido[]; total: number }> {
+  async findByUserId(
+    userId: number,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ pedidos: Pedido[]; total: number }> {
     const skip = (page - 1) * limit;
     const [pedidos, total] = await Promise.all([
       this.prisma.pedido.findMany({
@@ -148,4 +153,4 @@ export class OrderRepository {
       },
     });
   }
-} 
+}

@@ -36,9 +36,9 @@ describe('Order Integration Tests', () => {
           {
             produtoId: produto.id,
             quantidade: 1,
-            tamanho: 'M'
-          }
-        ]
+            tamanho: 'M',
+          },
+        ],
       });
 
     expect(response.status).toBe(201);
@@ -56,10 +56,10 @@ describe('Order Integration Tests', () => {
           create: {
             produtoId: produto.id,
             quantidade: 1,
-            tamanho: 'M'
-          }
-        }
-      }
+            tamanho: 'M',
+          },
+        },
+      },
     });
 
     const response = await request(app)
@@ -81,10 +81,10 @@ describe('Order Integration Tests', () => {
           create: {
             produtoId: produto.id,
             quantidade: 1,
-            tamanho: 'M'
-          }
-        }
-      }
+            tamanho: 'M',
+          },
+        },
+      },
     });
 
     const response = await request(app)
@@ -94,4 +94,4 @@ describe('Order Integration Tests', () => {
     expect(response.status).toBe(200);
     expect(response.body.status).toBe('CANCELADO');
   });
-}); 
+});

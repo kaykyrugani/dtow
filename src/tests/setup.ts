@@ -19,7 +19,7 @@ export const tokenServiceMock = {
   generatePasswordResetToken: vi.fn(),
   verifyPasswordResetToken: vi.fn(),
   revokePasswordResetToken: vi.fn(),
-  revokeRefreshToken: vi.fn()
+  revokeRefreshToken: vi.fn(),
 };
 
 // Mock do UsuarioRepository
@@ -36,7 +36,7 @@ export const usuarioRepositoryMock = {
 beforeAll(() => {
   // Forçar uso do ambiente de teste
   process.env.NODE_ENV = 'test';
-  
+
   // Limpar e registrar instâncias no container
   container.clearInstances();
   container.registerInstance(PrismaClient, mockPrisma);
@@ -85,4 +85,4 @@ export const createMockResponse = () => {
   return res;
 };
 
-export const mockNext = vi.fn(); 
+export const mockNext = vi.fn();

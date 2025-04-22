@@ -42,7 +42,7 @@ export class PasswordValidator {
         onlineThrottling100PerHour: result.crackTimesSeconds.onlineThrottling100PerHour,
         onlineNoThrottling10PerSecond: result.crackTimesSeconds.onlineNoThrottling10PerSecond,
         offlineSlowHashing1e4PerSecond: result.crackTimesSeconds.offlineSlowHashing1e4PerSecond,
-        offlineFastHashing1e10PerSecond: result.crackTimesSeconds.offlineFastHashing1e10PerSecond
+        offlineFastHashing1e10PerSecond: result.crackTimesSeconds.offlineFastHashing1e10PerSecond,
       },
     };
   }
@@ -66,13 +66,13 @@ export class PasswordValidator {
 
   static formatFeedback(result: PasswordStrength): string {
     const score = ['Muito fraca', 'Fraca', 'Média', 'Forte', 'Muito forte'][result.score];
-    
+
     let feedback = `Força da senha: ${score}\n`;
-    
+
     if (result.feedback.warning) {
       feedback += `\nAviso: ${result.feedback.warning}`;
     }
-    
+
     if (result.feedback.suggestions.length > 0) {
       feedback += '\n\nSugestões:';
       result.feedback.suggestions.forEach(suggestion => {
@@ -82,4 +82,4 @@ export class PasswordValidator {
 
     return feedback;
   }
-} 
+}

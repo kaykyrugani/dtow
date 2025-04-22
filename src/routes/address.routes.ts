@@ -10,29 +10,18 @@ const addressRouter = Router();
 addressRouter.use(authMiddleware);
 
 // Criar novo endereço
-addressRouter.post(
-  '/',
-  validateSchema(createAddressSchema),
-  AddressController.createAddress
-);
+addressRouter.post('/', validateSchema(createAddressSchema), AddressController.createAddress);
 
 // Listar endereços do usuário
 addressRouter.get('/', AddressController.listAddresses);
 
 // Atualizar endereço
-addressRouter.put(
-  '/:id',
-  validateSchema(createAddressSchema),
-  AddressController.updateAddress
-);
+addressRouter.put('/:id', validateSchema(createAddressSchema), AddressController.updateAddress);
 
 // Deletar endereço
 addressRouter.delete('/:id', AddressController.deleteAddress);
 
 // Definir endereço como principal
-addressRouter.patch(
-  '/:id/primary',
-  AddressController.setPrimaryAddress
-);
+addressRouter.patch('/:id/primary', AddressController.setPrimaryAddress);
 
-export { addressRouter }; 
+export { addressRouter };

@@ -60,10 +60,7 @@ export class CouponService {
         where.dataInicio = { lte: now };
         where.dataFim = { gte: now };
       } else if (status === 'inativo') {
-        where.OR = [
-          { dataInicio: { gt: now } },
-          { dataFim: { lt: now } },
-        ];
+        where.OR = [{ dataInicio: { gt: now } }, { dataFim: { lt: now } }];
       } else if (status === 'expirado') {
         where.dataFim = { lt: now };
       }
@@ -76,9 +73,7 @@ export class CouponService {
 
     // Busca por texto
     if (search) {
-      where.OR = [
-        { codigo: { contains: search, mode: 'insensitive' } },
-      ];
+      where.OR = [{ codigo: { contains: search, mode: 'insensitive' } }];
     }
 
     // Ordenação
@@ -181,13 +176,12 @@ export class CouponService {
     if (coupon.valorMinimoCompra && valorTotal < coupon.valorMinimoCompra) {
       throw new AppError(
         `Valor mínimo de compra não atingido: R$ ${coupon.valorMinimoCompra}`,
-        HttpStatusCode.BAD_REQUEST
+        HttpStatusCode.BAD_REQUEST,
       );
     }
 
-    const desconto = coupon.tipoDesconto === 'PERCENTUAL'
-      ? (valorTotal * coupon.desconto) / 100
-      : coupon.desconto;
+    const desconto =
+      coupon.tipoDesconto === 'PERCENTUAL' ? (valorTotal * coupon.desconto) / 100 : coupon.desconto;
 
     return {
       valido: true,
@@ -195,4 +189,4 @@ export class CouponService {
       valorFinal: valorTotal - desconto,
     };
   }
-} 
+}

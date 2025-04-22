@@ -12,7 +12,7 @@ export class OrderService {
   async create(userId: string, items: { productId: string; quantity: number }[]) {
     // Verificar se o usuário existe
     const user = await this.prisma.usuario.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     if (!user) {
@@ -25,7 +25,7 @@ export class OrderService {
 
     for (const item of items) {
       const product = await this.prisma.produto.findUnique({
-        where: { id: item.productId }
+        where: { id: item.productId },
       });
 
       if (!product) {
@@ -33,14 +33,17 @@ export class OrderService {
       }
 
       if (product.quantidade < item.quantity) {
-        throw new AppError(`Quantidade insuficiente para o produto ${product.nome}`, ERROR_CODES.VALIDATION_ERROR);
+        throw new AppError(
+          `Quantidade insuficiente para o produto ${product.nome}`,
+          ERROR_CODES.VALIDATION_ERROR,
+        );
       }
 
       total += product.preco * item.quantity;
       orderItems.push({
         produtoId: product.id,
         quantidade: item.quantity,
-        precoUnitario: product.preco
+        precoUnitario: product.preco,
       });
     }
 
@@ -51,16 +54,16 @@ export class OrderService {
         status: OrderStatus.PENDING,
         total,
         itens: {
-          create: orderItems
-        }
+          create: orderItems,
+        },
       },
       include: {
         itens: {
           include: {
-            produto: true
-          }
-        }
-      }
+            produto: true,
+          },
+        },
+      },
     });
 
     // Atualizar o estoque dos produtos
@@ -69,9 +72,9 @@ export class OrderService {
         where: { id: item.productId },
         data: {
           quantidade: {
-            decrement: item.quantity
-          }
-        }
+            decrement: item.quantity,
+          },
+        },
       });
     }
 
@@ -84,10 +87,10 @@ export class OrderService {
       include: {
         itens: {
           include: {
-            produto: true
-          }
-        }
-      }
+            produto: true,
+          },
+        },
+      },
     });
 
     if (!order) {
@@ -103,13 +106,13 @@ export class OrderService {
       include: {
         itens: {
           include: {
-            produto: true
-          }
-        }
+            produto: true,
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
     return orders;
@@ -117,7 +120,7 @@ export class OrderService {
 
   async updateStatus(id: string, status: OrderStatus) {
     const order = await this.prisma.pedido.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!order) {
@@ -125,7 +128,10 @@ export class OrderService {
     }
 
     if (order.status === OrderStatus.CANCELLED) {
-      throw new AppError('Não é possível atualizar o status de um pedido cancelado', ERROR_CODES.VALIDATION_ERROR);
+      throw new AppError(
+        'Não é possível atualizar o status de um pedido cancelado',
+        ERROR_CODES.VALIDATION_ERROR,
+      );
     }
 
     const updatedOrder = await this.prisma.pedido.update({
@@ -134,10 +140,10 @@ export class OrderService {
       include: {
         itens: {
           include: {
-            produto: true
-          }
-        }
-      }
+            produto: true,
+          },
+        },
+      },
     });
 
     return updatedOrder;
@@ -147,8 +153,8 @@ export class OrderService {
     const order = await this.prisma.pedido.findUnique({
       where: { id },
       include: {
-        itens: true
-      }
+        itens: true,
+      },
     });
 
     if (!order) {
@@ -160,7 +166,10 @@ export class OrderService {
     }
 
     if (order.status === OrderStatus.DELIVERED) {
-      throw new AppError('Não é possível cancelar um pedido já entregue', ERROR_CODES.VALIDATION_ERROR);
+      throw new AppError(
+        'Não é possível cancelar um pedido já entregue',
+        ERROR_CODES.VALIDATION_ERROR,
+      );
     }
 
     // Restaurar o estoque dos produtos
@@ -169,9 +178,9 @@ export class OrderService {
         where: { id: item.produtoId },
         data: {
           quantidade: {
-            increment: item.quantidade
-          }
-        }
+            increment: item.quantidade,
+          },
+        },
       });
     }
 
@@ -181,12 +190,12 @@ export class OrderService {
       include: {
         itens: {
           include: {
-            produto: true
-          }
-        }
-      }
+            produto: true,
+          },
+        },
+      },
     });
 
     return cancelledOrder;
   }
-} 
+}

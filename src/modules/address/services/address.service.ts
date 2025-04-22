@@ -16,7 +16,7 @@ export class AddressService {
   async searchByCep(cep: string) {
     try {
       const response = await axios.get(`${this.viaCepBaseUrl}/${cep}/json`);
-      
+
       if (response.data.erro) {
         throw new AppError('CEP não encontrado', ERROR_CODES.NOT_FOUND);
       }
@@ -37,7 +37,7 @@ export class AddressService {
   async create(userId: number, data: CreateAddressDTO) {
     // Verificar se o usuário existe
     const user = await this.prisma.usuario.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     if (!user) {
@@ -47,11 +47,11 @@ export class AddressService {
     // Se for endereço principal, desmarcar outros endereços principais
     if (data.principal) {
       await this.prisma.endereco.updateMany({
-        where: { 
+        where: {
           usuarioId: userId,
-          principal: true 
+          principal: true,
         },
-        data: { principal: false }
+        data: { principal: false },
       });
     }
 
@@ -59,8 +59,8 @@ export class AddressService {
     const address = await this.prisma.endereco.create({
       data: {
         ...data,
-        usuarioId
-      }
+        usuarioId,
+      },
     });
 
     return address;
@@ -68,10 +68,10 @@ export class AddressService {
 
   async update(id: number, userId: number, data: UpdateAddressDTO) {
     const address = await this.prisma.endereco.findFirst({
-      where: { 
+      where: {
         id,
-        usuarioId 
-      }
+        usuarioId,
+      },
     });
 
     if (!address) {
@@ -81,18 +81,18 @@ export class AddressService {
     // Se for endereço principal, desmarcar outros endereços principais
     if (data.principal) {
       await this.prisma.endereco.updateMany({
-        where: { 
+        where: {
           usuarioId,
           principal: true,
-          id: { not: id }
+          id: { not: id },
         },
-        data: { principal: false }
+        data: { principal: false },
       });
     }
 
     const updatedAddress = await this.prisma.endereco.update({
       where: { id },
-      data
+      data,
     });
 
     return updatedAddress;
@@ -100,10 +100,10 @@ export class AddressService {
 
   async delete(id: number, userId: number) {
     const address = await this.prisma.endereco.findFirst({
-      where: { 
+      where: {
         id,
-        usuarioId 
-      }
+        usuarioId,
+      },
     });
 
     if (!address) {
@@ -111,17 +111,14 @@ export class AddressService {
     }
 
     await this.prisma.endereco.delete({
-      where: { id }
+      where: { id },
     });
   }
 
   async listByUserId(userId: number) {
     const addresses = await this.prisma.endereco.findMany({
       where: { usuarioId: userId },
-      orderBy: [
-        { principal: 'desc' },
-        { createdAt: 'desc' }
-      ]
+      orderBy: [{ principal: 'desc' }, { createdAt: 'desc' }],
     });
 
     return addresses;
@@ -129,10 +126,10 @@ export class AddressService {
 
   async setPrimary(id: number, userId: number) {
     const address = await this.prisma.endereco.findFirst({
-      where: { 
+      where: {
         id,
-        usuarioId 
-      }
+        usuarioId,
+      },
     });
 
     if (!address) {
@@ -141,20 +138,20 @@ export class AddressService {
 
     // Desmarcar outros endereços principais
     await this.prisma.endereco.updateMany({
-      where: { 
+      where: {
         usuarioId,
         principal: true,
-        id: { not: id }
+        id: { not: id },
       },
-      data: { principal: false }
+      data: { principal: false },
     });
 
     // Marcar este endereço como principal
     const updatedAddress = await this.prisma.endereco.update({
       where: { id },
-      data: { principal: true }
+      data: { principal: true },
     });
 
     return updatedAddress;
   }
-} 
+}

@@ -58,4 +58,4 @@ export interface PedidoData {
   enderecoId: number;
   itens: PedidoItemData[];
   cupomCodigo?: string;
-} 
+}

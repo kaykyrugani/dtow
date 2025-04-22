@@ -3,7 +3,7 @@ import { MockProxy } from 'vitest-mock-extended';
 
 export enum TipoUsuario {
   ADMIN = 'ADMIN',
-  CLIENTE = 'CLIENTE'
+  CLIENTE = 'CLIENTE',
 }
 
 export type MockPrisma = MockProxy<PrismaClient>;
@@ -22,4 +22,4 @@ export interface TestUser {
 export interface TestLoginData {
   email: string;
   senha: string;
-} 
+}

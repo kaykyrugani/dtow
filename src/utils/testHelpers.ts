@@ -7,4 +7,4 @@ export function createPrismaError(code: string, meta?: PrismaErrorMeta): PrismaE
   error.meta = meta || {};
   error.name = 'PrismaClientKnownRequestError';
   return error;
-} 
+}

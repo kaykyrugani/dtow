@@ -6,7 +6,7 @@ import { mockJWT } from '../mocks/jwt.mock';
 import { AppError } from '../../utils/AppError';
 
 vi.mock('../../config/prisma', () => ({
-  getPrismaInstance: () => mockPrisma
+  getPrismaInstance: () => mockPrisma,
 }));
 
 describe('AuthMiddleware', () => {
@@ -16,11 +16,11 @@ describe('AuthMiddleware', () => {
 
   beforeEach(() => {
     req = {
-      headers: {}
+      headers: {},
     };
     res = {
       status: vi.fn().mockReturnThis(),
-      json: vi.fn()
+      json: vi.fn(),
     };
     next = vi.fn();
   });
@@ -34,15 +34,15 @@ describe('AuthMiddleware', () => {
     expect(next).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Token ausente',
-        statusCode: 401
-      })
+        statusCode: 401,
+      }),
     );
   });
 
   it('deve retornar erro quando token está expirado', async () => {
     // Arrange
     req.headers = {
-      authorization: 'Bearer expired'
+      authorization: 'Bearer expired',
     };
 
     // Act
@@ -52,15 +52,15 @@ describe('AuthMiddleware', () => {
     expect(next).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Token expirado',
-        statusCode: 401
-      })
+        statusCode: 401,
+      }),
     );
   });
 
   it('deve retornar erro quando token é inválido', async () => {
     // Arrange
     req.headers = {
-      authorization: 'Bearer invalid'
+      authorization: 'Bearer invalid',
     };
 
     // Act
@@ -70,15 +70,15 @@ describe('AuthMiddleware', () => {
     expect(next).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Token inválido',
-        statusCode: 401
-      })
+        statusCode: 401,
+      }),
     );
   });
 
   it('deve retornar erro quando usuário não é encontrado', async () => {
     // Arrange
     req.headers = {
-      authorization: 'Bearer valid.token'
+      authorization: 'Bearer valid.token',
     };
     mockPrisma.usuario.findUnique.mockResolvedValue(null);
 
@@ -89,21 +89,21 @@ describe('AuthMiddleware', () => {
     expect(next).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Usuário não encontrado',
-        statusCode: 401
-      })
+        statusCode: 401,
+      }),
     );
   });
 
   it('deve prosseguir com a requisição quando token é válido', async () => {
     // Arrange
     req.headers = {
-      authorization: 'Bearer valid.token'
+      authorization: 'Bearer valid.token',
     };
     const mockUser = {
       id: 1,
       nome: 'Test User',
       email: 'test@example.com',
-      tipoUsuario: 'cliente'
+      tipoUsuario: 'cliente',
     };
     mockPrisma.usuario.findUnique.mockResolvedValue(mockUser);
 
@@ -114,4 +114,4 @@ describe('AuthMiddleware', () => {
     expect(req.user).toEqual(mockUser);
     expect(next).toHaveBeenCalledWith();
   });
-}); 
+});

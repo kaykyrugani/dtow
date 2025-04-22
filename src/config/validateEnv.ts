@@ -48,4 +48,4 @@ export const validateEnv = (): EnvConfig => {
 
 const env = envSchema.parse(process.env);
 
-export { env }; 
+export { env };

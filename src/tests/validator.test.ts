@@ -17,8 +17,7 @@ describe('Validator', () => {
       senha: '123',
     };
 
-    await expect(Validator.validate(schema, dadosInvalidos))
-      .rejects.toThrow(AppError);
+    await expect(Validator.validate(schema, dadosInvalidos)).rejects.toThrow(AppError);
   });
 
   it('deve retornar dados validados quando são válidos', async () => {
@@ -39,18 +38,17 @@ describe('Validator', () => {
       senha: '123',
     };
 
-    await expect(Validator.validate(schema, dadosInvalidos))
-      .rejects.toThrow(AppError);
+    await expect(Validator.validate(schema, dadosInvalidos)).rejects.toThrow(AppError);
   });
 
   describe('validateSync', () => {
     it('deve validar dados corretos sincronamente', () => {
       const schema = z.object({
-        nome: z.string().min(3)
+        nome: z.string().min(3),
       });
 
       const dados = {
-        nome: 'Teste'
+        nome: 'Teste',
       };
 
       const resultado = Validator.validateSync(schema, dados);
@@ -59,11 +57,11 @@ describe('Validator', () => {
 
     it('deve lançar AppError para dados inválidos sincronamente', () => {
       const schema = z.object({
-        nome: z.string().min(3)
+        nome: z.string().min(3),
       });
 
       const dados = {
-        nome: 'Te'
+        nome: 'Te',
       };
 
       try {
@@ -83,11 +81,11 @@ describe('Validator', () => {
     it('deve validar dados parciais corretos', () => {
       const schema = z.object({
         nome: z.string().min(3),
-        email: z.string().email()
+        email: z.string().email(),
       });
 
       const dados = {
-        nome: 'Teste'
+        nome: 'Teste',
       };
 
       const resultado = Validator.validatePartial(schema, dados);
@@ -97,11 +95,11 @@ describe('Validator', () => {
     it('deve lançar AppError para dados parciais inválidos', () => {
       const schema = z.object({
         nome: z.string().min(3),
-        email: z.string().email()
+        email: z.string().email(),
       });
 
       const dados = {
-        nome: 'Te'
+        nome: 'Te',
       };
 
       try {
@@ -116,4 +114,4 @@ describe('Validator', () => {
       }
     });
   });
-}); 
+});

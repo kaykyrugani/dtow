@@ -15,8 +15,8 @@ export const createTestUser = async (prisma: PrismaClient) => {
       nome: 'Test User',
       tipoUsuario: 'CLIENTE',
       cpf: '12345678900',
-      telefone: '11999999999'
-    }
+      telefone: '11999999999',
+    },
   });
 };
 
@@ -25,7 +25,7 @@ export const createTestProduct = async (prisma: PrismaClient) => {
     data: {
       nome: 'Produto Teste',
       descricao: 'Descrição do produto teste',
-      preco: 100.00,
+      preco: 100.0,
       estoque: 10,
       categoria: 'ELETRONICOS',
       subcategoria: 'SMARTPHONES',
@@ -34,50 +34,47 @@ export const createTestProduct = async (prisma: PrismaClient) => {
       imagem: 'https://exemplo.com/imagem.jpg',
       imagens: '[]',
       tamanhos: '[]',
-      ativo: true
-    }
+      ativo: true,
+    },
   });
 };
 
 export const createInvalidTestUser = (overrides = {}) => ({
   ...users.invalid,
-  ...overrides
+  ...overrides,
 });
 
 export const createTestLoginData = (overrides = {}) => ({
   ...loginData.valid,
-  ...overrides
+  ...overrides,
 });
 
 export const createInvalidLoginData = (overrides = {}) => ({
   ...loginData.invalid,
-  ...overrides
+  ...overrides,
 });
 
 export const createPrismaError = (
   code: string,
   message = 'Database error',
-  meta?: Record<string, unknown>
+  meta?: Record<string, unknown>,
 ): PrismaClientKnownRequestError => {
-  return new PrismaClientKnownRequestError(
-    message,
-    {
-      code,
-      clientVersion: '5.x',
-      meta: meta || {}
-    }
-  );
+  return new PrismaClientKnownRequestError(message, {
+    code,
+    clientVersion: '5.x',
+    meta: meta || {},
+  });
 };
 
 export const generateAuthToken = (user: Usuario) => {
   return jwt.sign(
-    { 
+    {
       id: user.id,
       email: user.email,
-      tipoUsuario: user.tipoUsuario
+      tipoUsuario: user.tipoUsuario,
     },
     process.env.JWT_SECRET || 'secret',
-    { expiresIn: '1d' }
+    { expiresIn: '1d' },
   );
 };
 
@@ -85,7 +82,7 @@ export const createDuplicateEntryError = () => {
   return new AppError(
     ERROR_CODES.DUPLICATE_ENTRY.message,
     ERROR_CODES.DUPLICATE_ENTRY.code,
-    ERROR_CODES.DUPLICATE_ENTRY.status
+    ERROR_CODES.DUPLICATE_ENTRY.status,
   );
 };
 
@@ -93,7 +90,7 @@ export const createNotFoundError = () => {
   return new AppError(
     ERROR_CODES.INTERNAL_ERROR.message,
     ERROR_CODES.INTERNAL_ERROR.code,
-    ERROR_CODES.INTERNAL_ERROR.status
+    ERROR_CODES.INTERNAL_ERROR.status,
   );
 };
 
@@ -101,7 +98,7 @@ export const createValidationError = () => {
   return new AppError(
     ERROR_CODES.VALIDATION_ERROR.message,
     ERROR_CODES.VALIDATION_ERROR.code,
-    ERROR_CODES.VALIDATION_ERROR.status
+    ERROR_CODES.VALIDATION_ERROR.status,
   );
 };
 
@@ -109,14 +106,14 @@ export const createAuthError = () =>
   new AppError(
     ERROR_CODES.INVALID_CREDENTIALS.message,
     ERROR_CODES.INVALID_CREDENTIALS.code,
-    ERROR_CODES.INVALID_CREDENTIALS.status
+    ERROR_CODES.INVALID_CREDENTIALS.status,
   );
 
 export const createTokenError = (expired = false) =>
   new AppError(
     expired ? ERROR_CODES.TOKEN_EXPIRED.message : ERROR_CODES.TOKEN_INVALID.message,
     expired ? ERROR_CODES.TOKEN_EXPIRED.code : ERROR_CODES.TOKEN_INVALID.code,
-    expired ? ERROR_CODES.TOKEN_EXPIRED.status : ERROR_CODES.TOKEN_INVALID.status
+    expired ? ERROR_CODES.TOKEN_EXPIRED.status : ERROR_CODES.TOKEN_INVALID.status,
   );
 
 export const createUnauthorizedError = () => {

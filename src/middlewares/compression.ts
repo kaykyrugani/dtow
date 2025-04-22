@@ -11,4 +11,4 @@ export const compressionMiddleware = (level: number = 6) => {
       return compression.filter(req, res);
     },
   });
-}; 
+};

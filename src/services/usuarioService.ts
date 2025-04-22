@@ -22,10 +22,7 @@ export class UsuarioService extends BaseService<'usuario'> {
 
   async criar(dados: IUsuario): Promise<IUsuarioSemSenha> {
     const usuarioExistente = await this.findOne<IUsuario>({
-      OR: [
-        { email: dados.email },
-        { cpf: dados.cpf }
-      ]
+      OR: [{ email: dados.email }, { cpf: dados.cpf }],
     });
 
     if (usuarioExistente) {
@@ -36,7 +33,7 @@ export class UsuarioService extends BaseService<'usuario'> {
 
     const usuario = await this.create<IUsuario>({
       ...dados,
-      senha: senhaHash
+      senha: senhaHash,
     });
 
     const { senha: _, ...usuarioSemSenha } = usuario;
@@ -56,11 +53,8 @@ export class UsuarioService extends BaseService<'usuario'> {
 
     if (dados.email || dados.cpf) {
       const usuarioExistente = await this.findOne<IUsuario>({
-        OR: [
-          dados.email ? { email: dados.email } : {},
-          dados.cpf ? { cpf: dados.cpf } : {}
-        ],
-        NOT: { id }
+        OR: [dados.email ? { email: dados.email } : {}, dados.cpf ? { cpf: dados.cpf } : {}],
+        NOT: { id },
       });
 
       if (usuarioExistente) {
@@ -99,4 +93,4 @@ export class UsuarioService extends BaseService<'usuario'> {
   async buscarPorEmail(email: string): Promise<IUsuario | null> {
     return this.findOne<IUsuario>({ email });
   }
-} 
+}

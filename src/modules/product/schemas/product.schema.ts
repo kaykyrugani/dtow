@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const createProductSchema = z.object({
   nome: z.string().min(3).max(255),
@@ -10,7 +10,7 @@ export const createProductSchema = z.object({
   subcategoria: z.string().min(3).max(50).optional(),
   marca: z.string().min(1).max(100),
   imagens: z.string(),
-  tamanhos: z.string()
-})
+  tamanhos: z.string(),
+});
 
-export const updateProductSchema = createProductSchema.partial() 
+export const updateProductSchema = createProductSchema.partial();

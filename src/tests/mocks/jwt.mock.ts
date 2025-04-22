@@ -26,10 +26,10 @@ export const mockJWT = {
       id: 1,
       nome: 'Test User',
       email: 'test@example.com',
-      tipoUsuario: 'cliente'
+      tipoUsuario: 'cliente',
     };
   }),
   sign: vi.fn(() => 'valid.test.token'),
   TokenExpiredError: MockTokenExpiredError,
-  JsonWebTokenError: MockJsonWebTokenError
-}; 
+  JsonWebTokenError: MockJsonWebTokenError,
+};

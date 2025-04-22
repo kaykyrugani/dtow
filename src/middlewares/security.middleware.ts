@@ -49,23 +49,23 @@ export const securityMiddleware = {
   securityHeaders: (_req: Request, res: Response, next: NextFunction) => {
     // Previne clickjacking
     res.setHeader('X-Frame-Options', 'DENY');
-    
+
     // Habilita proteção XSS do navegador
     res.setHeader('X-XSS-Protection', '1; mode=block');
-    
+
     // Previne MIME-type sniffing
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    
+
     // Configura CORS
     res.setHeader('Access-Control-Allow-Origin', SECURITY.CORS_ORIGINS.join(', '));
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    
+
     // Remove header que expõe informações do servidor
     res.removeHeader('X-Powered-By');
-    
+
     next();
-  }
+  },
 };
 
 /**
@@ -82,9 +82,7 @@ export function sanitizeObject<T extends Record<string, any>>(obj: T): Record<st
     if (SENSITIVE_FIELDS.includes(key.toLowerCase())) {
       sanitized[key] = '[REDACTED]';
     } else if (Array.isArray(value)) {
-      sanitized[key] = value.map(item => 
-        typeof item === 'object' ? sanitizeObject(item) : item
-      );
+      sanitized[key] = value.map(item => (typeof item === 'object' ? sanitizeObject(item) : item));
     } else if (value && typeof value === 'object') {
       sanitized[key] = sanitizeObject(value);
     } else {
@@ -93,4 +91,4 @@ export function sanitizeObject<T extends Record<string, any>>(obj: T): Record<st
   }
 
   return sanitized as T;
-} 
+}

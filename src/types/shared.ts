@@ -24,11 +24,11 @@ export interface QueryOptions<T = any> {
 export enum PrismaErrorCodes {
   UNIQUE_CONSTRAINT = 'P2002',
   FOREIGN_KEY = 'P2003',
-  NOT_FOUND = 'P2025'
+  NOT_FOUND = 'P2025',
 }
 
 export interface ServiceResponse<T> {
   data: T;
   status: number;
   message?: string;
-} 
+}

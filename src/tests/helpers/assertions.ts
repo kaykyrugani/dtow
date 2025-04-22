@@ -8,4 +8,4 @@ export const expectSuccess = async <T>(promise: Promise<T>, expectedData: Partia
   const result = await promise;
   expect(result).toMatchObject(expectedData);
   return result;
-}; 
+};

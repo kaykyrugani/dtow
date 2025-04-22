@@ -1,6 +1,6 @@
 import { JobsOptions } from 'bullmq';
 
-export type NotificationType = 
+export type NotificationType =
   | 'order_confirmation'
   | 'order_status_update'
   | 'password_recovery'
@@ -49,4 +49,4 @@ export interface QueueOptions extends Partial<JobsOptions> {
   };
   removeOnComplete?: boolean;
   removeOnFail?: boolean;
-} 
+}

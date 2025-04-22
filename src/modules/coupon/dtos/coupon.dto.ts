@@ -8,10 +8,10 @@ export const createCouponSchema = z.object({
   dataInicio: z.string().datetime(),
   dataFim: z.string().datetime(),
   limiteUsos: z.number().int().min(0).optional(),
-  ativo: z.boolean().default(true)
+  ativo: z.boolean().default(true),
 });
 
 export const updateCouponSchema = createCouponSchema.partial();
 
 export type CreateCouponInput = z.infer<typeof createCouponSchema>;
-export type UpdateCouponInput = z.infer<typeof updateCouponSchema>; 
+export type UpdateCouponInput = z.infer<typeof updateCouponSchema>;

@@ -5,12 +5,12 @@ const mockBcrypt = {
   compare: vi.fn().mockImplementation((senha: string, hash: string) => {
     const expectedHash = `hashed_${senha}`;
     return Promise.resolve(hash === expectedHash);
-  })
+  }),
 };
 
 vi.mock('bcrypt', () => ({
   default: mockBcrypt,
-  ...mockBcrypt
+  ...mockBcrypt,
 }));
 
-export { mockBcrypt }; 
+export { mockBcrypt };

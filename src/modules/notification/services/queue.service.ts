@@ -12,14 +12,14 @@ export class QueueService {
 
   constructor(
     @inject(EmailService)
-    private emailService: EmailService
+    private emailService: EmailService,
   ) {
     this.notificationQueue = new Queue('notifications', {
       connection: {
         host: env.REDIS_HOST,
         port: env.REDIS_PORT,
-        password: env.REDIS_PASSWORD
-      }
+        password: env.REDIS_PASSWORD,
+      },
     });
 
     this.worker = new Worker(
@@ -31,19 +31,19 @@ export class QueueService {
         connection: {
           host: env.REDIS_HOST,
           port: env.REDIS_PORT,
-          password: env.REDIS_PASSWORD
-        }
-      }
+          password: env.REDIS_PASSWORD,
+        },
+      },
     );
 
     this.setupWorkerEvents();
   }
 
   private setupWorkerEvents() {
-    this.worker.on('completed', (job) => {
+    this.worker.on('completed', job => {
       logger.info('Notificação processada com sucesso', {
         jobId: job.id,
-        type: job.data.type
+        type: job.data.type,
       });
     });
 
@@ -51,7 +51,7 @@ export class QueueService {
       logger.error('Erro ao processar notificação:', {
         jobId: job?.id,
         type: job?.data.type,
-        error: error.message
+        error: error.message,
       });
     });
   }
@@ -60,39 +60,31 @@ export class QueueService {
     const { type, recipient, data: templateData } = data;
 
     if (recipient.email) {
-      return this.emailService.sendTemplateEmail(
-        recipient.email,
-        type,
-        templateData
-      );
+      return this.emailService.sendTemplateEmail(recipient.email, type, templateData);
     }
 
     throw new Error('Destinatário não possui email');
   }
 
-  async addNotification(
-    data: NotificationData,
-    options?: QueueOptions
-  ): Promise<Job> {
+  async addNotification(data: NotificationData, options?: QueueOptions): Promise<Job> {
     const defaultOptions: QueueOptions = {
       attempts: 3,
       backoff: {
         type: 'exponential',
-        delay: 1000
+        delay: 1000,
       },
       removeOnComplete: true,
-      removeOnFail: false
+      removeOnFail: false,
     };
 
-    const job = await this.notificationQueue.add(
-      data.type,
-      data,
-      { ...defaultOptions, ...options }
-    );
+    const job = await this.notificationQueue.add(data.type, data, {
+      ...defaultOptions,
+      ...options,
+    });
 
     logger.info('Notificação adicionada à fila', {
       jobId: job.id,
-      type: data.type
+      type: data.type,
     });
 
     return job;
@@ -103,15 +95,15 @@ export class QueueService {
   }
 
   async getJobs(
-    status: 'waiting' | 'active' | 'completed' | 'failed' | 'delayed' | 'paused'
+    status: 'waiting' | 'active' | 'completed' | 'failed' | 'delayed' | 'paused',
   ): Promise<Job[]> {
     return this.notificationQueue.getJobs([status]);
   }
 
   async cleanQueue(
     grace: number = 1000,
-    status: 'completed' | 'wait' | 'active' | 'delayed' | 'failed' | 'paused' = 'completed'
+    status: 'completed' | 'wait' | 'active' | 'delayed' | 'failed' | 'paused' = 'completed',
   ): Promise<void> {
     await this.notificationQueue.clean(grace, status);
   }
-} 
+}

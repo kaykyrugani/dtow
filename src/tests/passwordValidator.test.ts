@@ -46,4 +46,4 @@ describe('Password Validator', () => {
     expect(feedback).toContain('Força da senha:');
     expect(feedback).toContain('Muito fraca');
   });
-}); 
+});

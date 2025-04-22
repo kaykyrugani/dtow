@@ -28,13 +28,13 @@ export class AuthController {
     try {
       const { email } = req.body;
       const result = await AuthController.authService.gerarTokenRecuperacao(email);
-      
+
       if (result.status === 'ok') {
         // Em produção, você enviaria o token por email
         // Por enquanto, retornamos o token diretamente
-        res.json({ 
+        res.json({
           mensagem: 'Se o email existir, você receberá as instruções de recuperação',
-          token: result.token // Remover em produção
+          token: result.token, // Remover em produção
         });
       } else {
         res.json({ mensagem: result.mensagem });
@@ -53,4 +53,4 @@ export class AuthController {
       next(error);
     }
   }
-} 
+}

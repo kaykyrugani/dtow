@@ -24,33 +24,25 @@ describe('ensureAuthenticated', () => {
     mockRequest.headers = {};
 
     await expect(
-      ensureAuthenticated(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      )
+      ensureAuthenticated(mockRequest as Request, mockResponse as Response, mockNext),
     ).rejects.toThrow(new AppError('Token não fornecido', 401));
   });
 
   it('deve lançar erro quando token for inválido', async () => {
     mockRequest.headers = {
-      authorization: 'Bearer invalid-token'
+      authorization: 'Bearer invalid-token',
     };
 
     vi.spyOn(prisma.refreshToken, 'findUnique').mockResolvedValue(null);
 
     await expect(
-      ensureAuthenticated(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      )
+      ensureAuthenticated(mockRequest as Request, mockResponse as Response, mockNext),
     ).rejects.toThrow(new AppError('Token inválido', 401));
   });
 
   it('deve lançar erro quando token estiver expirado', async () => {
     mockRequest.headers = {
-      authorization: 'Bearer expired-token'
+      authorization: 'Bearer expired-token',
     };
 
     vi.spyOn(prisma.refreshToken, 'findUnique').mockResolvedValue({
@@ -60,24 +52,20 @@ describe('ensureAuthenticated', () => {
       userId: 1,
       usuario: {
         id: 1,
-        tipoUsuario: 'CLIENTE'
+        tipoUsuario: 'CLIENTE',
       },
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     } as any);
 
     await expect(
-      ensureAuthenticated(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      )
+      ensureAuthenticated(mockRequest as Request, mockResponse as Response, mockNext),
     ).rejects.toThrow(new AppError('Token expirado', 401));
   });
 
   it('deve adicionar usuário na requisição e chamar next quando token for válido', async () => {
     mockRequest.headers = {
-      authorization: 'Bearer valid-token'
+      authorization: 'Bearer valid-token',
     };
 
     vi.spyOn(prisma.refreshToken, 'findUnique').mockResolvedValue({
@@ -87,22 +75,18 @@ describe('ensureAuthenticated', () => {
       userId: 1,
       usuario: {
         id: 1,
-        tipoUsuario: 'CLIENTE'
+        tipoUsuario: 'CLIENTE',
       },
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     } as any);
 
-    await ensureAuthenticated(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    await ensureAuthenticated(mockRequest as Request, mockResponse as Response, mockNext);
 
     expect(mockRequest.user).toEqual({
       id: 1,
-      tipo: 'CLIENTE'
+      tipo: 'CLIENTE',
     });
     expect(mockNext).toHaveBeenCalled();
   });
-}); 
+});

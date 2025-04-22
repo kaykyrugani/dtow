@@ -23,7 +23,7 @@ export class AddressController {
         bairro,
         cidade,
         estado,
-        usuarioId
+        usuarioId,
       });
 
       return res.status(201).json(endereco);
@@ -56,7 +56,7 @@ export class AddressController {
         complemento,
         bairro,
         cidade,
-        estado
+        estado,
       });
 
       return res.json(endereco);
@@ -76,4 +76,4 @@ export class AddressController {
       next(error);
     }
   }
-} 
+}

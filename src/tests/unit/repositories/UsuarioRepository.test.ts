@@ -13,7 +13,7 @@ describe('UsuarioRepository', () => {
     prismaMock = {
       usuario: {
         findUnique: vi.fn(),
-      }
+      },
     };
     repository = new UsuarioRepository(prismaMock as unknown as PrismaClient);
   });
@@ -25,7 +25,7 @@ describe('UsuarioRepository', () => {
         email: 'test@example.com',
         nome: 'Test User',
         senha: 'hashedPassword',
-        tipoUsuario: 'ADMIN' as const
+        tipoUsuario: 'ADMIN' as const,
       };
 
       prismaMock.usuario.findUnique.mockResolvedValue(mockUser);
@@ -34,7 +34,7 @@ describe('UsuarioRepository', () => {
 
       expect(result).toEqual(mockUser);
       expect(prismaMock.usuario.findUnique).toHaveBeenCalledWith({
-        where: { email: 'test@example.com' }
+        where: { email: 'test@example.com' },
       });
     });
 
@@ -48,11 +48,11 @@ describe('UsuarioRepository', () => {
 
     it('deve lançar AppError quando ocorre erro no Prisma', async () => {
       prismaMock.usuario.findUnique.mockRejectedValue(
-        createPrismaError('P2002', { target: ['email'] })
+        createPrismaError('P2002', { target: ['email'] }),
       );
 
       await expect(repository.findByEmail('test@example.com')).rejects.toThrow(
-        new AppError(ERROR_CODES.DUPLICATE_ENTRY, 409, { field: 'email' })
+        new AppError(ERROR_CODES.DUPLICATE_ENTRY, 409, { field: 'email' }),
       );
     });
   });
@@ -64,7 +64,7 @@ describe('UsuarioRepository', () => {
         email: 'test@example.com',
         nome: 'Test User',
         senha: 'hashedPassword',
-        tipoUsuario: 'ADMIN' as const
+        tipoUsuario: 'ADMIN' as const,
       };
 
       prismaMock.usuario.findUnique.mockResolvedValue(mockUser);
@@ -79,8 +79,8 @@ describe('UsuarioRepository', () => {
           email: true,
           nome: true,
           senha: true,
-          tipoUsuario: true
-        }
+          tipoUsuario: true,
+        },
       });
     });
 
@@ -94,12 +94,12 @@ describe('UsuarioRepository', () => {
 
     it('deve lançar AppError quando ocorre erro no Prisma', async () => {
       prismaMock.usuario.findUnique.mockRejectedValue(
-        createPrismaError('P2002', { target: ['email'] })
+        createPrismaError('P2002', { target: ['email'] }),
       );
 
       await expect(repository.findByEmailWithPassword('test@example.com')).rejects.toThrow(
-        new AppError(ERROR_CODES.DUPLICATE_ENTRY, 409, { field: 'email' })
+        new AppError(ERROR_CODES.DUPLICATE_ENTRY, 409, { field: 'email' }),
       );
     });
   });
-}); 
+});

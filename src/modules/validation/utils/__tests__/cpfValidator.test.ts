@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { 
-  limparCpf, 
-  temFormatoValido, 
-  temDigitosRepetidos, 
-  calcularPrimeiroDigito, 
-  calcularSegundoDigito, 
-  validarCpf, 
-  formatarCpf 
+import {
+  limparCpf,
+  temFormatoValido,
+  temDigitosRepetidos,
+  calcularPrimeiroDigito,
+  calcularSegundoDigito,
+  validarCpf,
+  formatarCpf,
 } from '../cpfValidator';
 
 describe('CPF Validator', () => {
@@ -83,4 +83,4 @@ describe('CPF Validator', () => {
       expect(formatarCpf('123456')).toBe(null);
     });
   });
-}); 
+});

@@ -6,9 +6,9 @@ declare global {
         nome: string;
         email: string;
         tipoUsuario: string;
-      }
+      };
     }
   }
 }
 
-export {}; 
+export {};

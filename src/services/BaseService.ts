@@ -42,7 +42,11 @@ export class BaseService<T extends PrismaModels> {
     }
   }
 
-  async update<R = any>(id: number, data: Record<string, any>, options: QueryOptions<R> = {}): Promise<R> {
+  async update<R = any>(
+    id: number,
+    data: Record<string, any>,
+    options: QueryOptions<R> = {},
+  ): Promise<R> {
     try {
       return await this._updateInternal(id, data, options);
     } catch (error) {
@@ -73,8 +77,8 @@ export class BaseService<T extends PrismaModels> {
         skip,
         take: limit,
         where: params.where,
-        orderBy: params.orderBy ? { [String(params.orderBy)]: order } : undefined
-      })
+        orderBy: params.orderBy ? { [String(params.orderBy)]: order } : undefined,
+      }),
     ]);
 
     return {
@@ -82,25 +86,32 @@ export class BaseService<T extends PrismaModels> {
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit)
+      totalPages: Math.ceil(total / limit),
     };
   }
 
   protected async _findByIdInternal<R>(id: number, options: QueryOptions<R>): Promise<R | null> {
     return (this.prisma[this.model] as any).findUnique({
       where: { id },
-      ...options
+      ...options,
     });
   }
 
-  protected async _createInternal<R>(data: Record<string, any>, options: QueryOptions<R>): Promise<R> {
+  protected async _createInternal<R>(
+    data: Record<string, any>,
+    options: QueryOptions<R>,
+  ): Promise<R> {
     return (this.prisma[this.model] as any).create({
       data,
-      ...options
+      ...options,
     });
   }
 
-  protected async _updateInternal<R>(id: number, data: Record<string, any>, options: QueryOptions<R>): Promise<R> {
+  protected async _updateInternal<R>(
+    id: number,
+    data: Record<string, any>,
+    options: QueryOptions<R>,
+  ): Promise<R> {
     const exists = await this._findByIdInternal(id, {});
     if (!exists) {
       throw AppError.notFound(`${String(this.model)} não encontrado`);
@@ -109,7 +120,7 @@ export class BaseService<T extends PrismaModels> {
     return (this.prisma[this.model] as any).update({
       where: { id },
       data,
-      ...options
+      ...options,
     });
   }
 
@@ -120,7 +131,7 @@ export class BaseService<T extends PrismaModels> {
     }
 
     await (this.prisma[this.model] as any).delete({
-      where: { id }
+      where: { id },
     });
   }
 
@@ -146,4 +157,4 @@ export class BaseService<T extends PrismaModels> {
 
     throw AppError.internal('Erro interno do servidor');
   }
-} 
+}

@@ -8,13 +8,13 @@ const prisma = new PrismaClient();
 export class TwoFactorService {
   static async generateSecret(userId: string) {
     const secret = authenticator.generateSecret();
-    
+
     await prisma.usuario.update({
       where: { id: userId },
       data: {
         twoFactorSecret: secret,
-        twoFactorEnabled: false
-      }
+        twoFactorEnabled: false,
+      },
     });
 
     return secret;
@@ -32,7 +32,7 @@ export class TwoFactorService {
   static async enable2FA(userId: string, token: string) {
     const user = await prisma.usuario.findUnique({
       where: { id: userId },
-      select: { twoFactorSecret: true }
+      select: { twoFactorSecret: true },
     });
 
     if (!user?.twoFactorSecret) {
@@ -47,7 +47,7 @@ export class TwoFactorService {
 
     await prisma.usuario.update({
       where: { id: userId },
-      data: { twoFactorEnabled: true }
+      data: { twoFactorEnabled: true },
     });
 
     return true;
@@ -56,7 +56,7 @@ export class TwoFactorService {
   static async disable2FA(userId: string, token: string) {
     const user = await prisma.usuario.findUnique({
       where: { id: userId },
-      select: { twoFactorSecret: true, twoFactorEnabled: true }
+      select: { twoFactorSecret: true, twoFactorEnabled: true },
     });
 
     if (!user?.twoFactorEnabled) {
@@ -71,25 +71,23 @@ export class TwoFactorService {
 
     await prisma.usuario.update({
       where: { id: userId },
-      data: { 
+      data: {
         twoFactorEnabled: false,
-        twoFactorSecret: null
-      }
+        twoFactorSecret: null,
+      },
     });
 
     return true;
   }
 
   static async generateBackupCodes(userId: string) {
-    const backupCodes = Array.from({ length: 8 }, () => 
-      authenticator.generateSecret(10)
-    );
+    const backupCodes = Array.from({ length: 8 }, () => authenticator.generateSecret(10));
 
     await prisma.usuario.update({
       where: { id: userId },
-      data: { 
-        twoFactorBackupCodes: backupCodes
-      }
+      data: {
+        twoFactorBackupCodes: backupCodes,
+      },
     });
 
     return backupCodes;
@@ -98,7 +96,7 @@ export class TwoFactorService {
   static async verifyBackupCode(userId: string, code: string) {
     const user = await prisma.usuario.findUnique({
       where: { id: userId },
-      select: { twoFactorBackupCodes: true }
+      select: { twoFactorBackupCodes: true },
     });
 
     if (!user?.twoFactorBackupCodes?.includes(code)) {
@@ -110,11 +108,11 @@ export class TwoFactorService {
       where: { id: userId },
       data: {
         twoFactorBackupCodes: {
-          set: user.twoFactorBackupCodes.filter(c => c !== code)
-        }
-      }
+          set: user.twoFactorBackupCodes.filter(c => c !== code),
+        },
+      },
     });
 
     return true;
   }
-} 
+}

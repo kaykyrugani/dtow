@@ -4,12 +4,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 describe('Email Templates', () => {
-  const templates = [
-    'order-confirmation',
-    'password-recovery',
-    'welcome',
-    'order-status-update'
-  ];
+  const templates = ['order-confirmation', 'password-recovery', 'welcome', 'order-status-update'];
 
   templates.forEach(templateName => {
     describe(`${templateName}.hbs`, () => {
@@ -50,7 +45,7 @@ describe('Email Templates', () => {
       it('deve renderizar variáveis corretamente', () => {
         const data = getTemplateData(templateName);
         const rendered = compiledTemplate(data);
-        
+
         // Verifica se as variáveis básicas foram renderizadas
         if (data.nome) {
           expect(rendered).toContain(data.nome);
@@ -64,7 +59,7 @@ describe('Email Templates', () => {
 function getTemplateData(templateName: string): Record<string, any> {
   const baseData = {
     nome: 'João Silva',
-    email: 'joao@example.com'
+    email: 'joao@example.com',
   };
 
   switch (templateName) {
@@ -77,16 +72,16 @@ function getTemplateData(templateName: string): Record<string, any> {
         totalPedido: '299,90',
         itens: [
           { quantidade: 1, nome: 'Produto A', preco: '199,90' },
-          { quantidade: 2, nome: 'Produto B', preco: '50,00' }
+          { quantidade: 2, nome: 'Produto B', preco: '50,00' },
         ],
-        linkAcompanhamento: 'https://onlywave.com.br/pedidos/123456'
+        linkAcompanhamento: 'https://onlywave.com.br/pedidos/123456',
       };
 
     case 'password-recovery':
       return {
         ...baseData,
         tempoExpiracao: 30,
-        linkRedefinicao: 'https://onlywave.com.br/redefinir-senha?token=abc123'
+        linkRedefinicao: 'https://onlywave.com.br/redefinir-senha?token=abc123',
       };
 
     case 'welcome':
@@ -94,7 +89,7 @@ function getTemplateData(templateName: string): Record<string, any> {
         ...baseData,
         cupomBoasVindas: 'BEMVINDO25',
         descontoBoasVindas: 25,
-        linkLogin: 'https://onlywave.com.br/login'
+        linkLogin: 'https://onlywave.com.br/login',
       };
 
     case 'order-status-update':
@@ -104,10 +99,10 @@ function getTemplateData(templateName: string): Record<string, any> {
         statusAnterior: 'Em processamento',
         statusNovo: 'Enviado',
         dataAtualizacao: '15/04/2025',
-        linkAcompanhamento: 'https://onlywave.com.br/pedidos/123456'
+        linkAcompanhamento: 'https://onlywave.com.br/pedidos/123456',
       };
 
     default:
       return baseData;
   }
-} 
+}

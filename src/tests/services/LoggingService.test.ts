@@ -11,7 +11,7 @@ describe('LoggingService', () => {
     REDIS_HOST: 'localhost',
     REDIS_PORT: 6379,
     DATABASE_URL: 'test-url',
-    JWT_SECRET: 'test-secret-key-with-minimum-32-chars-here'
+    JWT_SECRET: 'test-secret-key-with-minimum-32-chars-here',
   };
 
   beforeEach(() => {
@@ -26,14 +26,14 @@ describe('LoggingService', () => {
 
   it('deve sanitizar dados sensíveis no contexto', () => {
     const spy = vi.spyOn(loggingService['winston'], 'info');
-    
+
     loggingService.info('Test message', {
       user: 'test',
       password: 'secret123',
       nested: {
         token: 'abc123',
-        data: 'safe'
-      }
+        data: 'safe',
+      },
     });
 
     expect(spy).toHaveBeenCalledWith('Test message', {
@@ -41,8 +41,8 @@ describe('LoggingService', () => {
       password: '[REDACTED]',
       nested: {
         token: '[REDACTED]',
-        data: 'safe'
-      }
+        data: 'safe',
+      },
     });
   });
 
@@ -51,9 +51,10 @@ describe('LoggingService', () => {
     container.registerInstance('Env', devEnv);
     const devLogger = container.resolve(LoggingService);
 
-    const consoleTransport = devLogger.getTransports()
+    const consoleTransport = devLogger
+      .getTransports()
       .find(t => t.constructor.name === 'ConsoleTransport');
-    
+
     expect(consoleTransport).toBeDefined();
   });
 
@@ -67,4 +68,4 @@ describe('LoggingService', () => {
     const prodLogger = container.resolve(LoggingService);
     expect(prodLogger['winston'].level).toBe('info');
   });
-}); 
+});

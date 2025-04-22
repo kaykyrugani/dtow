@@ -4,7 +4,7 @@ import sanitizeHtml from 'sanitize-html';
 const sanitizeOptions = {
   allowedTags: [],
   allowedAttributes: {},
-  disallowedTagsMode: 'discard'
+  disallowedTagsMode: 'discard',
 };
 
 export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
@@ -33,4 +33,4 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
   }
 
   next();
-}; 
+};

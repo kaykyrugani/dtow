@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { MetricsService } from '../services/MetricsService';
+import { MetricsService } from '../modules/metrics/metrics.service';
 
-export const errorCountMiddleware = (err: Error, req: Request, res: Response, next: NextFunction) => {
-  MetricsService.incrementErrorCount();
-  next(err);
-}; 
+export function errorCountMiddleware(metricsService: MetricsService) {
+  return (err: Error, req: Request, res: Response, next: NextFunction) => {
+    metricsService.incrementErrorCount(err.name);
+    next(err);
+  };
+}

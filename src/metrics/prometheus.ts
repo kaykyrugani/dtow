@@ -73,17 +73,17 @@ export const webhookQueueSize = new Gauge({
 // Middleware para coletar métricas de requisições HTTP
 export const httpMetricsMiddleware = (req: Request, res: Response, next: Function) => {
   const start = Date.now();
-  
+
   // Registrar métricas após a resposta
   res.on('finish', () => {
     const duration = (Date.now() - start) / 1000;
     const { method, path } = req;
     const status = res.statusCode;
-    
+
     httpRequestTotal.inc({ method, path, status });
     httpRequestDuration.observe({ method, path }, duration);
   });
-  
+
   next();
 };
 
@@ -95,4 +95,4 @@ export const metricsRoute = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).end(error);
   }
-}; 
+};

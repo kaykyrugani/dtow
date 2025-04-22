@@ -194,9 +194,8 @@ export class ReviewService {
     });
 
     const totalReviews = reviews.length;
-    const averageRating = totalReviews > 0
-      ? reviews.reduce((acc, review) => acc + review.nota, 0) / totalReviews
-      : 0;
+    const averageRating =
+      totalReviews > 0 ? reviews.reduce((acc, review) => acc + review.nota, 0) / totalReviews : 0;
 
     await this.prisma.produto.update({
       where: { id: produtoId },
@@ -206,4 +205,4 @@ export class ReviewService {
       },
     });
   }
-} 
+}

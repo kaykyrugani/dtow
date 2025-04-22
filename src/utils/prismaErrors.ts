@@ -23,4 +23,4 @@ export class PrismaErrorHandler {
 
     throw new AppError(ERROR_MESSAGES.INTERNAL_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR);
   }
-} 
+}

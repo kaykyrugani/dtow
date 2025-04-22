@@ -18,11 +18,7 @@ declare global {
   }
 }
 
-export async function authMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export async function authMiddleware(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -42,8 +38,8 @@ export async function authMiddleware(
         id: true,
         email: true,
         nome: true,
-        tipoUsuario: true
-      }
+        tipoUsuario: true,
+      },
     });
 
     if (!user) {
@@ -61,4 +57,4 @@ export async function authMiddleware(
     }
     return next(new AppError('Erro na autenticação', 401));
   }
-} 
+}

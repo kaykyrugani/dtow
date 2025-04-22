@@ -21,7 +21,7 @@ interface LoginResponse {
 export class AuthService {
   async login({ email, password }: LoginCredentials): Promise<LoginResponse> {
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (!user) {
@@ -35,27 +35,27 @@ export class AuthService {
     }
 
     const token = sign(
-      { 
+      {
         userId: user.id,
-        role: user.role 
+        role: user.role,
       },
       process.env.JWT_SECRET || 'default_secret',
-      { expiresIn: '1d' }
+      { expiresIn: '1d' },
     );
 
     return {
       user: {
         id: user.id,
         email: user.email,
-        name: user.name
+        name: user.name,
       },
-      token
+      token,
     };
   }
 
   async generate2FASecret(userId: string) {
     const user = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     if (!user) {
@@ -63,26 +63,22 @@ export class AuthService {
     }
 
     const secret = authenticator.generateSecret();
-    const otpauth = authenticator.keyuri(
-      user.email,
-      'OnlyWave',
-      secret
-    );
+    const otpauth = authenticator.keyuri(user.email, 'OnlyWave', secret);
 
     await prisma.user.update({
       where: { id: userId },
-      data: { twoFactorSecret: secret }
+      data: { twoFactorSecret: secret },
     });
 
     return {
       secret,
-      qrCode: otpauth
+      qrCode: otpauth,
     };
   }
 
   async verify2FA(userId: string, token: string) {
     const user = await prisma.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
     });
 
     if (!user || !user.twoFactorSecret) {
@@ -91,7 +87,7 @@ export class AuthService {
 
     const isValid = authenticator.verify({
       token,
-      secret: user.twoFactorSecret
+      secret: user.twoFactorSecret,
     });
 
     if (!isValid) {
@@ -100,4 +96,4 @@ export class AuthService {
 
     return true;
   }
-} 
+}

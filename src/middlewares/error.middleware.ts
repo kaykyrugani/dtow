@@ -3,12 +3,7 @@ import { AppError } from '../utils/AppError';
 import { HttpStatusCode } from '../constants/httpStatusCode';
 import { ZodError } from 'zod';
 
-export const errorMiddleware = (
-  error: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const errorMiddleware = (error: Error, req: Request, res: Response, next: NextFunction) => {
   if (error instanceof AppError) {
     return res.status(error.status).json({
       error: {
@@ -36,4 +31,4 @@ export const errorMiddleware = (
       code: 'INTERNAL_SERVER_ERROR',
     },
   });
-}; 
+};

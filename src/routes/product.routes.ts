@@ -6,13 +6,17 @@ const router = Router();
 const productController = new ProductController();
 
 // Rota com cache de 1 hora (3600 segundos)
-router.get('/products', cacheMiddleware(3600), async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    await productController.findAll(req, res);
-  } catch (error) {
-    next(error);
-  }
-});
+router.get(
+  '/products',
+  cacheMiddleware(3600),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      await productController.findAll(req, res);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 // Rota sem cache
 router.get('/products/:id', async (req: Request, res: Response, next: NextFunction) => {
@@ -23,4 +27,4 @@ router.get('/products/:id', async (req: Request, res: Response, next: NextFuncti
   }
 });
 
-export default router; 
+export default router;

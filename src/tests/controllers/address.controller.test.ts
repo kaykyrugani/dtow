@@ -21,7 +21,7 @@ describe('AddressController', () => {
       criarEndereco: vi.fn(),
       listarEnderecos: vi.fn(),
       atualizarEndereco: vi.fn(),
-      deletarEndereco: vi.fn()
+      deletarEndereco: vi.fn(),
     };
 
     vi.spyOn(container, 'resolve').mockReturnValue(mockAddressService);
@@ -37,15 +37,15 @@ describe('AddressController', () => {
         complemento: 'Apto 1',
         bairro: 'Bairro Teste',
         cidade: 'Cidade Teste',
-        estado: 'Estado Teste'
+        estado: 'Estado Teste',
       },
-      params: {}
+      params: {},
     };
 
     mockRes = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn(),
-      send: vi.fn()
+      send: vi.fn(),
     };
 
     mockNext = vi.fn();
@@ -58,20 +58,16 @@ describe('AddressController', () => {
         ...mockReq.body,
         usuarioId: mockReq.user!.id,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       mockAddressService.criarEndereco.mockResolvedValue(mockEndereco);
 
-      await addressController.criarEndereco(
-        mockReq as Request,
-        mockRes as Response,
-        mockNext
-      );
+      await addressController.criarEndereco(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockAddressService.criarEndereco).toHaveBeenCalledWith({
         ...mockReq.body,
-        usuarioId: mockReq.user!.id
+        usuarioId: mockReq.user!.id,
       });
       expect(mockRes.status).toHaveBeenCalledWith(201);
       expect(mockRes.json).toHaveBeenCalledWith(mockEndereco);
@@ -81,11 +77,7 @@ describe('AddressController', () => {
       const error = new AppError('Erro ao criar endereço');
       mockAddressService.criarEndereco.mockRejectedValue(error);
 
-      await addressController.criarEndereco(
-        mockReq as Request,
-        mockRes as Response,
-        mockNext
-      );
+      await addressController.criarEndereco(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(error);
     });
@@ -99,17 +91,13 @@ describe('AddressController', () => {
           ...mockReq.body,
           usuarioId: mockReq.user!.id,
           createdAt: new Date(),
-          updatedAt: new Date()
-        }
+          updatedAt: new Date(),
+        },
       ];
 
       mockAddressService.listarEnderecos.mockResolvedValue(mockEnderecos);
 
-      await addressController.listarEnderecos(
-        mockReq as Request,
-        mockRes as Response,
-        mockNext
-      );
+      await addressController.listarEnderecos(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockAddressService.listarEnderecos).toHaveBeenCalledWith(mockReq.user!.id);
       expect(mockRes.json).toHaveBeenCalledWith(mockEnderecos);
@@ -119,11 +107,7 @@ describe('AddressController', () => {
       const error = new AppError('Erro ao listar endereços');
       mockAddressService.listarEnderecos.mockRejectedValue(error);
 
-      await addressController.listarEnderecos(
-        mockReq as Request,
-        mockRes as Response,
-        mockNext
-      );
+      await addressController.listarEnderecos(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(error);
     });
@@ -139,21 +123,14 @@ describe('AddressController', () => {
         ...mockReq.body,
         usuarioId: mockReq.user!.id,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       mockAddressService.atualizarEndereco.mockResolvedValue(mockEnderecoAtualizado);
 
-      await addressController.atualizarEndereco(
-        mockReq as Request,
-        mockRes as Response,
-        mockNext
-      );
+      await addressController.atualizarEndereco(mockReq as Request, mockRes as Response, mockNext);
 
-      expect(mockAddressService.atualizarEndereco).toHaveBeenCalledWith(
-        enderecoId,
-        mockReq.body
-      );
+      expect(mockAddressService.atualizarEndereco).toHaveBeenCalledWith(enderecoId, mockReq.body);
       expect(mockRes.json).toHaveBeenCalledWith(mockEnderecoAtualizado);
     });
 
@@ -162,11 +139,7 @@ describe('AddressController', () => {
       const error = new AppError('Erro ao atualizar endereço');
       mockAddressService.atualizarEndereco.mockRejectedValue(error);
 
-      await addressController.atualizarEndereco(
-        mockReq as Request,
-        mockRes as Response,
-        mockNext
-      );
+      await addressController.atualizarEndereco(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(error);
     });
@@ -177,11 +150,7 @@ describe('AddressController', () => {
       const enderecoId = 1;
       mockReq.params = { id: enderecoId.toString() };
 
-      await addressController.deletarEndereco(
-        mockReq as Request,
-        mockRes as Response,
-        mockNext
-      );
+      await addressController.deletarEndereco(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockAddressService.deletarEndereco).toHaveBeenCalledWith(enderecoId);
       expect(mockRes.status).toHaveBeenCalledWith(204);
@@ -193,13 +162,9 @@ describe('AddressController', () => {
       const error = new AppError('Erro ao deletar endereço');
       mockAddressService.deletarEndereco.mockRejectedValue(error);
 
-      await addressController.deletarEndereco(
-        mockReq as Request,
-        mockRes as Response,
-        mockNext
-      );
+      await addressController.deletarEndereco(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith(error);
     });
   });
-}); 
+});

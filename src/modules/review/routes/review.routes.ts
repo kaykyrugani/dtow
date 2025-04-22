@@ -7,15 +7,27 @@ import { cacheMiddleware } from '../../../middlewares/cache.middleware';
 const reviewRouter = Router();
 
 // Rotas públicas com cache
-reviewRouter.get('/products/:produtoId/reviews', cacheMiddleware(1800), ReviewController.getProductReviews);
+reviewRouter.get(
+  '/products/:produtoId/reviews',
+  cacheMiddleware(1800),
+  ReviewController.getProductReviews,
+);
 
 // Rotas protegidas (sem cache)
-reviewRouter.post('/products/:produtoId/reviews', ensureAuthenticated, ReviewController.createReview);
+reviewRouter.post(
+  '/products/:produtoId/reviews',
+  ensureAuthenticated,
+  ReviewController.createReview,
+);
 reviewRouter.put('/reviews/:reviewId', ensureAuthenticated, ReviewController.updateReview);
 reviewRouter.delete('/reviews/:reviewId', ensureAuthenticated, ReviewController.deleteReview);
 
 // Rotas de administrador (sem cache)
 reviewRouter.get('/admin/reviews', ensureAdmin, ReviewController.getAllReviews);
-reviewRouter.put('/admin/reviews/:reviewId/status', ensureAdmin, ReviewController.updateReviewStatus);
+reviewRouter.put(
+  '/admin/reviews/:reviewId/status',
+  ensureAdmin,
+  ReviewController.updateReviewStatus,
+);
 
-export default reviewRouter; 
+export default reviewRouter;

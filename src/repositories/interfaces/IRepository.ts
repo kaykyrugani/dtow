@@ -6,4 +6,4 @@ export interface IRepository<T> {
   create<R = T>(data: Partial<T>, options?: R): Promise<T>;
   update<R = T>(id: string, data: Partial<T>, options?: R): Promise<T>;
   delete(id: string): Promise<void>;
-} 
+}

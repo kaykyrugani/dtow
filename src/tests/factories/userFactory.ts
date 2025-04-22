@@ -18,7 +18,7 @@ export const createTestUser = (overrides: Partial<TestUser> = {}): TestUser => (
   tipoUsuario: TipoUsuario.ADMIN,
   createdAt: new Date(),
   updatedAt: new Date(),
-  ...overrides
+  ...overrides,
 });
 
 export interface TestLoginData {
@@ -29,5 +29,5 @@ export interface TestLoginData {
 export const createTestLoginData = (overrides: Partial<TestLoginData> = {}): TestLoginData => ({
   email: 'test@example.com',
   senha: 'senha_valida_123',
-  ...overrides
-}); 
+  ...overrides,
+});

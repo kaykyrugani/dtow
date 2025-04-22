@@ -1,26 +1,33 @@
-import { createClient } from 'redis';
-import { promisify } from 'util';
-import { logger } from '../config/logger';
+import { injectable } from 'tsyringe';
+import Redis from 'ioredis';
+import { config } from '../config';
+import { LoggingService } from './LoggingService';
 
+@injectable()
 export class CacheService {
   private static instance: CacheService;
-  private client;
-  private defaultTTL = 3600; // 1 hora em segundos
+  private readonly redis: Redis;
+  private readonly logger = LoggingService.getInstance();
+  private readonly DEFAULT_TTL = 3600; // 1 hora
 
-  private constructor() {
-    this.client = createClient({
-      url: process.env.REDIS_URL || 'redis://localhost:6379'
+  constructor() {
+    this.redis = new Redis({
+      host: config.redis.host,
+      port: config.redis.port,
+      password: config.redis.password,
+      retryStrategy: times => {
+        const delay = Math.min(times * 50, 2000);
+        return delay;
+      },
     });
 
-    this.client.on('error', (err) => {
-      logger.error('Erro na conexão com Redis:', err);
+    this.redis.on('error', error => {
+      this.logger.error('Redis connection error', { error });
     });
 
-    this.client.on('connect', () => {
-      logger.info('Conectado ao Redis com sucesso');
+    this.redis.on('connect', () => {
+      this.logger.info('Redis connected successfully');
     });
-
-    this.client.connect();
   }
 
   public static getInstance(): CacheService {
@@ -30,50 +37,39 @@ export class CacheService {
     return CacheService.instance;
   }
 
-  public async connect(): Promise<void> {
-    try {
-      await this.client.connect();
-    } catch (error) {
-      logger.error('Erro ao conectar ao Redis:', error);
-      throw error;
-    }
-  }
-
   public async get<T>(key: string): Promise<T | null> {
     try {
-      const value = await this.client.get(key);
+      const value = await this.redis.get(key);
       return value ? JSON.parse(value) : null;
     } catch (error) {
-      logger.error('Erro ao buscar do cache:', error);
+      this.logger.error('Error getting value from cache', { error, key });
       return null;
     }
   }
 
-  public async set(key: string, value: any, ttl: number = this.defaultTTL): Promise<void> {
+  public async set<T>(key: string, value: T, ttl: number = this.DEFAULT_TTL): Promise<void> {
     try {
-      await this.client.set(key, JSON.stringify(value), {
-        EX: ttl
-      });
+      await this.redis.set(key, JSON.stringify(value), 'EX', ttl);
     } catch (error) {
-      logger.error('Erro ao salvar no cache:', error);
+      this.logger.error('Error setting value in cache', { error, key });
     }
   }
 
-  public async delete(key: string): Promise<void> {
+  public async del(key: string): Promise<void> {
     try {
-      await this.client.del(key);
+      await this.redis.del(key);
     } catch (error) {
-      logger.error('Erro ao deletar do cache:', error);
+      this.logger.error('Error deleting value from cache', { error, key });
     }
   }
 
-  public async clear(): Promise<void> {
+  public async exists(key: string): Promise<boolean> {
     try {
-      await this.client.flushAll();
+      const exists = await this.redis.exists(key);
+      return exists === 1;
     } catch (error) {
-      logger.error('Erro ao limpar cache:', error);
+      this.logger.error('Error checking key existence in cache', { error, key });
+      return false;
     }
   }
-
-  generateKey(prefix: string, params: Record<string, any> = {}): string {
-export const cacheService = CacheService.getInstance(); 
+}

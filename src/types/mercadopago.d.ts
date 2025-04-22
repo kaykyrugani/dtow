@@ -77,4 +77,4 @@ declare module 'mercadopago' {
     statement_descriptor?: string;
     binary_mode?: boolean;
   }
-} 
+}

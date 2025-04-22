@@ -13,7 +13,7 @@ const mockLogger = {
   warn: jest.fn(),
   info: jest.fn(),
   debug: jest.fn(),
-  http: jest.fn()
+  http: jest.fn(),
 };
 
 jest.mock('@prisma/client');
@@ -73,15 +73,16 @@ describe('Payment Error Handling Tests', () => {
       comprador: {
         nome: 'Test User',
         email: 'test@example.com',
-        cpf: '12345678900'
-      }
+        cpf: '12345678900',
+      },
     };
 
     it('should throw AppError when order is not found', async () => {
       mockPrisma.pedido.findUnique.mockResolvedValue(null);
 
-      await expect(paymentService.createPreference(mockPreferenceData))
-        .rejects.toThrow('Pedido não encontrado');
+      await expect(paymentService.createPreference(mockPreferenceData)).rejects.toThrow(
+        'Pedido não encontrado',
+      );
 
       expect(mockPrisma.pedido.findUnique).toHaveBeenCalledWith({
         where: { id: mockPreferenceData.pedidoId },
@@ -94,8 +95,9 @@ describe('Payment Error Handling Tests', () => {
       mockPrisma.pedido.findUnique.mockResolvedValue({ id: 'order_123' });
       mockPayment.create.mockResolvedValue({ id: '123456789' } as unknown as Preference);
 
-      await expect(paymentService.createPreference(mockPreferenceData))
-        .rejects.toThrow('Erro ao criar preferência de pagamento');
+      await expect(paymentService.createPreference(mockPreferenceData)).rejects.toThrow(
+        'Erro ao criar preferência de pagamento',
+      );
 
       expect(mockPrisma.pedido.findUnique).toHaveBeenCalledWith({
         where: { id: mockPreferenceData.pedidoId },
@@ -109,8 +111,9 @@ describe('Payment Error Handling Tests', () => {
       const error = new Error('API Error');
       mockPayment.create.mockRejectedValue(error);
 
-      await expect(paymentService.createPreference(mockPreferenceData))
-        .rejects.toThrow('Erro ao criar preferência de pagamento');
+      await expect(paymentService.createPreference(mockPreferenceData)).rejects.toThrow(
+        'Erro ao criar preferência de pagamento',
+      );
 
       expect(mockPrisma.pedido.findUnique).toHaveBeenCalledWith({
         where: { id: mockPreferenceData.pedidoId },
@@ -121,8 +124,8 @@ describe('Payment Error Handling Tests', () => {
         'Erro ao criar preferência de pagamento:',
         expect.objectContaining({
           error,
-          pedidoId: mockPreferenceData.pedidoId
-        })
+          pedidoId: mockPreferenceData.pedidoId,
+        }),
       );
     });
 
@@ -134,15 +137,16 @@ describe('Payment Error Handling Tests', () => {
         items: [],
         api_response: {
           status: 200,
-          headers: {}
-        }
+          headers: {},
+        },
       } as unknown as Preference);
-      
+
       const error = new Error('Database Error');
       mockPrisma.pedido.update.mockRejectedValue(error);
 
-      await expect(paymentService.createPreference(mockPreferenceData))
-        .rejects.toThrow('Erro ao criar preferência de pagamento');
+      await expect(paymentService.createPreference(mockPreferenceData)).rejects.toThrow(
+        'Erro ao criar preferência de pagamento',
+      );
 
       expect(mockPrisma.pedido.findUnique).toHaveBeenCalledWith({
         where: { id: mockPreferenceData.pedidoId },
@@ -153,8 +157,8 @@ describe('Payment Error Handling Tests', () => {
         'Erro ao criar preferência de pagamento:',
         expect.objectContaining({
           error,
-          pedidoId: mockPreferenceData.pedidoId
-        })
+          pedidoId: mockPreferenceData.pedidoId,
+        }),
       );
     });
   });
@@ -173,8 +177,8 @@ describe('Payment Error Handling Tests', () => {
       transaction_amount: 100,
       api_response: {
         status: 200,
-        headers: {}
-      }
+        headers: {},
+      },
     };
 
     it('should throw AppError when payment.get fails with API error', async () => {
@@ -183,17 +187,16 @@ describe('Payment Error Handling Tests', () => {
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
-      await expect(paymentService.handleWebhook(webhookData))
-        .rejects.toThrow('Erro ao processar webhook');
+      await expect(paymentService.handleWebhook(webhookData)).rejects.toThrow(
+        'Erro ao processar webhook',
+      );
 
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).not.toHaveBeenCalled();
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        `Erro ao processar webhook: ${error}`
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith(`Erro ao processar webhook: ${error}`);
     });
 
     it('should throw AppError when payment.get fails with timeout', async () => {
@@ -202,17 +205,16 @@ describe('Payment Error Handling Tests', () => {
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
-      await expect(paymentService.handleWebhook(webhookData))
-        .rejects.toThrow('Erro ao processar webhook');
+      await expect(paymentService.handleWebhook(webhookData)).rejects.toThrow(
+        'Erro ao processar webhook',
+      );
 
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).not.toHaveBeenCalled();
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        `Erro ao processar webhook: ${error}`
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith(`Erro ao processar webhook: ${error}`);
     });
 
     it('should throw AppError when payment.get fails with invalid token', async () => {
@@ -221,38 +223,36 @@ describe('Payment Error Handling Tests', () => {
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
-      await expect(paymentService.handleWebhook(webhookData))
-        .rejects.toThrow('Erro ao processar webhook');
+      await expect(paymentService.handleWebhook(webhookData)).rejects.toThrow(
+        'Erro ao processar webhook',
+      );
 
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).not.toHaveBeenCalled();
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        `Erro ao processar webhook: ${error}`
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith(`Erro ao processar webhook: ${error}`);
     });
 
     it('should throw AppError when pedido.update fails', async () => {
       mockPayment.get.mockResolvedValue(mockPaymentResponse);
-      
+
       const error = new Error('Database Error');
       mockPrisma.pedido.update.mockRejectedValue(error);
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
-      await expect(paymentService.handleWebhook(webhookData))
-        .rejects.toThrow('Erro ao processar webhook');
+      await expect(paymentService.handleWebhook(webhookData)).rejects.toThrow(
+        'Erro ao processar webhook',
+      );
 
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).toHaveBeenCalled();
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        `Erro ao processar webhook: ${error}`
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith(`Erro ao processar webhook: ${error}`);
     });
   });
 
@@ -264,52 +264,48 @@ describe('Payment Error Handling Tests', () => {
       const error = new Error('API Error');
       mockPayment.cancel.mockRejectedValue(error);
 
-      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount))
-        .rejects.toThrow('Erro ao reembolsar pagamento');
+      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount)).rejects.toThrow(
+        'Erro ao reembolsar pagamento',
+      );
 
       expect(mockPayment.cancel).toHaveBeenCalledWith(mockPaymentId);
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        `Erro ao reembolsar pagamento: ${error}`
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith(`Erro ao reembolsar pagamento: ${error}`);
     });
 
     it('should throw AppError when payment.cancel fails with timeout', async () => {
       const error = new Error('ETIMEDOUT');
       mockPayment.cancel.mockRejectedValue(error);
 
-      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount))
-        .rejects.toThrow('Erro ao reembolsar pagamento');
+      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount)).rejects.toThrow(
+        'Erro ao reembolsar pagamento',
+      );
 
       expect(mockPayment.cancel).toHaveBeenCalledWith(mockPaymentId);
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        `Erro ao reembolsar pagamento: ${error}`
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith(`Erro ao reembolsar pagamento: ${error}`);
     });
 
     it('should throw AppError when payment.cancel fails with invalid token', async () => {
       const error = new Error('401 Unauthorized');
       mockPayment.cancel.mockRejectedValue(error);
 
-      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount))
-        .rejects.toThrow('Erro ao reembolsar pagamento');
+      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount)).rejects.toThrow(
+        'Erro ao reembolsar pagamento',
+      );
 
       expect(mockPayment.cancel).toHaveBeenCalledWith(mockPaymentId);
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        `Erro ao reembolsar pagamento: ${error}`
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith(`Erro ao reembolsar pagamento: ${error}`);
     });
 
     it('should throw AppError when payment.cancel fails with payment not found', async () => {
       const error = new Error('404 Not Found');
       mockPayment.cancel.mockRejectedValue(error);
 
-      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount))
-        .rejects.toThrow('Erro ao reembolsar pagamento');
+      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount)).rejects.toThrow(
+        'Erro ao reembolsar pagamento',
+      );
 
       expect(mockPayment.cancel).toHaveBeenCalledWith(mockPaymentId);
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        `Erro ao reembolsar pagamento: ${error}`
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith(`Erro ao reembolsar pagamento: ${error}`);
     });
   });
-}); 
+});

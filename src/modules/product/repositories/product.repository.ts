@@ -22,7 +22,10 @@ export class ProductRepository {
     });
   }
 
-  async findAll(page: number = 1, limit: number = 10): Promise<{ produtos: Produto[]; total: number }> {
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ produtos: Produto[]; total: number }> {
     const skip = (page - 1) * limit;
     const [produtos, total] = await Promise.all([
       this.prisma.produto.findMany({
@@ -49,7 +52,11 @@ export class ProductRepository {
     });
   }
 
-  async findByCategory(categoria: string, page: number = 1, limit: number = 10): Promise<{ produtos: Produto[]; total: number }> {
+  async findByCategory(
+    categoria: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ produtos: Produto[]; total: number }> {
     const skip = (page - 1) * limit;
     const [produtos, total] = await Promise.all([
       this.prisma.produto.findMany({
@@ -66,7 +73,11 @@ export class ProductRepository {
     return { produtos, total };
   }
 
-  async findBySubcategory(subcategoria: string, page: number = 1, limit: number = 10): Promise<{ produtos: Produto[]; total: number }> {
+  async findBySubcategory(
+    subcategoria: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ produtos: Produto[]; total: number }> {
     const skip = (page - 1) * limit;
     const [produtos, total] = await Promise.all([
       this.prisma.produto.findMany({
@@ -83,7 +94,11 @@ export class ProductRepository {
     return { produtos, total };
   }
 
-  async searchProducts(query: string, page: number = 1, limit: number = 10): Promise<{ produtos: Produto[]; total: number }> {
+  async searchProducts(
+    query: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ produtos: Produto[]; total: number }> {
     const skip = (page - 1) * limit;
     const [produtos, total] = await Promise.all([
       this.prisma.produto.findMany({
@@ -111,4 +126,4 @@ export class ProductRepository {
 
     return { produtos, total };
   }
-} 
+}

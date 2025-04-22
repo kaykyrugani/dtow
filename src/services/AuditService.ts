@@ -15,7 +15,7 @@ export enum AuditAction {
   USER_UPDATED = 'USER_UPDATED',
   ORDER_CREATED = 'ORDER_CREATED',
   ORDER_UPDATED = 'ORDER_UPDATED',
-  ORDER_CANCELLED = 'ORDER_CANCELLED'
+  ORDER_CANCELLED = 'ORDER_CANCELLED',
 }
 
 export interface AuditLogData {
@@ -34,7 +34,7 @@ export class AuditService {
     @inject('PrismaClient')
     private prisma: PrismaClient,
     @inject('LoggingService')
-    private logger: LoggingService
+    private logger: LoggingService,
   ) {}
 
   /**
@@ -53,8 +53,8 @@ export class AuditService {
           details: data.details,
           ipAddress: data.ipAddress,
           userAgent: data.userAgent,
-          createdAt: new Date()
-        }
+          createdAt: new Date(),
+        },
       });
 
       // Registra nos logs do sistema
@@ -62,12 +62,12 @@ export class AuditService {
         userId: data.userId,
         entityId: data.entityId,
         entityType: data.entityType,
-        details: data.details
+        details: data.details,
       });
     } catch (error) {
       this.logger.error('Erro ao registrar auditoria', {
         error: error instanceof Error ? error.message : 'Erro desconhecido',
-        action: data.action
+        action: data.action,
       });
     }
   }
@@ -81,7 +81,7 @@ export class AuditService {
     return this.prisma.auditLog.findMany({
       where: { action },
       orderBy: { createdAt: 'desc' },
-      take: limit
+      take: limit,
     });
   }
 
@@ -92,11 +92,11 @@ export class AuditService {
    */
   async findByEntity(entityId: string, entityType: string): Promise<any[]> {
     return this.prisma.auditLog.findMany({
-      where: { 
+      where: {
         entityId,
-        entityType
+        entityType,
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
   }
 
@@ -107,7 +107,7 @@ export class AuditService {
   async findByUser(userId: string): Promise<any[]> {
     return this.prisma.auditLog.findMany({
       where: { userId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
   }
-} 
+}

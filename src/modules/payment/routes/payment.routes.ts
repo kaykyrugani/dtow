@@ -15,7 +15,7 @@ const paymentController = PaymentController.getInstance();
  * tags:
  *   name: Pagamentos
  *   description: Endpoints para gerenciamento de pagamentos via Mercado Pago
- * 
+ *
  * components:
  *   securitySchemes:
  *     bearerAuth:
@@ -121,7 +121,7 @@ paymentRouter.post(
   '/preference',
   rateLimit(15 * 60 * 1000, 100), // 100 requisições por 15 minutos
   validateRequest(createPreferenceSchema),
-  paymentController.createPreference.bind(paymentController)
+  paymentController.createPreference.bind(paymentController),
 );
 
 /**
@@ -172,7 +172,7 @@ paymentRouter.post(
   rateLimit(15 * 60 * 1000, 200), // 200 requisições por 15 minutos
   validateRequest(webhookSchema),
   verifyWebhookSignature,
-  paymentController.handleWebhook.bind(paymentController)
+  paymentController.handleWebhook.bind(paymentController),
 );
 
 // Rotas protegidas
@@ -241,7 +241,7 @@ paymentRouter.post(
   rateLimit(15 * 60 * 1000, 50), // 50 requisições por 15 minutos
   adminMiddleware,
   validateRequest(refundSchema),
-  paymentController.reembolsarPagamento.bind(paymentController)
+  paymentController.reembolsarPagamento.bind(paymentController),
 );
 
-export { paymentRouter }; 
+export { paymentRouter };

@@ -26,12 +26,12 @@ export class AddressService {
       complemento?: string;
       tipo: 'RESIDENCIAL' | 'COMERCIAL';
       principal: boolean;
-    }
+    },
   ): Promise<Endereco> {
     try {
       // Buscar dados do CEP na API ViaCEP
       const viaCepResponse = await axios.get<ViaCepResponse>(
-        `https://viacep.com.br/ws/${data.cep}/json/`
+        `https://viacep.com.br/ws/${data.cep}/json/`,
       );
 
       if (viaCepResponse.data.erro) {
@@ -90,7 +90,7 @@ export class AddressService {
       complemento?: string;
       tipo?: 'RESIDENCIAL' | 'COMERCIAL';
       principal?: boolean;
-    }
+    },
   ): Promise<Endereco> {
     try {
       // Verificar se o endereço pertence ao usuário
@@ -177,4 +177,4 @@ export class AddressService {
       throw new AppError('Erro ao definir endereço principal', 500);
     }
   }
-} 
+}

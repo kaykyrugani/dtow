@@ -27,7 +27,7 @@ export function generateToken(user: any) {
     config.JWT_SECRET,
     {
       expiresIn: '1h',
-    }
+    },
   );
 }
 
@@ -98,4 +98,4 @@ export async function createTestOrder(userId: number, productId: number) {
       itens: true,
     },
   });
-} 
+}

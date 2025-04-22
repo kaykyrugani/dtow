@@ -2,7 +2,13 @@ import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
 import { app } from '../../app';
 import type { PrismaClient } from '@prisma/client';
-import { createTestUser, generateAuthToken, createTestProduct, createNotFoundError, createValidationError } from '../helpers/testData';
+import {
+  createTestUser,
+  generateAuthToken,
+  createTestProduct,
+  createNotFoundError,
+  createValidationError,
+} from '../helpers/testData';
 import { container } from 'tsyringe';
 import { OrderService } from '../../modules/order/services/order.service';
 import { OrderController } from '../../modules/order/controllers/order.controller';
@@ -20,14 +26,14 @@ enum OrderStatus {
   SHIPPED = 'SHIPPED',
   DELIVERED = 'DELIVERED',
   CANCELLED = 'CANCELLED',
-  PROCESSING = 'PROCESSING'
+  PROCESSING = 'PROCESSING',
 }
 
 enum PaymentType {
   CREDIT_CARD = 'CREDIT_CARD',
   DEBIT_CARD = 'DEBIT_CARD',
   PIX = 'PIX',
-  BANK_SLIP = 'BANK_SLIP'
+  BANK_SLIP = 'BANK_SLIP',
 }
 
 const prisma = new PrismaClient();
@@ -44,40 +50,40 @@ describe('Order Integration Tests', () => {
   const mockProductData = {
     nome: 'Produto Teste',
     descricao: 'Descrição do produto teste',
-    preco: 100.00,
+    preco: 100.0,
     categoria: 'ELETRONICOS',
     subcategoria: 'SMARTPHONES',
     marca: 'Marca Teste',
     estoque: 10,
     imagem: 'https://exemplo.com/imagem.jpg',
     imagens: '[]',
-    tamanhos: '[]'
+    tamanhos: '[]',
   };
 
   const mockCouponData = {
     codigo: 'TESTE10',
     desconto: 10,
     tipoDesconto: 'PERCENTUAL',
-    valorMinimo: 50.00,
+    valorMinimo: 50.0,
     dataInicio: new Date(),
     dataFim: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dias
     limiteUsos: 100,
-    ativo: true
+    ativo: true,
   };
 
   const mockOrderData = {
     items: [
       {
         productId: '0', // Será atualizado após criar o produto
-        quantity: 1
-      }
+        quantity: 1,
+      },
     ],
     pagamento: {
       tipo: PaymentType.CREDIT_CARD,
       numeroCartao: '4111111111111111',
       nomeCartao: 'Test User',
       validade: '12/25',
-      cvv: '123'
+      cvv: '123',
     },
     endereco: {
       rua: 'Rua Teste',
@@ -86,8 +92,8 @@ describe('Order Integration Tests', () => {
       bairro: 'Centro',
       cidade: 'São Paulo',
       estado: 'SP',
-      cep: '01234567'
-    }
+      cep: '01234567',
+    },
   };
 
   beforeAll(async () => {
@@ -108,8 +114,8 @@ describe('Order Integration Tests', () => {
     const coupon = await prisma.cupom.create({
       data: {
         ...mockCouponData,
-        criadoPor: adminUser.id
-      }
+        criadoPor: adminUser.id,
+      },
     });
     testCouponId = coupon.id;
 
@@ -147,9 +153,7 @@ describe('Order Integration Tests', () => {
     });
 
     it('deve falhar ao criar pedido sem autenticação', async () => {
-      const response = await request(app)
-        .post('/orders')
-        .send(mockOrderData);
+      const response = await request(app).post('/orders').send(mockOrderData);
 
       expect(response.status).toBe(401);
     });
@@ -157,7 +161,7 @@ describe('Order Integration Tests', () => {
     it('deve falhar ao criar pedido com produto inexistente', async () => {
       const invalidOrderData = {
         ...mockOrderData,
-        items: [{ productId: '999999', quantity: 1 }]
+        items: [{ productId: '999999', quantity: 1 }],
       };
 
       const response = await request(app)
@@ -172,7 +176,7 @@ describe('Order Integration Tests', () => {
     it('deve falhar ao criar pedido com quantidade maior que o estoque', async () => {
       const invalidOrderData = {
         ...mockOrderData,
-        items: [{ productId: testProductId, quantity: 20 }]
+        items: [{ productId: testProductId, quantity: 20 }],
       };
 
       const response = await request(app)
@@ -280,7 +284,9 @@ describe('Order Integration Tests', () => {
         .send({ status: OrderStatus.PAID });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toContain('não é possível atualizar o status de um pedido cancelado');
+      expect(response.body.message).toContain(
+        'não é possível atualizar o status de um pedido cancelado',
+      );
     });
   });
 
@@ -300,7 +306,7 @@ describe('Order Integration Tests', () => {
 
       // Verificar se o estoque foi restaurado
       const product = await prisma.produto.findUnique({
-        where: { id: parseInt(testProductId) }
+        where: { id: parseInt(testProductId) },
       });
       expect(product?.estoque).toBe(mockProductData.estoque);
     });
@@ -351,7 +357,7 @@ describe('Order Integration Tests', () => {
     it('deve criar pedido com cupom percentual válido', async () => {
       const orderWithCoupon = {
         ...mockOrderData,
-        cupomCodigo: 'TESTE10'
+        cupomCodigo: 'TESTE10',
       };
 
       const response = await request(app)
@@ -360,8 +366,8 @@ describe('Order Integration Tests', () => {
         .send(orderWithCoupon);
 
       expect(response.status).toBe(201);
-      expect(response.body.total).toBe(90.00); // 100 - 10%
-      expect(response.body.desconto).toBe(10.00);
+      expect(response.body.total).toBe(90.0); // 100 - 10%
+      expect(response.body.desconto).toBe(10.0);
       expect(response.body.cupomId).toBe(testCouponId);
     });
 
@@ -373,13 +379,13 @@ describe('Order Integration Tests', () => {
           codigo: 'FIXO20',
           desconto: 20,
           tipoDesconto: 'VALOR_FIXO',
-          criadoPor: testUserId
-        }
+          criadoPor: testUserId,
+        },
       });
 
       const orderWithFixedCoupon = {
         ...mockOrderData,
-        cupomCodigo: 'FIXO20'
+        cupomCodigo: 'FIXO20',
       };
 
       const response = await request(app)
@@ -388,8 +394,8 @@ describe('Order Integration Tests', () => {
         .send(orderWithFixedCoupon);
 
       expect(response.status).toBe(201);
-      expect(response.body.total).toBe(80.00); // 100 - 20
-      expect(response.body.desconto).toBe(20.00);
+      expect(response.body.total).toBe(80.0); // 100 - 20
+      expect(response.body.desconto).toBe(20.0);
       expect(response.body.cupomId).toBe(fixedCoupon.id);
     });
 
@@ -401,13 +407,13 @@ describe('Order Integration Tests', () => {
           codigo: 'EXPIRADO',
           dataInicio: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), // 14 dias atrás
           dataFim: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 dias atrás
-          criadoPor: testUserId
-        }
+          criadoPor: testUserId,
+        },
       });
 
       const orderWithExpiredCoupon = {
         ...mockOrderData,
-        cupomCodigo: 'EXPIRADO'
+        cupomCodigo: 'EXPIRADO',
       };
 
       await expectAppError(
@@ -416,7 +422,7 @@ describe('Order Integration Tests', () => {
           .set('Authorization', `Bearer ${customerToken}`)
           .send(orderWithExpiredCoupon),
         'CUPOM_EXPIRADO',
-        HttpStatusCode.BAD_REQUEST
+        HttpStatusCode.BAD_REQUEST,
       );
     });
 
@@ -426,14 +432,14 @@ describe('Order Integration Tests', () => {
         data: {
           ...mockProductData,
           nome: 'Produto Barato',
-          preco: 10.00
-        }
+          preco: 10.0,
+        },
       });
 
       const orderWithCheapProduct = {
         ...mockOrderData,
         items: [{ productId: cheapProduct.id, quantity: 1 }],
-        cupomCodigo: 'TESTE10'
+        cupomCodigo: 'TESTE10',
       };
 
       await expectAppError(
@@ -442,7 +448,7 @@ describe('Order Integration Tests', () => {
           .set('Authorization', `Bearer ${customerToken}`)
           .send(orderWithCheapProduct),
         'VALOR_MINIMO_NAO_ATINGIDO',
-        HttpStatusCode.BAD_REQUEST
+        HttpStatusCode.BAD_REQUEST,
       );
     });
 
@@ -453,8 +459,8 @@ describe('Order Integration Tests', () => {
           ...mockCouponData,
           codigo: 'LIMITADO',
           limiteUsos: 1,
-          criadoPor: testUserId
-        }
+          criadoPor: testUserId,
+        },
       });
 
       // Usar o cupom uma vez
@@ -462,22 +468,24 @@ describe('Order Integration Tests', () => {
         data: {
           usuarioId: testUserId,
           status: 'PENDING' as OrderStatus,
-          total: 90.00,
-          desconto: 10.00,
+          total: 90.0,
+          desconto: 10.0,
           cupomId: limitedCoupon.id,
           itens: {
-            create: [{
-              produtoId: testProductId,
-              quantidade: 1,
-              precoUnitario: 100.00
-            }]
-          }
-        }
+            create: [
+              {
+                produtoId: testProductId,
+                quantidade: 1,
+                precoUnitario: 100.0,
+              },
+            ],
+          },
+        },
       });
 
       const orderWithLimitedCoupon = {
         ...mockOrderData,
-        cupomCodigo: 'LIMITADO'
+        cupomCodigo: 'LIMITADO',
       };
 
       await expectAppError(
@@ -486,7 +494,7 @@ describe('Order Integration Tests', () => {
           .set('Authorization', `Bearer ${customerToken}`)
           .send(orderWithLimitedCoupon),
         'CUPOM_ESGOTADO',
-        HttpStatusCode.BAD_REQUEST
+        HttpStatusCode.BAD_REQUEST,
       );
     });
 
@@ -496,17 +504,17 @@ describe('Order Integration Tests', () => {
         data: {
           ...mockProductData,
           nome: 'Segundo Produto',
-          preco: 50.00
-        }
+          preco: 50.0,
+        },
       });
 
       const orderWithMultipleProducts = {
         ...mockOrderData,
         items: [
           { productId: testProductId, quantity: 1 },
-          { productId: secondProduct.id, quantity: 1 }
+          { productId: secondProduct.id, quantity: 1 },
         ],
-        cupomCodigo: 'TESTE10'
+        cupomCodigo: 'TESTE10',
       };
 
       const response = await request(app)
@@ -515,14 +523,14 @@ describe('Order Integration Tests', () => {
         .send(orderWithMultipleProducts);
 
       expect(response.status).toBe(201);
-      expect(response.body.total).toBe(135.00); // (100 + 50) - 15 (10% de 150)
-      expect(response.body.desconto).toBe(15.00);
+      expect(response.body.total).toBe(135.0); // (100 + 50) - 15 (10% de 150)
+      expect(response.body.desconto).toBe(15.0);
     });
 
     it('deve rejeitar pedido com cupom inexistente', async () => {
       const orderWithInvalidCoupon = {
         ...mockOrderData,
-        cupomCodigo: 'INVALIDO123'
+        cupomCodigo: 'INVALIDO123',
       };
 
       const response = await request(app)
@@ -541,13 +549,13 @@ describe('Order Integration Tests', () => {
           ...mockCouponData,
           codigo: 'INATIVO',
           ativo: false,
-          criadoPor: testUserId
-        }
+          criadoPor: testUserId,
+        },
       });
 
       const orderWithInactiveCoupon = {
         ...mockOrderData,
-        cupomCodigo: 'INATIVO'
+        cupomCodigo: 'INATIVO',
       };
 
       const response = await request(app)
@@ -566,8 +574,8 @@ describe('Order Integration Tests', () => {
           ...mockCouponData,
           codigo: 'USERONCE',
           limiteUsos: 1,
-          criadoPor: testUserId
-        }
+          criadoPor: testUserId,
+        },
       });
 
       // Usar o cupom uma vez
@@ -575,22 +583,24 @@ describe('Order Integration Tests', () => {
         data: {
           usuarioId: testUserId,
           status: 'PENDING' as OrderStatus,
-          total: 90.00,
-          desconto: 10.00,
+          total: 90.0,
+          desconto: 10.0,
           cupomId: userLimitedCoupon.id,
           itens: {
-            create: [{
-              produtoId: testProductId,
-              quantidade: 1,
-              precoUnitario: 100.00
-            }]
-          }
-        }
+            create: [
+              {
+                produtoId: testProductId,
+                quantidade: 1,
+                precoUnitario: 100.0,
+              },
+            ],
+          },
+        },
       });
 
       const orderWithUsedCoupon = {
         ...mockOrderData,
-        cupomCodigo: 'USERONCE'
+        cupomCodigo: 'USERONCE',
       };
 
       const response = await request(app)
@@ -606,7 +616,7 @@ describe('Order Integration Tests', () => {
       const orderWithShipping = {
         ...mockOrderData,
         cupomCodigo: 'TESTE10',
-        frete: 15.00 // Frete fixo de R$ 15
+        frete: 15.0, // Frete fixo de R$ 15
       };
 
       const response = await request(app)
@@ -615,9 +625,9 @@ describe('Order Integration Tests', () => {
         .send(orderWithShipping);
 
       expect(response.status).toBe(201);
-      expect(response.body.total).toBe(105.00); // (100 - 10%) + 15 frete
-      expect(response.body.desconto).toBe(10.00);
-      expect(response.body.frete).toBe(15.00);
+      expect(response.body.total).toBe(105.0); // (100 - 10%) + 15 frete
+      expect(response.body.desconto).toBe(10.0);
+      expect(response.body.frete).toBe(15.0);
     });
 
     it('deve lidar com concorrência no limite de uso do cupom', async () => {
@@ -627,14 +637,14 @@ describe('Order Integration Tests', () => {
           ...mockCouponData,
           codigo: 'CONCURRENT',
           limiteUsos: 1,
-          criadoPor: testUserId
-        }
+          criadoPor: testUserId,
+        },
       });
 
       // Simular duas requisições simultâneas
       const orderWithConcurrentCoupon = {
         ...mockOrderData,
-        cupomCodigo: 'CONCURRENT'
+        cupomCodigo: 'CONCURRENT',
       };
 
       const [response1, response2] = await Promise.all([
@@ -645,7 +655,7 @@ describe('Order Integration Tests', () => {
         request(app)
           .post('/orders')
           .set('Authorization', `Bearer ${customerToken}`)
-          .send(orderWithConcurrentCoupon)
+          .send(orderWithConcurrentCoupon),
       ]);
 
       // Uma das requisições deve ter sucesso e a outra deve falhar
@@ -680,8 +690,8 @@ describe('Order Integration Tests', () => {
         const items = [
           {
             productId: testProduct.id,
-            quantity: 2
-          }
+            quantity: 2,
+          },
         ];
 
         const order = await orderService.create(testUser.id, items);
@@ -698,12 +708,12 @@ describe('Order Integration Tests', () => {
         const items = [
           {
             productId: testProduct.id,
-            quantity: 20 // More than available stock
-          }
+            quantity: 20, // More than available stock
+          },
         ];
 
         await expect(orderService.create(testUser.id, items)).rejects.toThrow(
-          new AppError('Estoque insuficiente', 400)
+          new AppError('Estoque insuficiente', 400),
         );
       });
     });
@@ -713,8 +723,8 @@ describe('Order Integration Tests', () => {
         const items = [
           {
             productId: testProduct.id,
-            quantity: 1
-          }
+            quantity: 1,
+          },
         ];
 
         const createdOrder = await orderService.create(testUser.id, items);
@@ -726,7 +736,7 @@ describe('Order Integration Tests', () => {
 
       it('should throw error when order is not found', async () => {
         await expect(orderService.findById('non-existent-id')).rejects.toThrow(
-          new AppError('Pedido não encontrado', 404)
+          new AppError('Pedido não encontrado', 404),
         );
       });
     });
@@ -736,8 +746,8 @@ describe('Order Integration Tests', () => {
         const items = [
           {
             productId: testProduct.id,
-            quantity: 1
-          }
+            quantity: 1,
+          },
         ];
 
         await orderService.create(testUser.id, items);
@@ -761,8 +771,8 @@ describe('Order Integration Tests', () => {
         const items = [
           {
             productId: testProduct.id,
-            quantity: 1
-          }
+            quantity: 1,
+          },
         ];
 
         const order = await orderService.create(testUser.id, items);
@@ -772,24 +782,24 @@ describe('Order Integration Tests', () => {
       });
 
       it('should throw error when order is not found', async () => {
-        await expect(orderService.updateStatus('non-existent-id', OrderStatus.PROCESSING)).rejects.toThrow(
-          new AppError('Pedido não encontrado', 404)
-        );
+        await expect(
+          orderService.updateStatus('non-existent-id', OrderStatus.PROCESSING),
+        ).rejects.toThrow(new AppError('Pedido não encontrado', 404));
       });
 
       it('should throw error when trying to update cancelled order', async () => {
         const items = [
           {
             productId: testProduct.id,
-            quantity: 1
-          }
+            quantity: 1,
+          },
         ];
 
         const order = await orderService.create(testUser.id, items);
         await orderService.cancel(order.id);
 
         await expect(orderService.updateStatus(order.id, OrderStatus.PROCESSING)).rejects.toThrow(
-          new AppError('Não é possível atualizar o status de um pedido cancelado', 400)
+          new AppError('Não é possível atualizar o status de um pedido cancelado', 400),
         );
       });
     });
@@ -799,8 +809,8 @@ describe('Order Integration Tests', () => {
         const items = [
           {
             productId: testProduct.id,
-            quantity: 1
-          }
+            quantity: 1,
+          },
         ];
 
         const order = await orderService.create(testUser.id, items);
@@ -811,7 +821,7 @@ describe('Order Integration Tests', () => {
 
       it('should throw error when order is not found', async () => {
         await expect(orderService.cancel('non-existent-id')).rejects.toThrow(
-          new AppError('Pedido não encontrado', 404)
+          new AppError('Pedido não encontrado', 404),
         );
       });
 
@@ -819,17 +829,17 @@ describe('Order Integration Tests', () => {
         const items = [
           {
             productId: testProduct.id,
-            quantity: 1
-          }
+            quantity: 1,
+          },
         ];
 
         const order = await orderService.create(testUser.id, items);
         await orderService.cancel(order.id);
 
         await expect(orderService.cancel(order.id)).rejects.toThrow(
-          new AppError('Pedido já está cancelado', 400)
+          new AppError('Pedido já está cancelado', 400),
         );
       });
     });
   });
-}); 
+});

@@ -29,4 +29,4 @@ export interface AddressResponseDTO {
   principal: boolean;
   createdAt: Date;
   updatedAt: Date;
-} 
+}

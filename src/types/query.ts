@@ -17,4 +17,4 @@ export interface PaginatedResult<T> {
     limit: number;
     totalPages: number;
   };
-} 
+}

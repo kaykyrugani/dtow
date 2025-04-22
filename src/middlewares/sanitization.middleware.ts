@@ -1,6 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import xss from 'xss-clean';
-import { logger } from '../config/logger';
+import { LoggingService } from '../services/LoggingService';
+import { z } from 'zod';
+import { AppError } from '../errors/AppError';
+import { Injectable, NestMiddleware, HttpException, HttpStatus } from '@nestjs/common';
+import { ZodSchema } from 'zod';
+
+const logger = LoggingService.getInstance();
 
 /**
  * Middleware para sanitização de inputs
@@ -29,6 +35,31 @@ export const sanitizationMiddleware = (req: Request, res: Response, next: NextFu
     logger.error('Erro ao sanitizar inputs', { error });
     next(error);
   }
+};
+
+@Injectable()
+export class ValidationMiddleware implements NestMiddleware {
+  constructor(private schema: ZodSchema) {}
+
+  use(req: Request, res: Response, next: NextFunction) {
+    try {
+      const validatedData = this.schema.parse(req.body);
+      req.body = validatedData;
+      next();
+    } catch (error) {
+      throw new HttpException(
+        {
+          message: 'Erro de validação',
+          errors: error.errors,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+}
+
+export const validateSchema = (schema: ZodSchema) => {
+  return new ValidationMiddleware(schema);
 };
 
 /**
@@ -67,15 +98,15 @@ function sanitizeObject(obj: any): any {
 function sanitizeString(str: string): string {
   // Remove caracteres de controle
   let sanitized = str.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
-  
+
   // Remove tags HTML
   sanitized = sanitized.replace(/<[^>]*>/g, '');
-  
+
   // Remove caracteres especiais que podem ser usados para injeção
   sanitized = sanitized.replace(/[;'"\\]/g, '');
-  
+
   // Normaliza espaços em branco
   sanitized = sanitized.replace(/\s+/g, ' ').trim();
-  
+
   return sanitized;
-} 
+}

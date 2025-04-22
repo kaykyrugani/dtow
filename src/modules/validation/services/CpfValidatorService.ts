@@ -15,13 +15,11 @@ export class CpfValidatorService {
   validarCpf(cpf: string): void {
     if (!validarCpf(cpf)) {
       logger.warn(`Tentativa de uso de CPF inválido: ${cpf}`);
-      throw new AppError(
-        ERROR_CODES.INVALID_CPF,
-        HttpStatusCode.BAD_REQUEST,
-        { message: 'CPF inválido' }
-      );
+      throw new AppError(ERROR_CODES.INVALID_CPF, HttpStatusCode.BAD_REQUEST, {
+        message: 'CPF inválido',
+      });
     }
-    
+
     logger.info(`CPF ${cpf} validado com sucesso`);
   }
 
@@ -33,16 +31,14 @@ export class CpfValidatorService {
    */
   validarEFormatarCpf(cpf: string): string {
     this.validarCpf(cpf);
-    
+
     const cpfFormatado = formatarCpf(cpf);
     if (!cpfFormatado) {
-      throw new AppError(
-        ERROR_CODES.INVALID_CPF,
-        HttpStatusCode.BAD_REQUEST,
-        { message: 'CPF inválido' }
-      );
+      throw new AppError(ERROR_CODES.INVALID_CPF, HttpStatusCode.BAD_REQUEST, {
+        message: 'CPF inválido',
+      });
     }
-    
+
     return cpfFormatado;
   }
 
@@ -54,4 +50,4 @@ export class CpfValidatorService {
   isCpfValido(cpf: string): boolean {
     return validarCpf(cpf);
   }
-} 
+}

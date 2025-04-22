@@ -19,8 +19,8 @@ export class EmailService {
       secure: env.SMTP_SECURE,
       auth: {
         user: env.SMTP_USER,
-        pass: env.SMTP_PASS
-      }
+        pass: env.SMTP_PASS,
+      },
     });
 
     // Carrega templates
@@ -32,7 +32,7 @@ export class EmailService {
       'ORDER_CONFIRMATION',
       'ORDER_STATUS_UPDATE',
       'PASSWORD_RECOVERY',
-      'WELCOME'
+      'WELCOME',
     ];
 
     templateTypes.forEach(type => {
@@ -46,10 +46,7 @@ export class EmailService {
     });
   }
 
-  private async renderTemplate(
-    type: string,
-    data: Record<string, any>
-  ): Promise<EmailTemplate> {
+  private async renderTemplate(type: string, data: Record<string, any>): Promise<EmailTemplate> {
     const template = this.templates.get(type);
     if (!template) {
       throw new Error(`Template ${type} não encontrado`);
@@ -61,7 +58,7 @@ export class EmailService {
     return {
       subject: this.getSubject(type, data),
       html,
-      text
+      text,
     };
   }
 
@@ -70,7 +67,7 @@ export class EmailService {
       ORDER_CONFIRMATION: 'Pedido Confirmado - OnlyWave',
       ORDER_STATUS_UPDATE: 'Atualização do seu Pedido - OnlyWave',
       PASSWORD_RECOVERY: 'Recuperação de Senha - OnlyWave',
-      WELCOME: 'Bem-vindo à OnlyWave!'
+      WELCOME: 'Bem-vindo à OnlyWave!',
     };
 
     return subjects[type] || 'Notificação - OnlyWave';
@@ -84,33 +81,30 @@ export class EmailService {
       .trim();
   }
 
-  async sendEmail(
-    to: string,
-    template: EmailTemplate
-  ): Promise<NotificationResult> {
+  async sendEmail(to: string, template: EmailTemplate): Promise<NotificationResult> {
     try {
       const info = await this.transporter.sendMail({
         from: `"OnlyWave" <${env.SMTP_FROM}>`,
         to,
         subject: template.subject,
         text: template.text,
-        html: template.html
+        html: template.html,
       });
 
       logger.info('Email enviado com sucesso', {
         messageId: info.messageId,
-        to
+        to,
       });
 
       return {
         success: true,
-        messageId: info.messageId
+        messageId: info.messageId,
       };
     } catch (error) {
       logger.error('Erro ao enviar email:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
       };
     }
   }
@@ -118,7 +112,7 @@ export class EmailService {
   async sendTemplateEmail(
     to: string,
     type: string,
-    data: Record<string, any>
+    data: Record<string, any>,
   ): Promise<NotificationResult> {
     try {
       const template = await this.renderTemplate(type, data);
@@ -127,8 +121,8 @@ export class EmailService {
       logger.error('Erro ao enviar email com template:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
+        error: error instanceof Error ? error.message : 'Erro desconhecido',
       };
     }
   }
-} 
+}

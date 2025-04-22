@@ -33,4 +33,4 @@ export function ensureAuthenticated(
   } catch {
     throw new AppError('Token inválido', HttpStatusCode.UNAUTHORIZED);
   }
-} 
+}

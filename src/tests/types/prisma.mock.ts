@@ -17,4 +17,4 @@ export interface PrismaMock {
     findUnique: jest.Mock<Promise<Usuario | null>, [params?: { where: any }]>;
     update: jest.Mock<Promise<Usuario>, [params: { where: any; data: Partial<Usuario> }]>;
   };
-} 
+}

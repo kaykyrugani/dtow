@@ -9,7 +9,7 @@ export const errorHandler = (
   error: Error | PrismaClientKnownRequestError | ZodError | AppError,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   // AppError personalizado
   if (error instanceof AppError) {
@@ -17,7 +17,7 @@ export const errorHandler = (
       status: 'error',
       code: error.code,
       message: error.message,
-      ...(error.details && { details: error.details })
+      ...(error.details && { details: error.details }),
     });
   }
 
@@ -27,7 +27,7 @@ export const errorHandler = (
     return res.status(appError.statusCode).json({
       status: 'error',
       code: appError.code,
-      message: appError.message
+      message: appError.message,
     });
   }
 
@@ -36,7 +36,7 @@ export const errorHandler = (
     return res.status(appError.statusCode).json({
       status: 'error',
       code: appError.code,
-      message: appError.message
+      message: appError.message,
     });
   }
 
@@ -49,7 +49,7 @@ export const errorHandler = (
           status: 'error',
           code: appError.code,
           message: appError.message,
-          details: appError.details
+          details: appError.details,
         });
       }
       case 'P2025': {
@@ -57,19 +57,19 @@ export const errorHandler = (
         return res.status(appError.statusCode).json({
           status: 'error',
           code: appError.code,
-          message: appError.message
+          message: appError.message,
         });
       }
       default: {
-        const appError = AppError.internal({ 
+        const appError = AppError.internal({
           prismaCode: error.code,
-          details: error.message 
+          details: error.message,
         });
         return res.status(appError.statusCode).json({
           status: 'error',
           code: appError.code,
           message: appError.message,
-          details: appError.details
+          details: appError.details,
         });
       }
     }
@@ -80,31 +80,31 @@ export const errorHandler = (
     const appError = AppError.validationError({
       errors: error.errors.map(e => ({
         field: e.path.join('.'),
-        message: e.message
-      }))
+        message: e.message,
+      })),
     });
     return res.status(appError.statusCode).json({
       status: 'error',
       code: appError.code,
       message: appError.message,
-      details: appError.details
+      details: appError.details,
     });
   }
 
   // Erro genérico
   console.error(error);
-  
+
   const appError = AppError.internal({
     ...(process.env.NODE_ENV === 'development' && {
       stack: error.stack,
-      detail: error.message
-    })
+      detail: error.message,
+    }),
   });
 
   return res.status(appError.statusCode).json({
     status: 'error',
     code: appError.code,
     message: appError.message,
-    ...(appError.details && { details: appError.details })
+    ...(appError.details && { details: appError.details }),
   });
-}; 
+};

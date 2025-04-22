@@ -9,7 +9,7 @@ export class ReviewController {
     try {
       const reviews = await prisma.avaliacao.findMany({
         where: {
-          status: 'PENDING'
+          status: 'PENDING',
         },
         include: {
           produto: true,
@@ -17,13 +17,13 @@ export class ReviewController {
             select: {
               id: true,
               nome: true,
-              email: true
-            }
-          }
+              email: true,
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: 'desc',
+        },
       });
 
       return res.json(reviews);
@@ -41,7 +41,7 @@ export class ReviewController {
         data: {
           status: 'APPROVED',
           reviewedBy: req.user.id,
-          reviewedAt: new Date()
+          reviewedAt: new Date(),
         },
         include: {
           produto: true,
@@ -49,10 +49,10 @@ export class ReviewController {
             select: {
               id: true,
               nome: true,
-              email: true
-            }
-          }
-        }
+              email: true,
+            },
+          },
+        },
       });
 
       // TODO: Enviar notificação por email para o usuário
@@ -74,7 +74,7 @@ export class ReviewController {
           status: 'REJECTED',
           reviewedBy: req.user.id,
           reviewedAt: new Date(),
-          rejectionReason: reason
+          rejectionReason: reason,
         },
         include: {
           produto: true,
@@ -82,10 +82,10 @@ export class ReviewController {
             select: {
               id: true,
               nome: true,
-              email: true
-            }
-          }
-        }
+              email: true,
+            },
+          },
+        },
       });
 
       // TODO: Enviar notificação por email para o usuário
@@ -101,24 +101,24 @@ export class ReviewController {
       const stats = await prisma.avaliacao.groupBy({
         by: ['status'],
         _count: {
-          id: true
-        }
+          id: true,
+        },
       });
 
       const totalReviews = await prisma.avaliacao.count();
       const averageRating = await prisma.avaliacao.aggregate({
         _avg: {
-          nota: true
-        }
+          nota: true,
+        },
       });
 
       return res.json({
         stats,
         totalReviews,
-        averageRating: averageRating._avg.nota
+        averageRating: averageRating._avg.nota,
       });
     } catch (error) {
       throw new AppError('Erro ao obter estatísticas de avaliações', 500);
     }
   }
-} 
+}

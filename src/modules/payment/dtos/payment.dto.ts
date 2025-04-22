@@ -13,22 +13,27 @@ export const createPreferenceSchema = z.object({
   comprador: z.object({
     nome: z.string(),
     email: z.string().email(),
-    cpf: z.string()
+    cpf: z.string(),
   }),
-  parcelas: z.number().int().min(1).max(12).optional()
+  parcelas: z.number().int().min(1).max(12).optional(),
 });
 
 // Schema para webhook
 export const webhookSchema = z.object({
   action: z.string(),
   data: z.object({
-    id: z.string()
-  })
+    id: z.string(),
+    amount: z.string(),
+    external_reference: z.string(),
+  }),
+  paymentType: z.string(),
+  timestamp: z.number(),
+  status: z.enum(['pending', 'approved', 'rejected', 'cancelled', 'refunded', 'charged_back']),
 });
 
 // Schema para reembolso
 export const refundSchema = z.object({
-  amount: z.number().positive().optional()
+  amount: z.number().positive().optional(),
 });
 
 // Tipos inferidos dos schemas
@@ -60,22 +65,37 @@ export interface PaymentDTO {
   formaPagamento: MercadoPagoPaymentType;
 }
 
+export type PaymentStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'cancelled'
+  | 'refunded'
+  | 'charged_back';
+
+export interface WebhookData {
+  id: string;
+  amount: string;
+  external_reference: string;
+  [key: string]: any;
+}
+
 export interface PaymentPreferenceDTO {
   pedidoId: string;
   descricao: string;
   valor: number;
-  paymentType: PaymentType;
+  parcelas?: number;
+  paymentType: string;
   comprador: {
     nome: string;
     email: string;
     cpf: string;
   };
-  parcelas?: number;
 }
 
-// Mapeamento de tipos de pagamento
-export const paymentTypeMap: Record<PaymentType, string> = {
-  CREDIT_CARD: 'credit_card',
-  PIX: 'pix',
-  BANK_SLIP: 'bank_slip'
-}; 
+export const paymentTypeMap: { [key: string]: string } = {
+  credit_card: 'credit_card',
+  debit_card: 'debit_card',
+  pix: 'pix',
+  boleto: 'boleto',
+};

@@ -14,7 +14,7 @@ export const createCouponSchema = z.object({
 
 export const updateCouponSchema = z.object({
   params: z.object({
-    id: z.string().transform((val) => parseInt(val, 10)),
+    id: z.string().transform(val => parseInt(val, 10)),
   }),
   body: z.object({
     codigo: z.string().min(3).max(20).optional(),
@@ -29,13 +29,13 @@ export const updateCouponSchema = z.object({
 
 export const deleteCouponSchema = z.object({
   params: z.object({
-    id: z.string().transform((val) => parseInt(val, 10)),
+    id: z.string().transform(val => parseInt(val, 10)),
   }),
 });
 
 export const getCouponByIdSchema = z.object({
   params: z.object({
-    id: z.string().transform((val) => parseInt(val, 10)),
+    id: z.string().transform(val => parseInt(val, 10)),
   }),
 });
 
@@ -54,8 +54,14 @@ export const validateCouponSchema = z.object({
 
 export const listCouponsSchema = z.object({
   query: z.object({
-    page: z.string().transform((val) => parseInt(val, 10)).default('1'),
-    limit: z.string().transform((val) => parseInt(val, 10)).default('10'),
+    page: z
+      .string()
+      .transform(val => parseInt(val, 10))
+      .default('1'),
+    limit: z
+      .string()
+      .transform(val => parseInt(val, 10))
+      .default('10'),
     sortBy: z.enum(['codigo', 'desconto', 'dataInicio', 'dataFim', 'quantidadeMaxima']).optional(),
     sortOrder: z.enum(['asc', 'desc']).optional().default('desc'),
     status: z.enum(['ativo', 'inativo', 'expirado']).optional(),
@@ -66,7 +72,7 @@ export const listCouponsSchema = z.object({
 
 export const updateCouponStatusSchema = z.object({
   params: z.object({
-    id: z.string().transform((val) => parseInt(val, 10)),
+    id: z.string().transform(val => parseInt(val, 10)),
   }),
 });
 
@@ -77,4 +83,4 @@ export type CouponParams = z.infer<typeof getCouponByIdSchema>['params'];
 export type CouponCodeParams = z.infer<typeof getCouponByCodeSchema>['params'];
 export type ValidateCouponInput = z.infer<typeof validateCouponSchema>['body'];
 export type ListCouponsQuery = z.infer<typeof listCouponsSchema>['query'];
-export type UpdateCouponStatusParams = z.infer<typeof updateCouponStatusSchema>['params']; 
+export type UpdateCouponStatusParams = z.infer<typeof updateCouponStatusSchema>['params'];

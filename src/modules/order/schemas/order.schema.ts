@@ -23,4 +23,4 @@ export const updateOrderStatusSchema = z.object({
 });
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
-export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>; 
+export type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>;

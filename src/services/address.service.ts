@@ -16,7 +16,7 @@ export class AddressService {
   }) {
     try {
       const endereco = await this.prisma.endereco.create({
-        data
+        data,
       });
 
       return endereco;
@@ -28,7 +28,7 @@ export class AddressService {
   async listarEnderecos(usuarioId: number) {
     try {
       const enderecos = await this.prisma.endereco.findMany({
-        where: { usuarioId }
+        where: { usuarioId },
       });
 
       return enderecos;
@@ -37,19 +37,22 @@ export class AddressService {
     }
   }
 
-  async atualizarEndereco(id: number, data: {
-    cep?: string;
-    rua?: string;
-    numero?: string;
-    complemento?: string;
-    bairro?: string;
-    cidade?: string;
-    estado?: string;
-  }) {
+  async atualizarEndereco(
+    id: number,
+    data: {
+      cep?: string;
+      rua?: string;
+      numero?: string;
+      complemento?: string;
+      bairro?: string;
+      cidade?: string;
+      estado?: string;
+    },
+  ) {
     try {
       const endereco = await this.prisma.endereco.update({
         where: { id },
-        data
+        data,
       });
 
       return endereco;
@@ -61,10 +64,10 @@ export class AddressService {
   async deletarEndereco(id: number) {
     try {
       await this.prisma.endereco.delete({
-        where: { id }
+        where: { id },
       });
     } catch (error) {
       throw new AppError('Erro ao deletar endereço', 400);
     }
   }
-} 
+}

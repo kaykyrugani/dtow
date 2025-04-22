@@ -21,40 +21,55 @@ describe('CouponService', () => {
     dataInicio: new Date().toISOString(),
     dataFim: new Date(Date.now() + 86400000).toISOString(),
     valorMinimoCompra: 100,
-    quantidadeMaxima: 100
+    quantidadeMaxima: 100,
   };
 
   describe('create', () => {
     it('deve criar um cupom com sucesso', async () => {
       mockPrisma.cupom.findUnique.mockResolvedValue(null);
-      mockPrisma.cupom.create.mockResolvedValue({ id: 1, ...mockCouponData, ativo: true, criadoPor: 1 });
+      mockPrisma.cupom.create.mockResolvedValue({
+        id: 1,
+        ...mockCouponData,
+        ativo: true,
+        criadoPor: 1,
+      });
 
       const result = await couponService.create(1, mockCouponData);
 
       expect(result).toEqual(expect.objectContaining({ id: 1, ...mockCouponData }));
       expect(mockPrisma.cupom.create).toHaveBeenCalledWith({
-        data: { ...mockCouponData, criadoPor: 1 }
+        data: { ...mockCouponData, criadoPor: 1 },
       });
     });
 
     it('deve lançar erro quando cupom já existe', async () => {
-      mockPrisma.cupom.findUnique.mockResolvedValue({ id: 1, ...mockCouponData, ativo: true, criadoPor: 1 });
+      mockPrisma.cupom.findUnique.mockResolvedValue({
+        id: 1,
+        ...mockCouponData,
+        ativo: true,
+        criadoPor: 1,
+      });
 
       await expect(couponService.create(1, mockCouponData)).rejects.toThrow(
-        new AppError('Cupom já existe', HttpStatusCode.CONFLICT)
+        new AppError('Cupom já existe', HttpStatusCode.CONFLICT),
       );
     });
   });
 
   describe('findById', () => {
     it('deve encontrar um cupom por ID com sucesso', async () => {
-      mockPrisma.cupom.findUnique.mockResolvedValue({ id: 1, ...mockCouponData, ativo: true, criadoPor: 1 });
+      mockPrisma.cupom.findUnique.mockResolvedValue({
+        id: 1,
+        ...mockCouponData,
+        ativo: true,
+        criadoPor: 1,
+      });
 
       const result = await couponService.findById(1);
 
       expect(result).toEqual(expect.objectContaining({ id: 1, ...mockCouponData }));
       expect(mockPrisma.cupom.findUnique).toHaveBeenCalledWith({
-        where: { id: 1 }
+        where: { id: 1 },
       });
     });
 
@@ -62,7 +77,7 @@ describe('CouponService', () => {
       mockPrisma.cupom.findUnique.mockResolvedValue(null);
 
       await expect(couponService.findById(1)).rejects.toThrow(
-        new AppError('Cupom não encontrado', HttpStatusCode.NOT_FOUND)
+        new AppError('Cupom não encontrado', HttpStatusCode.NOT_FOUND),
       );
     });
   });
@@ -71,7 +86,7 @@ describe('CouponService', () => {
     it('deve listar cupons com paginação', async () => {
       const mockCoupons = [
         { id: 1, ...mockCouponData, ativo: true, criadoPor: 1 },
-        { id: 2, ...mockCouponData, ativo: true, criadoPor: 1 }
+        { id: 2, ...mockCouponData, ativo: true, criadoPor: 1 },
       ];
 
       mockPrisma.cupom.findMany.mockResolvedValue(mockCoupons);
@@ -81,7 +96,7 @@ describe('CouponService', () => {
         page: 1,
         limit: 10,
         sortBy: 'codigo' as const,
-        sortOrder: 'desc' as const
+        sortOrder: 'desc' as const,
       };
 
       const result = await couponService.findAll(query);
@@ -92,15 +107,15 @@ describe('CouponService', () => {
           total: 2,
           page: 1,
           limit: 10,
-          totalPages: 1
-        }
+          totalPages: 1,
+        },
       });
 
       expect(mockPrisma.cupom.findMany).toHaveBeenCalledWith({
         where: {},
         orderBy: { codigo: 'desc' },
         skip: 0,
-        take: 10
+        take: 10,
       });
     });
   });
@@ -111,7 +126,7 @@ describe('CouponService', () => {
         id: 1,
         ...mockCouponData,
         ativo: true,
-        criadoPor: 1
+        criadoPor: 1,
       };
 
       mockPrisma.cupom.findUnique.mockResolvedValue(mockCoupon);
@@ -121,7 +136,7 @@ describe('CouponService', () => {
       expect(result).toEqual({
         valido: true,
         desconto: 20,
-        valorFinal: 180
+        valorFinal: 180,
       });
     });
 
@@ -129,7 +144,7 @@ describe('CouponService', () => {
       mockPrisma.cupom.findUnique.mockResolvedValue(null);
 
       await expect(couponService.validate('TESTE10', 200)).rejects.toThrow(
-        new AppError('Cupom não encontrado', HttpStatusCode.NOT_FOUND)
+        new AppError('Cupom não encontrado', HttpStatusCode.NOT_FOUND),
       );
     });
 
@@ -139,13 +154,13 @@ describe('CouponService', () => {
         ...mockCouponData,
         dataInicio: new Date(Date.now() + 86400000).toISOString(),
         ativo: true,
-        criadoPor: 1
+        criadoPor: 1,
       };
 
       mockPrisma.cupom.findUnique.mockResolvedValue(mockCoupon);
 
       await expect(couponService.validate('TESTE10', 200)).rejects.toThrow(
-        new AppError('Cupom fora do período de validade', HttpStatusCode.BAD_REQUEST)
+        new AppError('Cupom fora do período de validade', HttpStatusCode.BAD_REQUEST),
       );
     });
 
@@ -155,14 +170,14 @@ describe('CouponService', () => {
         ...mockCouponData,
         valorMinimoCompra: 300,
         ativo: true,
-        criadoPor: 1
+        criadoPor: 1,
       };
 
       mockPrisma.cupom.findUnique.mockResolvedValue(mockCoupon);
 
       await expect(couponService.validate('TESTE10', 200)).rejects.toThrow(
-        new AppError('Valor mínimo de compra não atingido: R$ 300', HttpStatusCode.BAD_REQUEST)
+        new AppError('Valor mínimo de compra não atingido: R$ 300', HttpStatusCode.BAD_REQUEST),
       );
     });
   });
-}); 
+});

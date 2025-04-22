@@ -11,19 +11,19 @@ export class MetricsService {
   private static paymentSuccessCounter = new Counter({
     name: 'onlywave_payment_success_total',
     help: 'Total de pagamentos com status "approved"',
-    labelNames: ['payment_type', 'amount']
+    labelNames: ['payment_type', 'amount'],
   });
 
   private static paymentFailureCounter = new Counter({
     name: 'onlywave_payment_failure_total',
     help: 'Total de falhas de pagamento',
-    labelNames: ['error_type', 'payment_type']
+    labelNames: ['error_type', 'payment_type'],
   });
 
   private static paymentConversionGauge = new Gauge({
     name: 'onlywave_payment_conversion_rate',
     help: 'Razão entre preferências criadas e pagamentos aprovados',
-    labelNames: ['payment_type']
+    labelNames: ['payment_type'],
   });
 
   // Métricas de Webhook
@@ -31,82 +31,82 @@ export class MetricsService {
     name: 'onlywave_webhook_processing_duration_seconds',
     help: 'Tempo de processamento de webhooks',
     labelNames: ['payment_id', 'status'],
-    buckets: [0.1, 0.5, 1, 2, 5, 10]
+    buckets: [0.1, 0.5, 1, 2, 5, 10],
   });
 
   private static webhookRetryCounter = new Counter({
     name: 'onlywave_webhook_retry_total',
     help: 'Total de tentativas de retry por paymentId',
-    labelNames: ['payment_id', 'attempt']
+    labelNames: ['payment_id', 'attempt'],
   });
 
   private static webhookFailuresCounter = new Counter({
     name: 'onlywave_webhook_failures_total',
     help: 'Total de webhooks com status >= 400',
-    labelNames: ['payment_id', 'status_code']
+    labelNames: ['payment_id', 'status_code'],
   });
 
   private static webhookQueueSizeGauge = new Gauge({
     name: 'onlywave_webhook_queue_size',
-    help: 'Tamanho da fila de webhooks pendentes'
+    help: 'Tamanho da fila de webhooks pendentes',
   });
 
   // Métricas de Reprocessamento
   private static retryBackoffCounter = new Counter({
     name: 'onlywave_retry_backoff_total',
     help: 'Retentativas feitas em cada nível de backoff',
-    labelNames: ['level', 'operation']
+    labelNames: ['level', 'operation'],
   });
 
   private static retryIntervalHistogram = new Histogram({
     name: 'onlywave_retry_interval_seconds',
     help: 'Tempo entre tentativas de retry',
     labelNames: ['operation'],
-    buckets: [1, 5, 10, 30, 60, 120, 300]
+    buckets: [1, 5, 10, 30, 60, 120, 300],
   });
 
   private static dlqWebhooksCounter = new Counter({
     name: 'onlywave_dlq_webhooks_total',
     help: 'Webhooks enviados para dead-letter queue',
-    labelNames: ['payment_id', 'reason']
+    labelNames: ['payment_id', 'reason'],
   });
 
   // Métricas de Segurança
   private static authFailuresCounter = new Counter({
     name: 'onlywave_auth_failures_total',
     help: 'Total de falhas de autenticação',
-    labelNames: ['reason', 'country', 'ip']
+    labelNames: ['reason', 'country', 'ip'],
   });
 
   private static tokenInvalidCounter = new Counter({
     name: 'onlywave_token_invalid_total',
     help: 'Tokens inválidos recebidos',
-    labelNames: ['reason']
+    labelNames: ['reason'],
   });
 
   private static authAttemptsByIpCounter = new Counter({
     name: 'onlywave_auth_attempts_by_ip',
     help: 'Tentativas de autenticação por IP',
-    labelNames: ['ip', 'status', 'country']
+    labelNames: ['ip', 'status', 'country'],
   });
 
   private static unauthorizedRequestsCounter = new Counter({
     name: 'onlywave_unauthorized_requests_total',
     help: 'Total de requisições não autorizadas',
-    labelNames: ['endpoint', 'ip', 'country']
+    labelNames: ['endpoint', 'ip', 'country'],
   });
 
   // Métricas de Tendência
   private static weeklyErrorTrendGauge = new Gauge({
     name: 'onlywave_weekly_error_trend',
     help: 'Tendência semanal de erros',
-    labelNames: ['error_type']
+    labelNames: ['error_type'],
   });
 
   private static weeklyPaymentTrendGauge = new Gauge({
     name: 'onlywave_weekly_payment_trend',
     help: 'Tendência semanal de pagamentos',
-    labelNames: ['status']
+    labelNames: ['status'],
   });
 
   private constructor() {
@@ -134,7 +134,11 @@ export class MetricsService {
   }
 
   // Métodos para Webhooks
-  public static recordWebhookProcessingDuration(paymentId: string, status: string, duration: number): void {
+  public static recordWebhookProcessingDuration(
+    paymentId: string,
+    status: string,
+    duration: number,
+  ): void {
     this.webhookProcessingDuration.observe({ payment_id: paymentId, status }, duration);
   }
 
@@ -232,4 +236,4 @@ export class MetricsService {
     MetricsService.getInstance().incrementMetric('total_response_time', time);
     MetricsService.getInstance().incrementMetric('request_count');
   }
-} 
+}

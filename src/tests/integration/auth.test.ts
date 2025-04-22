@@ -21,13 +21,11 @@ describe('Autenticação (E2E)', () => {
       nome: 'Teste Integração',
       email: 'teste.integracao@email.com',
       senha: 'Senha123',
-      tipoUsuario: 'CLIENTE'
+      tipoUsuario: 'CLIENTE',
     };
 
     it('deve registrar um novo usuário', async () => {
-      const response = await request(app)
-        .post('/auth/register')
-        .send(dadosRegistro);
+      const response = await request(app).post('/auth/register').send(dadosRegistro);
 
       expect(response.status).toBe(201);
       expect(response.body).toHaveProperty('id');
@@ -35,9 +33,7 @@ describe('Autenticação (E2E)', () => {
     });
 
     it('deve retornar erro quando email já existe', async () => {
-      const response = await request(app)
-        .post('/auth/register')
-        .send(dadosRegistro);
+      const response = await request(app).post('/auth/register').send(dadosRegistro);
 
       expect(response.status).toBe(409);
     });
@@ -46,13 +42,11 @@ describe('Autenticação (E2E)', () => {
   describe('POST /auth/login', () => {
     const dadosLogin = {
       email: 'teste.integracao@email.com',
-      senha: 'Senha123'
+      senha: 'Senha123',
     };
 
     it('deve fazer login com sucesso', async () => {
-      const response = await request(app)
-        .post('/auth/login')
-        .send(dadosLogin);
+      const response = await request(app).post('/auth/login').send(dadosLogin);
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('token');
@@ -64,10 +58,10 @@ describe('Autenticação (E2E)', () => {
         .post('/auth/login')
         .send({
           ...dadosLogin,
-          senha: 'senha_errada'
+          senha: 'senha_errada',
         });
 
       expect(response.status).toBe(401);
     });
   });
-}); 
+});

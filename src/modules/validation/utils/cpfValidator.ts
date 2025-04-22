@@ -40,11 +40,11 @@ export function temDigitosRepetidos(cpf: string): boolean {
 export function calcularPrimeiroDigito(cpf: string): number {
   const cpfLimpo = limparCpf(cpf);
   let soma = 0;
-  
+
   for (let i = 0; i < 9; i++) {
     soma += parseInt(cpfLimpo.charAt(i)) * (10 - i);
   }
-  
+
   const resto = soma % 11;
   return resto < 2 ? 0 : 11 - resto;
 }
@@ -57,11 +57,11 @@ export function calcularPrimeiroDigito(cpf: string): number {
 export function calcularSegundoDigito(cpf: string): number {
   const cpfLimpo = limparCpf(cpf);
   let soma = 0;
-  
+
   for (let i = 0; i < 10; i++) {
     soma += parseInt(cpfLimpo.charAt(i)) * (11 - i);
   }
-  
+
   const resto = soma % 11;
   return resto < 2 ? 0 : 11 - resto;
 }
@@ -77,24 +77,24 @@ export function validarCpf(cpf: string): boolean {
   if (!temFormatoValido(cpfLimpo)) {
     return false;
   }
-  
+
   // Verifica se todos os dígitos são iguais
   if (temDigitosRepetidos(cpfLimpo)) {
     return false;
   }
-  
+
   // Calcula o primeiro dígito verificador
   const primeiroDigito = calcularPrimeiroDigito(cpfLimpo.substring(0, 9));
   if (primeiroDigito !== parseInt(cpfLimpo.charAt(9))) {
     return false;
   }
-  
+
   // Calcula o segundo dígito verificador
   const segundoDigito = calcularSegundoDigito(cpfLimpo.substring(0, 10));
   if (segundoDigito !== parseInt(cpfLimpo.charAt(10))) {
     return false;
   }
-  
+
   return true;
 }
 
@@ -105,10 +105,10 @@ export function validarCpf(cpf: string): boolean {
  */
 export function formatarCpf(cpf: string): string | null {
   const cpfLimpo = limparCpf(cpf);
-  
+
   if (!validarCpf(cpfLimpo)) {
     return null;
   }
-  
+
   return cpfLimpo.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-} 
+}

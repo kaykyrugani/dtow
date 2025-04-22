@@ -12,6 +12,6 @@ export const createMockTokenService = () => ({
   revokePasswordResetToken: vi.fn().mockResolvedValue(undefined),
   refreshAccessToken: vi.fn().mockResolvedValue({
     accessToken: 'mock-new-access-token',
-    refreshToken: 'mock-new-refresh-token'
-  })
-}); 
+    refreshToken: 'mock-new-refresh-token',
+  }),
+});

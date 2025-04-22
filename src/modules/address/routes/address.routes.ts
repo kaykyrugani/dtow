@@ -17,18 +17,10 @@ addressRouter.use(authMiddleware);
 addressRouter.get('/', addressController.listByUserId);
 
 // Criar novo endereço
-addressRouter.post(
-  '/',
-  validateSchema(createAddressSchema),
-  addressController.create
-);
+addressRouter.post('/', validateSchema(createAddressSchema), addressController.create);
 
 // Atualizar endereço
-addressRouter.put(
-  '/:id',
-  validateSchema(updateAddressSchema),
-  addressController.update
-);
+addressRouter.put('/:id', validateSchema(updateAddressSchema), addressController.update);
 
 // Deletar endereço
 addressRouter.delete('/:id', addressController.delete);
@@ -36,4 +28,4 @@ addressRouter.delete('/:id', addressController.delete);
 // Definir endereço como principal
 addressRouter.patch('/:id/primary', addressController.setPrimary);
 
-export { addressRouter }; 
+export { addressRouter };

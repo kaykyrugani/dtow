@@ -6,7 +6,7 @@ export const timeoutMiddleware = (timeout: number = 500) => {
       if (!res.headersSent) {
         res.status(408).json({
           status: 'error',
-          message: 'Timeout da requisição'
+          message: 'Timeout da requisição',
         });
       }
     }, timeout);
@@ -23,4 +23,4 @@ export const timeoutMiddleware = (timeout: number = 500) => {
 
     next();
   };
-}; 
+};

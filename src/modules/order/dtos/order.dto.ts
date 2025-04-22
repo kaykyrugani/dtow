@@ -72,4 +72,4 @@ export interface OrderResponseDTO {
     estado: string;
     cep: string;
   };
-} 
+}

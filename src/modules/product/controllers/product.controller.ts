@@ -50,7 +50,11 @@ export class ProductController {
     const { subcategoria } = req.params;
     const { page = 1, limit = 10 } = req.query;
     const productService = container.resolve(ProductService);
-    const products = await productService.findBySubcategory(subcategoria, Number(page), Number(limit));
+    const products = await productService.findBySubcategory(
+      subcategoria,
+      Number(page),
+      Number(limit),
+    );
     return res.status(HttpStatusCode.OK).json(products);
   }
 
@@ -61,4 +65,4 @@ export class ProductController {
     const products = await productService.searchProducts(String(q), Number(page), Number(limit));
     return res.status(HttpStatusCode.OK).json(products);
   }
-} 
+}

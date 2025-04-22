@@ -24,12 +24,12 @@ describe('CouponController', () => {
       user: { id: 1, tipo: 'ADMIN' },
       body: {},
       params: {},
-      query: {}
+      query: {},
     };
     mockResponse = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
-      send: vi.fn()
+      send: vi.fn(),
     };
     mockNext = vi.fn();
     mockCouponService = new CouponService(mockPrisma) as jest.Mocked<CouponService>;
@@ -42,7 +42,7 @@ describe('CouponController', () => {
     dataInicio: new Date().toISOString(),
     dataFim: new Date(Date.now() + 86400000).toISOString(),
     valorMinimoCompra: 100,
-    quantidadeMaxima: 100
+    quantidadeMaxima: 100,
   };
 
   describe('create', () => {
@@ -65,7 +65,7 @@ describe('CouponController', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatusCode.UNAUTHORIZED);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        message: 'Não autorizado'
+        message: 'Não autorizado',
       });
     });
   });
@@ -88,7 +88,7 @@ describe('CouponController', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatusCode.BAD_REQUEST);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        message: 'ID inválido'
+        message: 'ID inválido',
       });
     });
   });
@@ -99,20 +99,20 @@ describe('CouponController', () => {
         page: '1',
         limit: '10',
         sortBy: 'codigo',
-        sortOrder: 'desc'
+        sortOrder: 'desc',
       };
 
       const mockResult = {
         data: [
           { id: 1, ...mockCouponData, ativo: true },
-          { id: 2, ...mockCouponData, ativo: true }
+          { id: 2, ...mockCouponData, ativo: true },
         ],
         meta: {
           total: 2,
           page: 1,
           limit: 10,
-          totalPages: 1
-        }
+          totalPages: 1,
+        },
       };
 
       mockCouponService.findAll.mockResolvedValue(mockResult);
@@ -125,7 +125,7 @@ describe('CouponController', () => {
     it('deve passar erro para o próximo middleware quando ocorrer exceção', async () => {
       mockRequest.query = {
         page: '1',
-        limit: '10'
+        limit: '10',
       };
 
       const error = new Error('Erro ao listar cupons');
@@ -145,7 +145,7 @@ describe('CouponController', () => {
       const mockValidationResult = {
         valido: true,
         desconto: 20,
-        valorFinal: 180
+        valorFinal: 180,
       };
 
       mockCouponService.validate.mockResolvedValue(mockValidationResult);
@@ -163,8 +163,8 @@ describe('CouponController', () => {
 
       expect(mockResponse.status).toHaveBeenCalledWith(HttpStatusCode.BAD_REQUEST);
       expect(mockResponse.json).toHaveBeenCalledWith({
-        message: 'Valor total inválido'
+        message: 'Valor total inválido',
       });
     });
   });
-}); 
+});

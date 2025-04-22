@@ -8,7 +8,7 @@ const levels = {
   http: 3,
   verbose: 4,
   debug: 5,
-  silly: 6
+  silly: 6,
 };
 
 const colors = {
@@ -18,7 +18,7 @@ const colors = {
   http: 'magenta',
   verbose: 'cyan',
   debug: 'blue',
-  silly: 'gray'
+  silly: 'gray',
 };
 
 winston.addColors(colors);
@@ -27,23 +27,24 @@ const format = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
   winston.format.errors({ stack: true }),
   winston.format.splat(),
-  winston.format.json()
+  winston.format.json(),
 );
 
 const consoleFormat = winston.format.combine(
   winston.format.colorize({ all: true }),
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
   winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}${info.stack ? '\n' + info.stack : ''}`
-  )
+    info =>
+      `${info.timestamp} ${info.level}: ${info.message}${info.stack ? '\n' + info.stack : ''}`,
+  ),
 );
 
 const transports: winston.transport[] = [
   new winston.transports.Console({
     format: consoleFormat,
     level: config.NODE_ENV === 'production' ? 'info' : 'debug',
-    stderrLevels: ['error', 'warn']
-  })
+    stderrLevels: ['error', 'warn'],
+  }),
 ];
 
 // Adiciona transporte para arquivo em produção
@@ -55,14 +56,14 @@ if (config.NODE_ENV === 'production') {
       format,
       maxsize: 5242880, // 5MB
       maxFiles: 5,
-      stderrLevels: ['error']
+      stderrLevels: ['error'],
     } as winston.transports.FileTransportOptions),
     new winston.transports.File({
       filename: 'logs/combined.log',
       format,
       maxsize: 5242880, // 5MB
-      maxFiles: 5
-    } as winston.transports.FileTransportOptions)
+      maxFiles: 5,
+    } as winston.transports.FileTransportOptions),
   );
 }
 
@@ -71,7 +72,7 @@ export const logger = winston.createLogger({
   levels,
   format,
   transports,
-  exitOnError: false
+  exitOnError: false,
 });
 
 // Adiciona handlers para erros não tratados
@@ -100,5 +101,5 @@ export const log = {
   },
   debug: (message: string, meta?: Record<string, unknown>) => {
     logger.debug(message, { ...meta, timestamp: new Date().toISOString() });
-  }
-}; 
+  },
+};

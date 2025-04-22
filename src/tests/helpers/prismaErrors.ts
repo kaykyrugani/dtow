@@ -5,14 +5,11 @@ export type PrismaError = {
   clientVersion: string;
 };
 
-export function createPrismaError(
-  code: string,
-  meta?: Record<string, any>
-): PrismaError {
+export function createPrismaError(code: string, meta?: Record<string, any>): PrismaError {
   return {
     code,
     meta,
     message: `Prisma error ${code}`,
-    clientVersion: '4.0.0'
+    clientVersion: '4.0.0',
   };
-} 
+}

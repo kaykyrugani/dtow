@@ -13,13 +13,7 @@ export const validateSchema = (schema: AnyZodObject) => {
       });
       return next();
     } catch (error) {
-      return next(
-        new AppError(
-          'Dados inválidos',
-          HttpStatusCode.BAD_REQUEST,
-          'VALIDATION_ERROR'
-        )
-      );
+      return next(new AppError('Dados inválidos', HttpStatusCode.BAD_REQUEST, 'VALIDATION_ERROR'));
     }
   };
-}; 
+};

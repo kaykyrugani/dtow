@@ -1,81 +1,104 @@
-import { injectable, inject } from 'tsyringe';
-import * as Winston from 'winston';
+import { Injectable } from '@nestjs/common';
+import { createLogger, format, transports } from 'winston';
 import { LoggingInterface, LogContext } from '../interfaces/LoggingInterface';
 import { EnvConfig } from '../config/env';
 
-@injectable()
+@Injectable()
 export class LoggingService implements LoggingInterface {
-  private winston: Winston.Logger;
-  private temporaryLogger: Winston.Logger;
+  private static instance: LoggingService;
+  private logger;
 
-  constructor(@inject('Env') private env: EnvConfig) {
-    this.temporaryLogger = this.createTemporaryLogger();
-    this.winston = this.initializeWinston();
-  }
-
-  private createTemporaryLogger(): Winston.Logger {
-    return Winston.createLogger({
-      level: 'warn',
-      format: Winston.format.combine(
-        Winston.format.timestamp(),
-        Winston.format.simple()
-      ),
-      transports: [new Winston.transports.Console()]
+  private constructor() {
+    this.logger = createLogger({
+      format: format.combine(format.timestamp(), format.json()),
+      transports: [
+        new transports.Console(),
+        new transports.File({ filename: 'logs/error.log', level: 'error' }),
+        new transports.File({ filename: 'logs/combined.log' }),
+      ],
     });
   }
 
-  private initializeWinston(): Winston.Logger {
-    const transports: Winston.transport[] = [];
-    
+  public static getInstance(): LoggingService {
+    if (!LoggingService.instance) {
+      LoggingService.instance = new LoggingService();
+    }
+    return LoggingService.instance;
+  }
+
+  public info(message: string, meta?: any) {
+    this.logger.info(message, meta);
+  }
+
+  public error(message: string, meta?: any) {
+    this.logger.error(message, meta);
+  }
+
+  public warn(message: string, meta?: any) {
+    this.logger.warn(message, meta);
+  }
+
+  public debug(message: string, meta?: any) {
+    this.logger.debug(message, meta);
+  }
+
+  private createTemporaryLogger(): createLogger {
+    return createLogger({
+      level: 'warn',
+      format: format.combine(format.timestamp(), format.simple()),
+      transports: [new transports.Console()],
+    });
+  }
+
+  private initializeWinston(): createLogger {
+    const transports: transports[] = [];
+
     // Sempre adiciona log de erro em arquivo
     transports.push(
-      new Winston.transports.File({
+      new transports.File({
         filename: 'logs/error.log',
         level: 'error',
-        format: this.getLogFormat()
-      })
+        format: this.getLogFormat(),
+      }),
     );
 
     try {
       if (this.env.LOGTAIL_API_KEY) {
         // Aqui você adicionaria a configuração do Logtail
-        this.temporaryLogger.info('✅ Logtail configurado com sucesso');
+        this.logger.info('✅ Logtail configurado com sucesso');
       }
     } catch (error) {
-      this.temporaryLogger.warn('⚠️ Fallback para console logging:', {
-        reason: error instanceof Error ? error.message : 'Erro desconhecido'
+      this.logger.warn('⚠️ Fallback para console logging:', {
+        reason: error instanceof Error ? error.message : 'Erro desconhecido',
       });
     }
 
     // Em desenvolvimento, adiciona console colorido
     if (this.env.NODE_ENV !== 'production') {
       transports.push(
-        new Winston.transports.Console({
-          format: Winston.format.combine(
-            Winston.format.colorize(),
-            Winston.format.simple()
-          )
-        })
+        new transports.Console({
+          format: format.combine(format.colorize(), format.simple()),
+        }),
       );
     }
 
-    return Winston.createLogger({
+    return createLogger({
       level: this.env.NODE_ENV === 'production' ? 'info' : 'debug',
       format: this.getLogFormat(),
       transports,
-      exitOnError: false
+      exitOnError: false,
     });
   }
 
   private getLogFormat() {
-    return Winston.format.combine(
-      Winston.format.timestamp(),
-      Winston.format.json(),
-      Winston.format((info) => {
+    return format.combine(
+      format.timestamp(),
+      format.json(),
+      format(info => {
         info.environment = this.env.NODE_ENV;
         info.service = 'auth-service';
         return info;
-      })()
+      })(),
     );
   }
 
@@ -96,23 +119,23 @@ export class LoggingService implements LoggingInterface {
   }
 
   info(message: string, context?: LogContext): void {
-    this.winston.info(message, this.sanitizeContext(context));
+    this.logger.info(message, this.sanitizeContext(context));
   }
 
   warn(message: string, context?: LogContext): void {
-    this.winston.warn(message, this.sanitizeContext(context));
+    this.logger.warn(message, this.sanitizeContext(context));
   }
 
   error(message: string, context?: LogContext): void {
-    this.winston.error(message, this.sanitizeContext(context));
+    this.logger.error(message, this.sanitizeContext(context));
   }
 
   debug(message: string, context?: LogContext): void {
-    this.winston.debug(message, this.sanitizeContext(context));
+    this.logger.debug(message, this.sanitizeContext(context));
   }
 
   // Método para testes
-  getTransports(): Winston.transport[] {
-    return this.winston.transports;
+  getTransports(): transports[] {
+    return this.logger.transports;
   }
-} 
+}

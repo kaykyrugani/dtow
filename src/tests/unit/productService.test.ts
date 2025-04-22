@@ -25,14 +25,14 @@ describe('Product Service Tests', () => {
       const productData: CreateProductDTO = {
         nome: 'Produto Teste',
         descricao: 'Descrição do produto teste',
-        preco: 100.00,
+        preco: 100.0,
         categoria: 'ELETRONICOS',
         subcategoria: 'SMARTPHONES',
         marca: 'Marca Teste',
         estoque: 10,
         imagem: 'https://exemplo.com/imagem.jpg',
         imagens: '[]',
-        tamanhos: '[]'
+        tamanhos: '[]',
       };
 
       const mockResponse: ProductResponseDTO = {
@@ -41,7 +41,7 @@ describe('Product Service Tests', () => {
         desconto: null,
         ativo: true,
         criadoEm: new Date(),
-        atualizadoEm: new Date()
+        atualizadoEm: new Date(),
       };
 
       mockPrisma.produto.create.mockResolvedValue(mockResponse);
@@ -65,7 +65,7 @@ describe('Product Service Tests', () => {
         estoque: -1,
         imagem: 'url-invalida',
         imagens: '[]',
-        tamanhos: '[]'
+        tamanhos: '[]',
       };
 
       await expect(productService.create(invalidProductData)).rejects.toThrow(AppError);
@@ -78,7 +78,7 @@ describe('Product Service Tests', () => {
         id: 1,
         nome: 'Produto Teste',
         descricao: 'Descrição do produto teste',
-        preco: 100.00,
+        preco: 100.0,
         desconto: null,
         categoria: 'ELETRONICOS',
         subcategoria: 'SMARTPHONES',
@@ -89,7 +89,7 @@ describe('Product Service Tests', () => {
         tamanhos: '[]',
         ativo: true,
         criadoEm: new Date(),
-        atualizadoEm: new Date()
+        atualizadoEm: new Date(),
       };
 
       mockPrisma.produto.findUnique.mockResolvedValue(mockProduct);
@@ -113,14 +113,14 @@ describe('Product Service Tests', () => {
       const productId = 1;
       const updateData = {
         nome: 'Produto Atualizado',
-        preco: 150.00
+        preco: 150.0,
       };
 
       const mockProduct = {
         id: productId,
         nome: 'Produto Teste',
         descricao: 'Descrição do produto teste',
-        preco: 100.00,
+        preco: 100.0,
         desconto: null,
         categoria: 'ELETRONICOS',
         subcategoria: 'SMARTPHONES',
@@ -131,13 +131,13 @@ describe('Product Service Tests', () => {
         tamanhos: '[]',
         ativo: true,
         criadoEm: new Date(),
-        atualizadoEm: new Date()
+        atualizadoEm: new Date(),
       };
 
       mockPrisma.produto.findUnique.mockResolvedValue(mockProduct);
       mockPrisma.produto.update.mockResolvedValue({
         ...mockProduct,
-        ...updateData
+        ...updateData,
       });
 
       const result = await productService.update(productId, updateData);
@@ -150,14 +150,10 @@ describe('Product Service Tests', () => {
     it('deve lançar erro ao atualizar produto inexistente', async () => {
       mockPrisma.produto.findUnique.mockResolvedValue(null);
 
-      await expect(
-        productService.update(999, { nome: 'Teste' })
-      ).rejects.toThrow(
-        new AppError(
-          ERROR_CODES.NOT_FOUND,
-          HttpStatusCode.NOT_FOUND,
-          { message: 'Produto não encontrado' }
-        )
+      await expect(productService.update(999, { nome: 'Teste' })).rejects.toThrow(
+        new AppError(ERROR_CODES.NOT_FOUND, HttpStatusCode.NOT_FOUND, {
+          message: 'Produto não encontrado',
+        }),
       );
     });
 
@@ -165,20 +161,16 @@ describe('Product Service Tests', () => {
       const mockProduct = {
         id: 1,
         nome: 'Produto Teste',
-        preco: 100.00,
-        ativo: true
+        preco: 100.0,
+        ativo: true,
       };
 
       mockPrisma.produto.findUnique.mockResolvedValue(mockProduct);
 
-      await expect(
-        productService.update(1, { preco: -100 })
-      ).rejects.toThrow(
-        new AppError(
-          ERROR_CODES.VALIDATION_ERROR,
-          HttpStatusCode.BAD_REQUEST,
-          { message: 'Dados do produto inválidos' }
-        )
+      await expect(productService.update(1, { preco: -100 })).rejects.toThrow(
+        new AppError(ERROR_CODES.VALIDATION_ERROR, HttpStatusCode.BAD_REQUEST, {
+          message: 'Dados do produto inválidos',
+        }),
       );
     });
   });
@@ -188,7 +180,7 @@ describe('Product Service Tests', () => {
       const mockProduct = {
         id: 1,
         nome: 'Produto Teste',
-        ativo: true
+        ativo: true,
       };
 
       mockPrisma.produto.findUnique.mockResolvedValue(mockProduct);
@@ -201,11 +193,9 @@ describe('Product Service Tests', () => {
       mockPrisma.produto.findUnique.mockResolvedValue(null);
 
       await expect(productService.delete(999)).rejects.toThrow(
-        new AppError(
-          ERROR_CODES.NOT_FOUND,
-          HttpStatusCode.NOT_FOUND,
-          { message: 'Produto não encontrado' }
-        )
+        new AppError(ERROR_CODES.NOT_FOUND, HttpStatusCode.NOT_FOUND, {
+          message: 'Produto não encontrado',
+        }),
       );
     });
   });
@@ -217,7 +207,7 @@ describe('Product Service Tests', () => {
           id: 1,
           nome: 'Produto 1',
           descricao: 'Descrição 1',
-          preco: 100.00,
+          preco: 100.0,
           desconto: null,
           categoria: 'ELETRONICOS',
           subcategoria: 'SMARTPHONES',
@@ -228,13 +218,13 @@ describe('Product Service Tests', () => {
           tamanhos: '[]',
           ativo: true,
           criadoEm: new Date(),
-          atualizadoEm: new Date()
+          atualizadoEm: new Date(),
         },
         {
           id: 2,
           nome: 'Produto 2',
           descricao: 'Descrição 2',
-          preco: 200.00,
+          preco: 200.0,
           desconto: null,
           categoria: 'ELETRONICOS',
           subcategoria: 'SMARTPHONES',
@@ -245,8 +235,8 @@ describe('Product Service Tests', () => {
           tamanhos: '[]',
           ativo: true,
           criadoEm: new Date(),
-          atualizadoEm: new Date()
-        }
+          atualizadoEm: new Date(),
+        },
       ];
 
       mockPrisma.produto.findMany.mockResolvedValue(mockProducts);
@@ -265,9 +255,9 @@ describe('Product Service Tests', () => {
           nome: 'Smartphone',
           categoria: 'ELETRONICOS',
           subcategoria: 'SMARTPHONES',
-          preco: 1000.00,
-          ativo: true
-        }
+          preco: 1000.0,
+          ativo: true,
+        },
       ];
 
       mockPrisma.produto.findMany.mockResolvedValue(mockProducts);
@@ -287,7 +277,7 @@ describe('Product Service Tests', () => {
           id: 1,
           nome: 'iPhone 12',
           descricao: 'Smartphone Apple',
-          preco: 5000.00,
+          preco: 5000.0,
           desconto: null,
           categoria: 'ELETRONICOS',
           subcategoria: 'SMARTPHONES',
@@ -298,8 +288,8 @@ describe('Product Service Tests', () => {
           tamanhos: '[]',
           ativo: true,
           criadoEm: new Date(),
-          atualizadoEm: new Date()
-        }
+          atualizadoEm: new Date(),
+        },
       ];
 
       mockPrisma.produto.findMany.mockResolvedValue(mockProducts);
@@ -321,4 +311,4 @@ describe('Product Service Tests', () => {
       expect(result.total).toBe(0);
     });
   });
-}); 
+});

@@ -9,19 +9,19 @@ import { join } from 'path';
 vi.mock('nodemailer', () => ({
   default: {
     createTransport: vi.fn().mockReturnValue({
-      sendMail: vi.fn().mockResolvedValue({ messageId: 'test-message-id' })
-    })
-  }
+      sendMail: vi.fn().mockResolvedValue({ messageId: 'test-message-id' }),
+    }),
+  },
 }));
 
 // Mock do fs
 vi.mock('fs', () => ({
-  readFileSync: vi.fn().mockReturnValue('template content')
+  readFileSync: vi.fn().mockReturnValue('template content'),
 }));
 
 // Mock do path
 vi.mock('path', () => ({
-  join: vi.fn().mockReturnValue('template/path')
+  join: vi.fn().mockReturnValue('template/path'),
 }));
 
 describe('EmailService', () => {
@@ -31,10 +31,10 @@ describe('EmailService', () => {
   beforeEach(() => {
     // Limpa todos os mocks antes de cada teste
     vi.clearAllMocks();
-    
+
     // Cria uma nova instância do serviço
     emailService = new EmailService();
-    
+
     // Obtém a referência do transporter mockado
     mockTransporter = nodemailer.createTransport();
   });
@@ -44,7 +44,7 @@ describe('EmailService', () => {
       const template = {
         subject: 'Test Subject',
         html: '<p>Test HTML</p>',
-        text: 'Test Text'
+        text: 'Test Text',
       };
 
       const result = await emailService.sendEmail('test@example.com', template);
@@ -56,7 +56,7 @@ describe('EmailService', () => {
         to: 'test@example.com',
         subject: 'Test Subject',
         text: 'Test Text',
-        html: '<p>Test HTML</p>'
+        html: '<p>Test HTML</p>',
       });
     });
 
@@ -67,7 +67,7 @@ describe('EmailService', () => {
       const template = {
         subject: 'Test Subject',
         html: '<p>Test HTML</p>',
-        text: 'Test Text'
+        text: 'Test Text',
       };
 
       const result = await emailService.sendEmail('test@example.com', template);
@@ -85,16 +85,14 @@ describe('EmailService', () => {
         dataPedido: '2025-04-15',
         statusPedido: 'Confirmado',
         totalPedido: '299,90',
-        itens: [
-          { quantidade: 1, nome: 'Produto A', preco: '199,90' }
-        ],
-        linkAcompanhamento: 'https://onlywave.com.br/pedidos/123'
+        itens: [{ quantidade: 1, nome: 'Produto A', preco: '199,90' }],
+        linkAcompanhamento: 'https://onlywave.com.br/pedidos/123',
       };
 
       const result = await emailService.sendTemplateEmail(
         'test@example.com',
         'ORDER_CONFIRMATION',
-        templateData
+        templateData,
       );
 
       expect(result.success).toBe(true);
@@ -102,8 +100,8 @@ describe('EmailService', () => {
       expect(mockTransporter.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'test@example.com',
-          subject: 'Pedido Confirmado - OnlyWave'
-        })
+          subject: 'Pedido Confirmado - OnlyWave',
+        }),
       );
     });
 
@@ -116,7 +114,7 @@ describe('EmailService', () => {
       const result = await emailService.sendTemplateEmail(
         'test@example.com',
         'INVALID_TEMPLATE',
-        {}
+        {},
       );
 
       expect(result.success).toBe(false);
@@ -129,7 +127,7 @@ describe('EmailService', () => {
       const template = {
         subject: 'Test Subject',
         html: '<p>Test <br/>HTML</p>',
-        text: ''
+        text: '',
       };
 
       const result = await emailService['renderTemplate']('TEST', {});
@@ -137,4 +135,4 @@ describe('EmailService', () => {
       expect(result.text).toBe('Test HTML');
     });
   });
-}); 
+});

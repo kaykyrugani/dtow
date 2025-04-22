@@ -26,4 +26,4 @@ export const validarCPF = (cpf: string): boolean => {
 export const validarSenha = (senha: string): boolean => {
   const regexSenha = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
   return regexSenha.test(senha);
-}; 
+};

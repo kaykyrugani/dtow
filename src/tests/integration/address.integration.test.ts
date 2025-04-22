@@ -24,9 +24,7 @@ describe('Address Integration Tests', () => {
 
   describe('GET /address/search/:cep', () => {
     it('deve retornar dados do endereço quando o CEP é válido', async () => {
-      const response = await request(app)
-        .get('/address/search/01001000')
-        .expect(200);
+      const response = await request(app).get('/address/search/01001000').expect(200);
 
       expect(response.body).toHaveProperty('cep', '01001000');
       expect(response.body).toHaveProperty('logradouro');
@@ -36,9 +34,7 @@ describe('Address Integration Tests', () => {
     });
 
     it('deve retornar erro quando o CEP é inválido', async () => {
-      const response = await request(app)
-        .get('/address/search/00000000')
-        .expect(404);
+      const response = await request(app).get('/address/search/00000000').expect(404);
 
       expect(response.body).toHaveProperty('error');
     });
@@ -263,4 +259,4 @@ describe('Address Integration Tests', () => {
       expect(response.body).toHaveProperty('error');
     });
   });
-}); 
+});

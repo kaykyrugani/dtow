@@ -20,4 +20,4 @@ export interface PaginatedResult<T> {
 export interface QueryOptions<T = any> extends PaginationParams<T> {
   select?: Record<string, boolean>;
   include?: Record<string, boolean | QueryOptions>;
-} 
+}

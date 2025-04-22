@@ -12,4 +12,4 @@ export const HttpStatusCode = {
   INTERNAL_SERVER_ERROR: 500,
   BAD_GATEWAY: 502,
   SERVICE_UNAVAILABLE: 503,
-} as const; 
+} as const;

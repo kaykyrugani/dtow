@@ -52,7 +52,7 @@ describe('AuthService', () => {
       senha: 'senha_valida_123',
       nome: 'Test User',
       cpf: '12345678901',
-      tipoUsuario: TipoUsuario.ADMIN
+      tipoUsuario: TipoUsuario.ADMIN,
     };
 
     it('deve criar um usuário com sucesso', async () => {
@@ -68,34 +68,26 @@ describe('AuthService', () => {
     it('deve lançar erro quando email já existe', async () => {
       mockPrisma.usuario.create.mockRejectedValue({
         code: ERROR_CODES.DUPLICATE_ENTRY,
-        meta: { target: ['email'] }
+        meta: { target: ['email'] },
       });
 
-      await expectAppError(
-        authService.cadastrar(testUserData),
-        'DUPLICATE_ENTRY',
-        409
-      );
+      await expectAppError(authService.cadastrar(testUserData), 'DUPLICATE_ENTRY', 409);
     });
 
     it('deve lançar erro quando senha é muito curta', async () => {
       const invalidData = { ...testUserData, senha: '123' };
 
-      await expectAppError(
-        authService.cadastrar(invalidData),
-        'VALIDATION_ERROR',
-        400
-      );
+      await expectAppError(authService.cadastrar(invalidData), 'VALIDATION_ERROR', 400);
     });
 
     it('deve lançar erro ao tentar cadastrar com tipo de usuário inválido', async () => {
       await expectAppError(
         authService.cadastrar({
           ...testUserData,
-          tipoUsuario: 'invalid' as any
+          tipoUsuario: 'invalid' as any,
         }),
         'VALIDATION_ERROR',
-        400
+        400,
       );
     });
   });
@@ -117,11 +109,7 @@ describe('AuthService', () => {
     it('deve lançar erro quando usuário não existe', async () => {
       mockPrisma.usuario.findUnique.mockResolvedValue(null);
 
-      await expectAppError(
-        authService.login(testLoginData),
-        'INVALID_CREDENTIALS',
-        401
-      );
+      await expectAppError(authService.login(testLoginData), 'INVALID_CREDENTIALS', 401);
     });
 
     it('deve lançar erro quando senha está incorreta', async () => {
@@ -130,10 +118,10 @@ describe('AuthService', () => {
       await expectAppError(
         authService.login({
           ...testLoginData,
-          senha: 'senha_incorreta'
+          senha: 'senha_incorreta',
         }),
         'INVALID_CREDENTIALS',
-        401
+        401,
       );
     });
 
@@ -141,10 +129,10 @@ describe('AuthService', () => {
       await expectAppError(
         authService.login({
           ...testLoginData,
-          senha: ''
+          senha: '',
         }),
         'VALIDATION_ERROR',
-        400
+        400,
       );
     });
 
@@ -152,10 +140,10 @@ describe('AuthService', () => {
       await expectAppError(
         authService.login({
           ...testLoginData,
-          email: 'invalid-email'
+          email: 'invalid-email',
         }),
         'VALIDATION_ERROR',
-        400
+        400,
       );
     });
   });
@@ -171,7 +159,7 @@ describe('AuthService', () => {
         token: 'mock_token',
         userId: mockUser.id,
         expiresAt: new Date(),
-        used: false
+        used: false,
       });
 
       const result = await authService.gerarTokenRecuperacao(testEmail);
@@ -191,7 +179,9 @@ describe('AuthService', () => {
       expect(result).toBeDefined();
       expect(result.status).toBe('info');
       if (result.status === 'info') {
-        expect(result.mensagem).toBe('Se o email existir, você receberá as instruções de recuperação');
+        expect(result.mensagem).toBe(
+          'Se o email existir, você receberá as instruções de recuperação',
+        );
       }
     });
 
@@ -199,7 +189,7 @@ describe('AuthService', () => {
       await expectAppError(
         authService.gerarTokenRecuperacao('invalid-email'),
         'VALIDATION_ERROR',
-        400
+        400,
       );
     });
   });
@@ -215,7 +205,7 @@ describe('AuthService', () => {
         token: testToken,
         userId: mockUser.id,
         expiresAt: new Date(Date.now() + 3600000),
-        used: false
+        used: false,
       });
 
       mockPrisma.usuario.update.mockResolvedValue(mockUser);
@@ -231,7 +221,7 @@ describe('AuthService', () => {
       await expectAppError(
         authService.alterarSenha(testToken, testNovaSenha),
         'TOKEN_INVALID',
-        400
+        400,
       );
     });
 
@@ -241,22 +231,18 @@ describe('AuthService', () => {
         token: testToken,
         userId: mockUser.id,
         expiresAt: new Date(Date.now() - 3600000),
-        used: false
+        used: false,
       });
 
       await expectAppError(
         authService.alterarSenha(testToken, testNovaSenha),
         'TOKEN_EXPIRED',
-        400
+        400,
       );
     });
 
     it('deve lançar erro quando senha é muito curta', async () => {
-      await expectAppError(
-        authService.alterarSenha(testToken, '123'),
-        'VALIDATION_ERROR',
-        400
-      );
+      await expectAppError(authService.alterarSenha(testToken, '123'), 'VALIDATION_ERROR', 400);
     });
   });
-}); 
+});

@@ -1,18 +1,19 @@
 import { describe, it, expect, beforeAll, test, vi, beforeEach } from 'vitest';
 import request from 'supertest';
 import express, { Express } from 'express';
-import { applySecurityMiddleware, securityHeaders, allowedMethods, timeout } from '../middlewares/security';
+import {
+  applySecurityMiddleware,
+  securityHeaders,
+  allowedMethods,
+  timeout,
+} from '../middlewares/security';
 import logger from '../utils/logger';
 import { timeoutMiddleware, sanitizeData } from '../middlewares/securityMiddleware';
 import { Request, Response, NextFunction } from 'express';
 import { securityMiddleware, sanitizeObject } from '../middlewares/security.middleware';
 import { ErrorMessages } from '../utils/errorConstants';
 import { REQUEST_TIMEOUT } from '../config/constants';
-import {
-  createMockRequest,
-  createMockResponse,
-  mockNext
-} from './setup';
+import { createMockRequest, createMockResponse, mockNext } from './setup';
 
 const app: Express = express();
 
@@ -20,7 +21,7 @@ const app: Express = express();
 beforeAll(() => {
   // Aplicar middlewares de segurança
   applySecurityMiddleware(app);
-  
+
   // Aplicar middlewares individualmente para testes específicos
   app.use('/test', securityHeaders);
   app.use('/test', allowedMethods);
@@ -55,14 +56,14 @@ describe('Middlewares de Segurança', () => {
     req = {
       method: 'GET',
       path: '/test',
-      headers: {}
+      headers: {},
     };
 
     res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn(),
       on: vi.fn(),
-      headersSent: false
+      headersSent: false,
     };
 
     next = vi.fn();
@@ -70,7 +71,7 @@ describe('Middlewares de Segurança', () => {
 
   it('deve incluir headers de segurança básicos', async () => {
     const res = await request(app).get('/test');
-    
+
     expect(res.headers['x-dns-prefetch-control']).toBe('off');
     expect(res.headers['x-frame-options']).toBe('DENY');
     expect(res.headers['strict-transport-security']).toBeDefined();
@@ -86,33 +87,33 @@ describe('Middlewares de Segurança', () => {
 
   test('deve retornar timeout após 30 segundos', async () => {
     vi.useFakeTimers();
-    
+
     timeoutMiddleware(req as Request, res as Response, next);
-    
+
     expect(next).toHaveBeenCalled();
-    
+
     vi.advanceTimersByTime(31000);
-    
+
     expect(res.status).toHaveBeenCalledWith(408);
     expect(res.json).toHaveBeenCalledWith({
-      error: 'Timeout da requisição'
+      error: 'Timeout da requisição',
     });
-    
+
     vi.useRealTimers();
   });
 
   test('não deve retornar timeout se a resposta já foi enviada', async () => {
     vi.useFakeTimers();
-    
+
     res.headersSent = true;
-    
+
     timeoutMiddleware(req as Request, res as Response, next);
-    
+
     vi.advanceTimersByTime(31000);
-    
+
     expect(res.status).not.toHaveBeenCalled();
     expect(res.json).not.toHaveBeenCalled();
-    
+
     vi.useRealTimers();
   });
 
@@ -135,7 +136,7 @@ describe('Sanitização de Dados', () => {
       cpf: '123.456.789-00',
       authorization: 'Bearer token',
       email: 'test@example.com',
-      nome: 'Test User'
+      nome: 'Test User',
     };
 
     const sanitized = sanitizeData(data);
@@ -146,28 +147,34 @@ describe('Sanitização de Dados', () => {
       cpf: '[REDACTED]',
       authorization: '[REDACTED]',
       email: 'test@example.com',
-      nome: 'Test User'
+      nome: 'Test User',
     });
   });
 
   test('deve redactar arrays de objetos', () => {
-    const data = [{
-      senha: 'secret123',
-      nome: 'Test User'
-    }, {
-      senha: 'secret456',
-      nome: 'Another User'
-    }];
+    const data = [
+      {
+        senha: 'secret123',
+        nome: 'Test User',
+      },
+      {
+        senha: 'secret456',
+        nome: 'Another User',
+      },
+    ];
 
     const sanitized = sanitizeData(data);
 
-    expect(sanitized).toEqual([{
-      senha: '[REDACTED]',
-      nome: 'Test User'
-    }, {
-      senha: '[REDACTED]',
-      nome: 'Another User'
-    }]);
+    expect(sanitized).toEqual([
+      {
+        senha: '[REDACTED]',
+        nome: 'Test User',
+      },
+      {
+        senha: '[REDACTED]',
+        nome: 'Another User',
+      },
+    ]);
   });
 
   test('deve redactar objetos aninhados', () => {
@@ -176,10 +183,10 @@ describe('Sanitização de Dados', () => {
         senha: 'secret123',
         token: 'sensitive_token',
         profile: {
-          cpf: '123.456.789-00'
-        }
+          cpf: '123.456.789-00',
+        },
       },
-      public: 'data'
+      public: 'data',
     };
 
     const sanitized = sanitizeData(data);
@@ -189,10 +196,10 @@ describe('Sanitização de Dados', () => {
         senha: '[REDACTED]',
         token: '[REDACTED]',
         profile: {
-          cpf: '[REDACTED]'
-        }
+          cpf: '[REDACTED]',
+        },
       },
-      public: 'data'
+      public: 'data',
     });
   });
 });
@@ -202,12 +209,12 @@ describe('Logger', () => {
     const sensitiveData = {
       password: 'secret123',
       token: 'sensitive_token',
-      data: 'public_data'
+      data: 'public_data',
     };
 
     const loggedData = logger.info(sensitiveData);
     const logString = JSON.stringify(loggedData);
-    
+
     expect(logString).not.toContain('secret123');
     expect(logString).not.toContain('sensitive_token');
     expect(logString).toContain('public_data');
@@ -237,8 +244,8 @@ describe('SecurityMiddleware', () => {
 
       expect(mockNext).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: ErrorMessages.TIMEOUT_ERROR
-        })
+          message: ErrorMessages.TIMEOUT_ERROR,
+        }),
       );
     });
 
@@ -269,9 +276,9 @@ describe('SecurityMiddleware', () => {
           password: 'secret123',
           nested: {
             token: 'sensitive-token',
-            data: 'safe-data'
-          }
-        }
+            data: 'safe-data',
+          },
+        },
       });
 
       securityMiddleware.sanitizeData(req, res, mockNext);
@@ -281,8 +288,8 @@ describe('SecurityMiddleware', () => {
         password: '[REDACTED]',
         nested: {
           token: '[REDACTED]',
-          data: 'safe-data'
-        }
+          data: 'safe-data',
+        },
       });
     });
 
@@ -291,16 +298,16 @@ describe('SecurityMiddleware', () => {
         body: {
           users: [
             { name: 'User 1', password: 'pass1' },
-            { name: 'User 2', password: 'pass2' }
-          ]
-        }
+            { name: 'User 2', password: 'pass2' },
+          ],
+        },
       });
 
       securityMiddleware.sanitizeData(req, res, mockNext);
 
       expect(req.body.users).toEqual([
         { name: 'User 1', password: '[REDACTED]' },
-        { name: 'User 2', password: '[REDACTED]' }
+        { name: 'User 2', password: '[REDACTED]' },
       ]);
     });
   });
@@ -320,11 +327,11 @@ describe('SecurityMiddleware', () => {
 
       expect(res.setHeader).toHaveBeenCalledWith(
         'Access-Control-Allow-Methods',
-        expect.stringContaining('GET')
+        expect.stringContaining('GET'),
       );
       expect(res.setHeader).toHaveBeenCalledWith(
         'Access-Control-Allow-Headers',
-        expect.stringContaining('Authorization')
+        expect.stringContaining('Authorization'),
       );
     });
   });
@@ -341,7 +348,7 @@ describe('SecurityMiddleware', () => {
         name: 'Test',
         password: 'secret',
         token: '12345',
-        data: { key: 'sensitive' }
+        data: { key: 'sensitive' },
       };
 
       const output = sanitizeObject(input);
@@ -350,14 +357,14 @@ describe('SecurityMiddleware', () => {
         name: 'Test',
         password: '[REDACTED]',
         token: '[REDACTED]',
-        data: { key: '[REDACTED]' }
+        data: { key: '[REDACTED]' },
       });
     });
 
     it('deve sanitizar arrays de objetos', () => {
       const input = [
         { name: 'User 1', password: 'pass1' },
-        { name: 'User 2', token: 'token2' }
+        { name: 'User 2', token: 'token2' },
       ];
 
       const output = sanitizeObject({ items: input });
@@ -365,9 +372,9 @@ describe('SecurityMiddleware', () => {
       expect(output).toEqual({
         items: [
           { name: 'User 1', password: '[REDACTED]' },
-          { name: 'User 2', token: '[REDACTED]' }
-        ]
+          { name: 'User 2', token: '[REDACTED]' },
+        ],
       });
     });
   });
-}); 
+});

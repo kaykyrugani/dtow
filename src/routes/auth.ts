@@ -1,7 +1,12 @@
-import { Router } from 'express'
-import { AuthController } from '../controllers/authController'
-import { validarSchema } from '../middlewares/validator'
-import { cadastroSchema, loginSchema, recuperacaoSenhaSchema, alteracaoSenhaSchema } from '../schemas/authSchemas'
+import { Router } from 'express';
+import { AuthController } from '../controllers/authController';
+import { validarSchema } from '../middlewares/validator';
+import {
+  cadastroSchema,
+  loginSchema,
+  recuperacaoSenhaSchema,
+  alteracaoSenhaSchema,
+} from '../schemas/authSchemas';
 
 /**
  * @swagger
@@ -10,7 +15,7 @@ import { cadastroSchema, loginSchema, recuperacaoSenhaSchema, alteracaoSenhaSche
  *   description: Endpoints para autenticação de usuários
  */
 
-const authRouter = Router()
+const authRouter = Router();
 
 /**
  * @swagger
@@ -66,7 +71,7 @@ const authRouter = Router()
  *       409:
  *         description: Email ou CPF já cadastrado
  */
-authRouter.post('/cadastro', validarSchema(cadastroSchema), AuthController.cadastrar)
+authRouter.post('/cadastro', validarSchema(cadastroSchema), AuthController.cadastrar);
 
 /**
  * @swagger
@@ -110,7 +115,7 @@ authRouter.post('/cadastro', validarSchema(cadastroSchema), AuthController.cadas
  *       401:
  *         description: Credenciais inválidas
  */
-authRouter.post('/login', validarSchema(loginSchema), AuthController.login)
+authRouter.post('/login', validarSchema(loginSchema), AuthController.login);
 
 /**
  * @swagger
@@ -141,7 +146,11 @@ authRouter.post('/login', validarSchema(loginSchema), AuthController.login)
  *       500:
  *         description: Erro interno do servidor
  */
-authRouter.post('/recuperar-senha', validarSchema(recuperacaoSenhaSchema), AuthController.recuperarSenha)
+authRouter.post(
+  '/recuperar-senha',
+  validarSchema(recuperacaoSenhaSchema),
+  AuthController.recuperarSenha,
+);
 
 /**
  * @swagger
@@ -175,6 +184,6 @@ authRouter.post('/recuperar-senha', validarSchema(recuperacaoSenhaSchema), AuthC
  *       500:
  *         description: Erro interno do servidor
  */
-authRouter.post('/alterar-senha', validarSchema(alteracaoSenhaSchema), AuthController.alterarSenha)
+authRouter.post('/alterar-senha', validarSchema(alteracaoSenhaSchema), AuthController.alterarSenha);
 
-export { authRouter } 
+export { authRouter };

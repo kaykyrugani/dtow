@@ -42,7 +42,7 @@ export class ProductService {
     MetricsService.incrementCacheMiss(this.SERVICE_NAME, 'findById');
     logger.debug('Cache miss para produto', { productId: id });
     const product = await this.productRepository.findById(id);
-    
+
     if (!product) {
       logger.warn('Produto não encontrado', { productId: id });
       throw new AppError('Product not found', 404);
@@ -54,10 +54,15 @@ export class ProductService {
     return product;
   }
 
-  async findAll(page: number = 1, limit: number = 10): Promise<{ produtos: ProductResponseDTO[]; total: number }> {
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ produtos: ProductResponseDTO[]; total: number }> {
     const start = Date.now();
     const cacheKey = this.cacheService.generateKey(this.CACHE_PREFIX, { page, limit });
-    const cached = await this.cacheService.get<{ produtos: ProductResponseDTO[]; total: number }>(cacheKey);
+    const cached = await this.cacheService.get<{ produtos: ProductResponseDTO[]; total: number }>(
+      cacheKey,
+    );
 
     if (cached) {
       MetricsService.incrementCacheHit(this.SERVICE_NAME, 'findAll');
@@ -87,10 +92,16 @@ export class ProductService {
     logger.info('Produto deletado com sucesso', { productId: id });
   }
 
-  async findByCategory(categoria: string, page: number = 1, limit: number = 10): Promise<{ produtos: ProductResponseDTO[]; total: number }> {
+  async findByCategory(
+    categoria: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ produtos: ProductResponseDTO[]; total: number }> {
     const start = Date.now();
     const cacheKey = this.cacheService.generateKey(this.CACHE_PREFIX, { categoria, page, limit });
-    const cached = await this.cacheService.get<{ produtos: ProductResponseDTO[]; total: number }>(cacheKey);
+    const cached = await this.cacheService.get<{ produtos: ProductResponseDTO[]; total: number }>(
+      cacheKey,
+    );
 
     if (cached) {
       MetricsService.incrementCacheHit(this.SERVICE_NAME, 'findByCategory');
@@ -107,10 +118,20 @@ export class ProductService {
     return { produtos, total };
   }
 
-  async findBySubcategory(subcategoria: string, page: number = 1, limit: number = 10): Promise<{ produtos: ProductResponseDTO[]; total: number }> {
+  async findBySubcategory(
+    subcategoria: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ produtos: ProductResponseDTO[]; total: number }> {
     const start = Date.now();
-    const cacheKey = this.cacheService.generateKey(this.CACHE_PREFIX, { subcategoria, page, limit });
-    const cached = await this.cacheService.get<{ produtos: ProductResponseDTO[]; total: number }>(cacheKey);
+    const cacheKey = this.cacheService.generateKey(this.CACHE_PREFIX, {
+      subcategoria,
+      page,
+      limit,
+    });
+    const cached = await this.cacheService.get<{ produtos: ProductResponseDTO[]; total: number }>(
+      cacheKey,
+    );
 
     if (cached) {
       MetricsService.incrementCacheHit(this.SERVICE_NAME, 'findBySubcategory');
@@ -120,14 +141,26 @@ export class ProductService {
 
     MetricsService.incrementCacheMiss(this.SERVICE_NAME, 'findBySubcategory');
     logger.debug('Cache miss para produtos por subcategoria', { subcategoria, page, limit });
-    const { produtos, total } = await this.productRepository.findBySubcategory(subcategoria, page, limit);
+    const { produtos, total } = await this.productRepository.findBySubcategory(
+      subcategoria,
+      page,
+      limit,
+    );
     await this.cacheService.set(cacheKey, { produtos, total }, this.CACHE_TTL);
-    MetricsService.observeCacheOperation(this.SERVICE_NAME, 'findBySubcategory', Date.now() - start);
+    MetricsService.observeCacheOperation(
+      this.SERVICE_NAME,
+      'findBySubcategory',
+      Date.now() - start,
+    );
     logger.debug('Produtos por subcategoria armazenados em cache', { subcategoria, page, limit });
     return { produtos, total };
   }
 
-  async searchProducts(query: string, page: number = 1, limit: number = 10): Promise<{ produtos: ProductResponseDTO[]; total: number }> {
+  async searchProducts(
+    query: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ produtos: ProductResponseDTO[]; total: number }> {
     const { produtos, total } = await this.productRepository.searchProducts(query, page, limit);
     return { produtos, total };
   }
@@ -136,4 +169,4 @@ export class ProductService {
     await this.cacheService.clear();
     logger.debug('Cache invalidado para produtos');
   }
-} 
+}

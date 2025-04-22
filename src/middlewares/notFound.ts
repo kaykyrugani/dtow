@@ -5,4 +5,4 @@ export const notFoundMiddleware = (req: Request, res: Response) => {
     status: 'error',
     message: `Rota ${req.method} ${req.path} não encontrada`,
   });
-}; 
+};

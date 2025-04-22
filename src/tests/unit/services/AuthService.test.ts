@@ -10,14 +10,14 @@ import jwt from 'jsonwebtoken';
 vi.mock('bcrypt', () => ({
   default: {
     hash: vi.fn().mockResolvedValue('hashed_password'),
-    compare: vi.fn().mockResolvedValue(true)
-  }
+    compare: vi.fn().mockResolvedValue(true),
+  },
 }));
 
 vi.mock('jsonwebtoken', () => ({
   default: {
-    sign: vi.fn().mockReturnValue('fake_token')
-  }
+    sign: vi.fn().mockReturnValue('fake_token'),
+  },
 }));
 
 describe('AuthService', () => {
@@ -35,7 +35,7 @@ describe('AuthService', () => {
       nome: 'Teste',
       email: 'teste@email.com',
       senha: 'Senha123',
-      tipoUsuario: 'USER' as const
+      tipoUsuario: 'USER' as const,
     };
 
     it('deve cadastrar um novo usuário com sucesso', async () => {
@@ -43,7 +43,7 @@ describe('AuthService', () => {
         id: 1,
         nome: dadosRegistro.nome,
         email: dadosRegistro.email,
-        tipoUsuario: dadosRegistro.tipoUsuario
+        tipoUsuario: dadosRegistro.tipoUsuario,
       };
 
       usuarioRepositoryMock.create.mockResolvedValue(usuarioMock);
@@ -57,27 +57,23 @@ describe('AuthService', () => {
     it('deve lançar erro quando dados são inválidos', async () => {
       const dadosInvalidos = {
         ...dadosRegistro,
-        email: 'email_invalido'
+        email: 'email_invalido',
       };
 
-      await expect(authService.cadastrar(dadosInvalidos))
-        .rejects
-        .toThrow(AppError);
+      await expect(authService.cadastrar(dadosInvalidos)).rejects.toThrow(AppError);
     });
 
     it('deve lançar erro quando email já existe', async () => {
       usuarioRepositoryMock.create.mockRejectedValue(new AppError('EMAIL_DUPLICATED', 409));
 
-      await expect(authService.cadastrar(dadosRegistro))
-        .rejects
-        .toThrow(AppError);
+      await expect(authService.cadastrar(dadosRegistro)).rejects.toThrow(AppError);
     });
   });
 
   describe('login', () => {
     const dadosLogin = {
       email: 'teste@email.com',
-      senha: 'Senha123'
+      senha: 'Senha123',
     };
 
     const usuarioMock = {
@@ -85,7 +81,7 @@ describe('AuthService', () => {
       nome: 'Teste',
       email: dadosLogin.email,
       senha: 'hashed_password',
-      tipoUsuario: 'USER'
+      tipoUsuario: 'USER',
     };
 
     it('deve fazer login com sucesso', async () => {
@@ -98,27 +94,23 @@ describe('AuthService', () => {
           id: usuarioMock.id,
           nome: usuarioMock.nome,
           email: usuarioMock.email,
-          tipoUsuario: usuarioMock.tipoUsuario
+          tipoUsuario: usuarioMock.tipoUsuario,
         },
-        token: 'fake_token'
+        token: 'fake_token',
       });
     });
 
     it('deve lançar erro quando email não existe', async () => {
       usuarioRepositoryMock.findByEmailWithPassword.mockResolvedValue(null);
 
-      await expect(authService.login(dadosLogin))
-        .rejects
-        .toThrow(AppError);
+      await expect(authService.login(dadosLogin)).rejects.toThrow(AppError);
     });
 
     it('deve lançar erro quando senha está incorreta', async () => {
       usuarioRepositoryMock.findByEmailWithPassword.mockResolvedValue(usuarioMock);
       vi.mocked(bcrypt.compare).mockResolvedValueOnce(false);
 
-      await expect(authService.login(dadosLogin))
-        .rejects
-        .toThrow(AppError);
+      await expect(authService.login(dadosLogin)).rejects.toThrow(AppError);
     });
   });
-}); 
+});

@@ -15,7 +15,7 @@ describe('ErrorHandler', () => {
     req = {};
     res = {
       status: vi.fn().mockReturnThis(),
-      json: vi.fn()
+      json: vi.fn(),
     };
     next = vi.fn();
   });
@@ -32,7 +32,7 @@ describe('ErrorHandler', () => {
     expect(res.json).toHaveBeenCalledWith({
       status: 'error',
       message: 'Erro customizado',
-      details: { field: 'test' }
+      details: { field: 'test' },
     });
   });
 
@@ -47,7 +47,7 @@ describe('ErrorHandler', () => {
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({
       status: 'error',
-      message: 'Token expirado'
+      message: 'Token expirado',
     });
   });
 
@@ -62,7 +62,7 @@ describe('ErrorHandler', () => {
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json).toHaveBeenCalledWith({
       status: 'error',
-      message: 'Token inválido'
+      message: 'Token inválido',
     });
   });
 
@@ -71,7 +71,7 @@ describe('ErrorHandler', () => {
     const error = new PrismaClientKnownRequestError('Unique constraint failed', {
       code: 'P2002',
       clientVersion: '4.0.0',
-      meta: { target: ['email'] }
+      meta: { target: ['email'] },
     });
 
     // Act
@@ -82,7 +82,7 @@ describe('ErrorHandler', () => {
     expect(res.json).toHaveBeenCalledWith({
       status: 'error',
       message: 'Registro duplicado',
-      field: ['email']
+      field: ['email'],
     });
   });
 
@@ -91,7 +91,7 @@ describe('ErrorHandler', () => {
     const error = new PrismaClientKnownRequestError('Record not found', {
       code: 'P2025',
       clientVersion: '4.0.0',
-      meta: {}
+      meta: {},
     });
 
     // Act
@@ -101,19 +101,21 @@ describe('ErrorHandler', () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith({
       status: 'error',
-      message: 'Registro não encontrado'
+      message: 'Registro não encontrado',
     });
   });
 
   it('deve tratar ZodError corretamente', () => {
     // Arrange
-    const error = new ZodError([{
-      code: 'invalid_type',
-      expected: 'string',
-      received: 'undefined',
-      path: ['email'],
-      message: 'Email é obrigatório'
-    }]);
+    const error = new ZodError([
+      {
+        code: 'invalid_type',
+        expected: 'string',
+        received: 'undefined',
+        path: ['email'],
+        message: 'Email é obrigatório',
+      },
+    ]);
 
     // Act
     errorHandler(error, req as Request, res as Response, next);
@@ -123,10 +125,12 @@ describe('ErrorHandler', () => {
     expect(res.json).toHaveBeenCalledWith({
       status: 'error',
       message: 'Erro de validação',
-      errors: [{
-        field: 'email',
-        message: 'Email é obrigatório'
-      }]
+      errors: [
+        {
+          field: 'email',
+          message: 'Email é obrigatório',
+        },
+      ],
     });
   });
 
@@ -142,7 +146,7 @@ describe('ErrorHandler', () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       status: 'error',
-      message: 'Erro interno do servidor'
+      message: 'Erro interno do servidor',
     });
 
     // Cleanup
@@ -163,10 +167,10 @@ describe('ErrorHandler', () => {
       status: 'error',
       message: 'Erro interno do servidor',
       stack: error.stack,
-      detail: error.message
+      detail: error.message,
     });
 
     // Cleanup
     process.env.NODE_ENV = 'test';
   });
-}); 
+});

@@ -13,7 +13,7 @@ const mockLogger = {
   warn: jest.fn(),
   info: jest.fn(),
   debug: jest.fn(),
-  http: jest.fn()
+  http: jest.fn(),
 };
 
 jest.mock('@prisma/client');
@@ -69,8 +69,8 @@ describe('PaymentService', () => {
       comprador: {
         nome: 'Test User',
         email: 'test@example.com',
-        cpf: '12345678900'
-      }
+        cpf: '12345678900',
+      },
     };
 
     const mockPreferenceResponse = {
@@ -82,7 +82,7 @@ describe('PaymentService', () => {
           title: 'Test Product',
           quantity: 1,
           unit_price: 100,
-          currency_id: 'BRL'
+          currency_id: 'BRL',
         },
       ],
       payer: {
@@ -91,7 +91,7 @@ describe('PaymentService', () => {
       api_response: {
         status: 200,
         headers: {},
-      }
+      },
     } as unknown as Preference;
 
     it('should create a payment preference successfully', async () => {
@@ -104,41 +104,43 @@ describe('PaymentService', () => {
         init_point: 'https://example.com/checkout',
         valorOriginal: 100,
         valorFinal: 100,
-        desconto: 0
+        desconto: 0,
       });
 
       expect(mockPayment.create).toHaveBeenCalledWith({
         body: {
-          items: [{
-            title: mockPreferenceData.descricao,
-            quantity: 1,
-            unit_price: mockPreferenceData.valor,
-            currency_id: "BRL"
-          }],
+          items: [
+            {
+              title: mockPreferenceData.descricao,
+              quantity: 1,
+              unit_price: mockPreferenceData.valor,
+              currency_id: 'BRL',
+            },
+          ],
           payer: {
             name: mockPreferenceData.comprador.nome,
             email: mockPreferenceData.comprador.email,
             identification: {
               type: 'CPF',
-              number: mockPreferenceData.comprador.cpf
-            }
+              number: mockPreferenceData.comprador.cpf,
+            },
           },
           external_reference: mockPreferenceData.pedidoId,
           payment_methods: {
             default_payment_method_id: mockPreferenceData.formaPagamento,
-            installments: 12
+            installments: 12,
           },
-          statement_descriptor: "ONLYWAVE",
-          binary_mode: true
-        }
+          statement_descriptor: 'ONLYWAVE',
+          binary_mode: true,
+        },
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith(
         'Preferência de pagamento criada com sucesso',
         expect.objectContaining({
           preferenceId: '123456789',
-          pedidoId: 'order_123'
-        })
+          pedidoId: 'order_123',
+        }),
       );
     });
 
@@ -146,15 +148,14 @@ describe('PaymentService', () => {
       const error = new Error('API Error');
       mockPayment.create.mockRejectedValue(error);
 
-      await expect(paymentService.createPreference(mockPreferenceData))
-        .rejects.toThrow(AppError);
+      await expect(paymentService.createPreference(mockPreferenceData)).rejects.toThrow(AppError);
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Erro ao criar preferência de pagamento:',
         expect.objectContaining({
           error,
-          pedidoId: 'order_123'
-        })
+          pedidoId: 'order_123',
+        }),
       );
     });
   });
@@ -173,34 +174,34 @@ describe('PaymentService', () => {
       transaction_amount: 100,
       api_response: {
         status: 200,
-        headers: {}
-      }
+        headers: {},
+      },
     };
 
     it('should update order status when payment is approved', async () => {
       mockPayment.get.mockResolvedValue(mockPaymentResponse);
-      mockPrisma.pedido.update.mockResolvedValue({ 
-        id: mockOrderId, 
-        status: 'PAID' 
+      mockPrisma.pedido.update.mockResolvedValue({
+        id: mockOrderId,
+        status: 'PAID',
       });
 
-      await paymentService.handleWebhook({ 
+      await paymentService.handleWebhook({
         action: 'payment.updated',
-        data: { id: mockPaymentId } 
+        data: { id: mockPaymentId },
       });
 
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).toHaveBeenCalledWith({
         where: { id: mockOrderId },
-        data: { 
+        data: {
           status: 'PAID',
           paymentStatus: 'approved',
           paymentDetails: mockPaymentResponse,
           paymentMethod: 'credit_card',
           paymentType: 'credit_card',
           installments: 1,
-          transactionAmount: 100
-        }
+          transactionAmount: 100,
+        },
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith(
@@ -208,28 +209,28 @@ describe('PaymentService', () => {
         expect.objectContaining({
           paymentId: mockPaymentId,
           status: 'approved',
-          method: 'credit_card'
-        })
+          method: 'credit_card',
+        }),
       );
     });
 
     it('should log warning when external_reference is missing', async () => {
       const responseWithoutRef = {
         ...mockPaymentResponse,
-        external_reference: undefined
+        external_reference: undefined,
       };
       mockPayment.get.mockResolvedValue(responseWithoutRef);
 
-      await paymentService.handleWebhook({ 
+      await paymentService.handleWebhook({
         action: 'payment.updated',
-        data: { id: mockPaymentId } 
+        data: { id: mockPaymentId },
       });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'Pagamento recebido sem external_reference',
         expect.objectContaining({
-          paymentId: mockPaymentId
-        })
+          paymentId: mockPaymentId,
+        }),
       );
     });
   });
@@ -244,8 +245,8 @@ describe('PaymentService', () => {
         status: 'refunded',
         api_response: {
           status: 200,
-          headers: {}
-        }
+          headers: {},
+        },
       };
 
       mockPayment.cancel.mockResolvedValue(mockRefundResponse);
@@ -258,8 +259,8 @@ describe('PaymentService', () => {
         'Pagamento reembolsado com sucesso',
         expect.objectContaining({
           paymentId: mockPaymentId,
-          amount: mockAmount
-        })
+          amount: mockAmount,
+        }),
       );
     });
 
@@ -267,16 +268,17 @@ describe('PaymentService', () => {
       const error = new Error('Payment already refunded');
       mockPayment.cancel.mockRejectedValue(error);
 
-      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount))
-        .rejects.toThrow('Erro ao reembolsar pagamento');
+      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount)).rejects.toThrow(
+        'Erro ao reembolsar pagamento',
+      );
 
       expect(mockPayment.cancel).toHaveBeenCalledWith(mockPaymentId, { amount: mockAmount });
       expect(mockLogger.error).toHaveBeenCalledWith(
         `Erro ao reembolsar pagamento: ${error}`,
         expect.objectContaining({
           paymentId: mockPaymentId,
-          amount: mockAmount
-        })
+          amount: mockAmount,
+        }),
       );
     });
 
@@ -284,16 +286,17 @@ describe('PaymentService', () => {
       const error = new Error('401 Unauthorized');
       mockPayment.cancel.mockRejectedValue(error);
 
-      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount))
-        .rejects.toThrow('Erro ao reembolsar pagamento');
+      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount)).rejects.toThrow(
+        'Erro ao reembolsar pagamento',
+      );
 
       expect(mockPayment.cancel).toHaveBeenCalledWith(mockPaymentId, { amount: mockAmount });
       expect(mockLogger.error).toHaveBeenCalledWith(
         `Erro ao reembolsar pagamento: ${error}`,
         expect.objectContaining({
           paymentId: mockPaymentId,
-          amount: mockAmount
-        })
+          amount: mockAmount,
+        }),
       );
     });
 
@@ -301,16 +304,17 @@ describe('PaymentService', () => {
       const error = new Error('ETIMEDOUT');
       mockPayment.cancel.mockRejectedValue(error);
 
-      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount))
-        .rejects.toThrow('Erro ao reembolsar pagamento');
+      await expect(paymentService.reembolsarPagamento(mockPaymentId, mockAmount)).rejects.toThrow(
+        'Erro ao reembolsar pagamento',
+      );
 
       expect(mockPayment.cancel).toHaveBeenCalledWith(mockPaymentId, { amount: mockAmount });
       expect(mockLogger.error).toHaveBeenCalledWith(
         `Erro ao reembolsar pagamento: ${error}`,
         expect.objectContaining({
           paymentId: mockPaymentId,
-          amount: mockAmount
-        })
+          amount: mockAmount,
+        }),
       );
     });
 
@@ -321,8 +325,8 @@ describe('PaymentService', () => {
         status: 'refunded',
         api_response: {
           status: 200,
-          headers: {}
-        }
+          headers: {},
+        },
       };
 
       mockPayment.cancel.mockResolvedValue(mockRefundResponse);
@@ -335,40 +339,42 @@ describe('PaymentService', () => {
         'Pagamento reembolsado com sucesso',
         expect.objectContaining({
           paymentId: mockPaymentId,
-          amount: partialAmount
-        })
+          amount: partialAmount,
+        }),
       );
     });
 
     it('deve lançar AppError quando valor do reembolso é inválido', async () => {
       const invalidAmount = -100;
 
-      await expect(paymentService.reembolsarPagamento(mockPaymentId, invalidAmount))
-        .rejects.toThrow('Valor do reembolso inválido');
+      await expect(
+        paymentService.reembolsarPagamento(mockPaymentId, invalidAmount),
+      ).rejects.toThrow('Valor do reembolso inválido');
 
       expect(mockPayment.cancel).not.toHaveBeenCalled();
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Valor do reembolso inválido',
         expect.objectContaining({
           paymentId: mockPaymentId,
-          amount: invalidAmount
-        })
+          amount: invalidAmount,
+        }),
       );
     });
 
     it('deve lançar AppError quando ID do pagamento é inválido', async () => {
       const invalidPaymentId = '';
 
-      await expect(paymentService.reembolsarPagamento(invalidPaymentId, mockAmount))
-        .rejects.toThrow('ID do pagamento inválido');
+      await expect(
+        paymentService.reembolsarPagamento(invalidPaymentId, mockAmount),
+      ).rejects.toThrow('ID do pagamento inválido');
 
       expect(mockPayment.cancel).not.toHaveBeenCalled();
       expect(mockLogger.error).toHaveBeenCalledWith(
         'ID do pagamento inválido',
         expect.objectContaining({
           paymentId: invalidPaymentId,
-          amount: mockAmount
-        })
+          amount: mockAmount,
+        }),
       );
     });
   });

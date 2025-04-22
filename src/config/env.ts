@@ -4,7 +4,7 @@ import { createLogger, transports } from 'winston';
 // Logger temporário para erros de inicialização
 const setupLogger = createLogger({
   level: 'warn',
-  transports: [new transports.Console()]
+  transports: [new transports.Console()],
 });
 
 const envSchema = z.object({
@@ -20,7 +20,7 @@ const envSchema = z.object({
   SMTP_USER: z.string(),
   SMTP_PASS: z.string(),
   SMTP_FROM: z.string().default('noreply@onlywave.com.br'),
-  LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly']).default('info')
+  LOG_LEVEL: z.enum(['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly']).default('info'),
 });
 
 export const env = envSchema.parse({
@@ -36,7 +36,7 @@ export const env = envSchema.parse({
   SMTP_USER: process.env.SMTP_USER,
   SMTP_PASS: process.env.SMTP_PASS,
   SMTP_FROM: process.env.SMTP_FROM,
-  LOG_LEVEL: process.env.LOG_LEVEL
+  LOG_LEVEL: process.env.LOG_LEVEL,
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
@@ -50,12 +50,12 @@ export function validateEnv(): EnvConfig {
     setupLogger.error('❌ Erro na validação das variáveis de ambiente:', {
       errors: error.errors.map(e => ({
         path: e.path.join('.'),
-        message: e.message
-      }))
+        message: e.message,
+      })),
     });
     throw error;
   }
 }
 
 // Exporta o objeto env já validado
-export const config = validateEnv(); 
+export const config = validateEnv();

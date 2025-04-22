@@ -16,7 +16,7 @@ describe('AuthMiddleware', () => {
     };
     res = {
       status: vi.fn().mockReturnThis(),
-      json: vi.fn()
+      json: vi.fn(),
     };
     next = vi.fn();
     vi.clearAllMocks();
@@ -27,8 +27,8 @@ describe('AuthMiddleware', () => {
     expect(next).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Token ausente',
-        statusCode: 401
-      })
+        statusCode: 401,
+      }),
     );
   });
 
@@ -38,8 +38,8 @@ describe('AuthMiddleware', () => {
     expect(next).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Token inválido ou expirado',
-        statusCode: 401
-      })
+        statusCode: 401,
+      }),
     );
   });
 
@@ -49,8 +49,8 @@ describe('AuthMiddleware', () => {
     expect(next).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Token inválido ou expirado',
-        statusCode: 401
-      })
+        statusCode: 401,
+      }),
     );
   });
 
@@ -59,15 +59,15 @@ describe('AuthMiddleware', () => {
       id: 1,
       nome: 'Test User',
       email: 'test@example.com',
-      tipoUsuario: 'cliente'
+      tipoUsuario: 'cliente',
     };
 
     req.headers = { authorization: 'Bearer valid.token' };
     mockPrisma.usuario.findUnique.mockResolvedValueOnce(mockUser);
-    
+
     await authMiddleware(req as Request, res as Response, next);
-    
+
     expect(req.user).toEqual(mockUser);
     expect(next).toHaveBeenCalledWith();
   });
-}); 
+});

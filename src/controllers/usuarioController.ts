@@ -17,12 +17,13 @@ const usuarioSchema = z.object({
   nome: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
   email: z.string().email('Email inválido'),
   senha: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
-  cpf: z.string()
+  cpf: z
+    .string()
     .regex(/^\d{11}$/, 'CPF deve conter 11 dígitos')
     .refine(validarCpfCustomizado, {
-      message: 'CPF inválido'
+      message: 'CPF inválido',
     }),
-  tipoUsuario: z.enum(['cliente', 'admin']).default('cliente')
+  tipoUsuario: z.enum(['cliente', 'admin']).default('cliente'),
 });
 
 export class UsuarioController {
@@ -55,19 +56,19 @@ export class UsuarioController {
 
   static async listar(req: Request, res: Response) {
     const { page, limit, sort, order } = req.query;
-    
+
     const params: PaginationParams = {
       page: Number(page) || 1,
-      limit: Number(limit) || 10
+      limit: Number(limit) || 10,
     };
-    
+
     if (sort && order) {
       params.orderBy = {
-        [String(sort)]: order as 'asc' | 'desc'
+        [String(sort)]: order as 'asc' | 'desc',
       };
     }
-    
+
     const usuarios = await UsuarioController.usuarioService.listar(params);
     return res.json(usuarios);
   }
-} 
+}

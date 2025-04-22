@@ -172,10 +172,7 @@ describe('AddressService', () => {
       expect(result).toEqual(mockAddresses);
       expect(mockPrisma.endereco.findMany).toHaveBeenCalledWith({
         where: { usuarioId: 1 },
-        orderBy: [
-          { principal: 'desc' },
-          { createdAt: 'desc' },
-        ],
+        orderBy: [{ principal: 'desc' }, { createdAt: 'desc' }],
       });
     });
   });
@@ -214,4 +211,4 @@ describe('AddressService', () => {
       await expect(addressService.setPrimary(1, 1)).rejects.toThrow(AppError);
     });
   });
-}); 
+});

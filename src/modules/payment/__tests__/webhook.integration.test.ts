@@ -13,7 +13,7 @@ const mockLogger = {
   warn: jest.fn(),
   info: jest.fn(),
   debug: jest.fn(),
-  http: jest.fn()
+  http: jest.fn(),
 };
 
 jest.mock('@prisma/client');
@@ -68,21 +68,21 @@ describe('Webhook Integration Tests', () => {
       transaction_amount: 100,
       api_response: {
         status: 200,
-        headers: {}
-      }
+        headers: {},
+      },
     });
 
     it('deve atualizar pedido como PAID quando pagamento é aprovado', async () => {
       const mockPaymentResponse = createMockPaymentResponse('approved');
       mockPayment.get.mockResolvedValue(mockPaymentResponse);
-      mockPrisma.pedido.update.mockResolvedValue({ 
-        id: mockOrderId, 
-        status: 'PAID' 
+      mockPrisma.pedido.update.mockResolvedValue({
+        id: mockOrderId,
+        status: 'PAID',
       });
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
       await paymentService.handleWebhook(webhookData);
@@ -90,15 +90,15 @@ describe('Webhook Integration Tests', () => {
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).toHaveBeenCalledWith({
         where: { id: mockOrderId },
-        data: { 
+        data: {
           status: 'PAID',
           paymentStatus: 'approved',
           paymentDetails: mockPaymentResponse,
           paymentMethod: 'credit_card',
           paymentType: 'credit_card',
           installments: 1,
-          transactionAmount: 100
-        }
+          transactionAmount: 100,
+        },
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith(
@@ -106,22 +106,22 @@ describe('Webhook Integration Tests', () => {
         expect.objectContaining({
           paymentId: mockPaymentId,
           status: 'approved',
-          method: 'credit_card'
-        })
+          method: 'credit_card',
+        }),
       );
     });
 
     it('deve atualizar pedido como PENDING quando pagamento está pendente', async () => {
       const mockPaymentResponse = createMockPaymentResponse('pending');
       mockPayment.get.mockResolvedValue(mockPaymentResponse);
-      mockPrisma.pedido.update.mockResolvedValue({ 
-        id: mockOrderId, 
-        status: 'PENDING' 
+      mockPrisma.pedido.update.mockResolvedValue({
+        id: mockOrderId,
+        status: 'PENDING',
       });
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
       await paymentService.handleWebhook(webhookData);
@@ -129,15 +129,15 @@ describe('Webhook Integration Tests', () => {
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).toHaveBeenCalledWith({
         where: { id: mockOrderId },
-        data: { 
+        data: {
           status: 'PENDING',
           paymentStatus: 'pending',
           paymentDetails: mockPaymentResponse,
           paymentMethod: 'credit_card',
           paymentType: 'credit_card',
           installments: 1,
-          transactionAmount: 100
-        }
+          transactionAmount: 100,
+        },
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith(
@@ -145,22 +145,22 @@ describe('Webhook Integration Tests', () => {
         expect.objectContaining({
           paymentId: mockPaymentId,
           status: 'pending',
-          method: 'credit_card'
-        })
+          method: 'credit_card',
+        }),
       );
     });
 
     it('deve atualizar pedido como CANCELLED quando pagamento é rejeitado', async () => {
       const mockPaymentResponse = createMockPaymentResponse('rejected');
       mockPayment.get.mockResolvedValue(mockPaymentResponse);
-      mockPrisma.pedido.update.mockResolvedValue({ 
-        id: mockOrderId, 
-        status: 'CANCELLED' 
+      mockPrisma.pedido.update.mockResolvedValue({
+        id: mockOrderId,
+        status: 'CANCELLED',
       });
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
       await paymentService.handleWebhook(webhookData);
@@ -168,15 +168,15 @@ describe('Webhook Integration Tests', () => {
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).toHaveBeenCalledWith({
         where: { id: mockOrderId },
-        data: { 
+        data: {
           status: 'CANCELLED',
           paymentStatus: 'rejected',
           paymentDetails: mockPaymentResponse,
           paymentMethod: 'credit_card',
           paymentType: 'credit_card',
           installments: 1,
-          transactionAmount: 100
-        }
+          transactionAmount: 100,
+        },
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith(
@@ -184,22 +184,22 @@ describe('Webhook Integration Tests', () => {
         expect.objectContaining({
           paymentId: mockPaymentId,
           status: 'rejected',
-          method: 'credit_card'
-        })
+          method: 'credit_card',
+        }),
       );
     });
 
     it('deve atualizar pedido como CANCELLED quando pagamento é cancelado', async () => {
       const mockPaymentResponse = createMockPaymentResponse('cancelled');
       mockPayment.get.mockResolvedValue(mockPaymentResponse);
-      mockPrisma.pedido.update.mockResolvedValue({ 
-        id: mockOrderId, 
-        status: 'CANCELLED' 
+      mockPrisma.pedido.update.mockResolvedValue({
+        id: mockOrderId,
+        status: 'CANCELLED',
       });
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
       await paymentService.handleWebhook(webhookData);
@@ -207,15 +207,15 @@ describe('Webhook Integration Tests', () => {
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).toHaveBeenCalledWith({
         where: { id: mockOrderId },
-        data: { 
+        data: {
           status: 'CANCELLED',
           paymentStatus: 'cancelled',
           paymentDetails: mockPaymentResponse,
           paymentMethod: 'credit_card',
           paymentType: 'credit_card',
           installments: 1,
-          transactionAmount: 100
-        }
+          transactionAmount: 100,
+        },
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith(
@@ -223,22 +223,22 @@ describe('Webhook Integration Tests', () => {
         expect.objectContaining({
           paymentId: mockPaymentId,
           status: 'cancelled',
-          method: 'credit_card'
-        })
+          method: 'credit_card',
+        }),
       );
     });
 
     it('deve atualizar pedido como CANCELLED quando pagamento é reembolsado', async () => {
       const mockPaymentResponse = createMockPaymentResponse('refunded');
       mockPayment.get.mockResolvedValue(mockPaymentResponse);
-      mockPrisma.pedido.update.mockResolvedValue({ 
-        id: mockOrderId, 
-        status: 'CANCELLED' 
+      mockPrisma.pedido.update.mockResolvedValue({
+        id: mockOrderId,
+        status: 'CANCELLED',
       });
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
       await paymentService.handleWebhook(webhookData);
@@ -246,15 +246,15 @@ describe('Webhook Integration Tests', () => {
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).toHaveBeenCalledWith({
         where: { id: mockOrderId },
-        data: { 
+        data: {
           status: 'CANCELLED',
           paymentStatus: 'refunded',
           paymentDetails: mockPaymentResponse,
           paymentMethod: 'credit_card',
           paymentType: 'credit_card',
           installments: 1,
-          transactionAmount: 100
-        }
+          transactionAmount: 100,
+        },
       });
 
       expect(mockLogger.info).toHaveBeenCalledWith(
@@ -262,21 +262,21 @@ describe('Webhook Integration Tests', () => {
         expect.objectContaining({
           paymentId: mockPaymentId,
           status: 'refunded',
-          method: 'credit_card'
-        })
+          method: 'credit_card',
+        }),
       );
     });
 
     it('deve registrar aviso e retornar quando external_reference está ausente', async () => {
       const mockPaymentResponse = {
         ...createMockPaymentResponse('approved'),
-        external_reference: undefined
+        external_reference: undefined,
       };
       mockPayment.get.mockResolvedValue(mockPaymentResponse);
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
       await paymentService.handleWebhook(webhookData);
@@ -287,8 +287,8 @@ describe('Webhook Integration Tests', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         'Pagamento recebido sem external_reference',
         expect.objectContaining({
-          paymentId: mockPaymentId
-        })
+          paymentId: mockPaymentId,
+        }),
       );
     });
 
@@ -298,18 +298,17 @@ describe('Webhook Integration Tests', () => {
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
-      await expect(paymentService.handleWebhook(webhookData))
-        .rejects.toThrow('Erro ao processar webhook');
+      await expect(paymentService.handleWebhook(webhookData)).rejects.toThrow(
+        'Erro ao processar webhook',
+      );
 
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).not.toHaveBeenCalled();
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        `Erro ao processar webhook: ${error}`
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith(`Erro ao processar webhook: ${error}`);
     });
 
     it('deve lançar AppError quando payment.get falha com timeout', async () => {
@@ -318,18 +317,17 @@ describe('Webhook Integration Tests', () => {
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
-      await expect(paymentService.handleWebhook(webhookData))
-        .rejects.toThrow('Erro ao processar webhook');
+      await expect(paymentService.handleWebhook(webhookData)).rejects.toThrow(
+        'Erro ao processar webhook',
+      );
 
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).not.toHaveBeenCalled();
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        `Erro ao processar webhook: ${error}`
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith(`Erro ao processar webhook: ${error}`);
     });
 
     it('deve lançar AppError quando payment.get falha com token inválido', async () => {
@@ -338,54 +336,52 @@ describe('Webhook Integration Tests', () => {
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
-      await expect(paymentService.handleWebhook(webhookData))
-        .rejects.toThrow('Erro ao processar webhook');
+      await expect(paymentService.handleWebhook(webhookData)).rejects.toThrow(
+        'Erro ao processar webhook',
+      );
 
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).not.toHaveBeenCalled();
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        `Erro ao processar webhook: ${error}`
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith(`Erro ao processar webhook: ${error}`);
     });
 
     it('deve lançar AppError quando pedido.update falha', async () => {
       const mockPaymentResponse = createMockPaymentResponse('approved');
       mockPayment.get.mockResolvedValue(mockPaymentResponse);
-      
+
       const error = new Error('Database Error');
       mockPrisma.pedido.update.mockRejectedValue(error);
 
       const webhookData: WebhookDTO = {
         action: 'payment.updated',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
-      await expect(paymentService.handleWebhook(webhookData))
-        .rejects.toThrow('Erro ao processar webhook');
+      await expect(paymentService.handleWebhook(webhookData)).rejects.toThrow(
+        'Erro ao processar webhook',
+      );
 
       expect(mockPayment.get).toHaveBeenCalledWith({ id: mockPaymentId });
       expect(mockPrisma.pedido.update).toHaveBeenCalled();
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        `Erro ao processar webhook: ${error}`
-      );
+      expect(mockLogger.error).toHaveBeenCalledWith(`Erro ao processar webhook: ${error}`);
     });
 
     it('deve processar ação payment.created corretamente', async () => {
       const mockPaymentResponse = createMockPaymentResponse('pending');
       mockPayment.get.mockResolvedValue(mockPaymentResponse);
-      mockPrisma.pedido.update.mockResolvedValue({ 
-        id: mockOrderId, 
-        status: 'PENDING' 
+      mockPrisma.pedido.update.mockResolvedValue({
+        id: mockOrderId,
+        status: 'PENDING',
       });
 
       const webhookData: WebhookDTO = {
         action: 'payment.created',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
       await paymentService.handleWebhook(webhookData);
@@ -397,7 +393,7 @@ describe('Webhook Integration Tests', () => {
     it('deve ignorar outras ações', async () => {
       const webhookData: WebhookDTO = {
         action: 'other.action',
-        data: { id: mockPaymentId }
+        data: { id: mockPaymentId },
       };
 
       await paymentService.handleWebhook(webhookData);
@@ -406,4 +402,4 @@ describe('Webhook Integration Tests', () => {
       expect(mockPrisma.pedido.update).not.toHaveBeenCalled();
     });
   });
-}); 
+});

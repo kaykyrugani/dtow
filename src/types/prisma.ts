@@ -5,7 +5,7 @@ export interface PrismaErrorMeta {
   [key: string]: any;
 }
 
-export type PrismaErrorCode = 
+export type PrismaErrorCode =
   | 'P2002' // Unique constraint violation
   | 'P2025' // Record not found
   | 'P2003' // Foreign key constraint violation
@@ -17,4 +17,4 @@ export interface PrismaError extends Error {
   meta?: PrismaErrorMeta;
 }
 
-export type DatabaseErrorHandler = (error: PrismaError) => never; 
+export type DatabaseErrorHandler = (error: PrismaError) => never;

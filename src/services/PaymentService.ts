@@ -53,11 +53,9 @@ export class PaymentService {
       };
     } catch (error) {
       logger.error(`Erro ao criar preferência de pagamento: ${error}`);
-      throw new AppError(
-        ERROR_CODES.PAYMENT_ERROR,
-        HttpStatusCode.INTERNAL_SERVER_ERROR,
-        { message: 'Erro ao criar preferência de pagamento' }
-      );
+      throw new AppError(ERROR_CODES.PAYMENT_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR, {
+        message: 'Erro ao criar preferência de pagamento',
+      });
     }
   }
 
@@ -85,11 +83,9 @@ export class PaymentService {
       return { success: true };
     } catch (error) {
       logger.error(`Erro ao processar webhook: ${error}`);
-      throw new AppError(
-        ERROR_CODES.PAYMENT_ERROR,
-        HttpStatusCode.INTERNAL_SERVER_ERROR,
-        { message: 'Erro ao processar webhook' }
-      );
+      throw new AppError(ERROR_CODES.PAYMENT_ERROR, HttpStatusCode.INTERNAL_SERVER_ERROR, {
+        message: 'Erro ao processar webhook',
+      });
     }
   }
 
@@ -104,4 +100,4 @@ export class PaymentService {
 
     return statusMap[mpStatus] || 'PENDENTE';
   }
-} 
+}

@@ -1,6 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { BaseRepository } from '../../../repositories/base.repository';
-import { CreateReviewInput, UpdateReviewInput, ReviewParams, ReviewQuery } from '../schemas/review.schema';
+import {
+  CreateReviewInput,
+  UpdateReviewInput,
+  ReviewParams,
+  ReviewQuery,
+} from '../schemas/review.schema';
 
 export class ReviewRepository extends BaseRepository {
   constructor(private prisma: PrismaClient) {
@@ -166,4 +171,4 @@ export class ReviewRepository extends BaseRepository {
       },
     });
   }
-} 
+}

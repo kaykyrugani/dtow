@@ -1,0 +1,52 @@
+groups:
+  - name: observability
+    rules:
+      # Alerta para latência alta
+      - alert: HighLatency
+        expr: rate(http_request_duration_seconds_sum[5m]) / rate(http_request_duration_seconds_count[5m]) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alta latência detectada"
+          description: "A latência média está acima de 2 segundos por 5 minutos"
+
+      # Alerta para taxa de erro alta
+      - alert: HighErrorRate
+        expr: rate(http_request_errors_total[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Taxa de erro alta detectada"
+          description: "A taxa de erro está acima de 5% por 5 minutos"
+
+      # Alerta para falhas de pagamento
+      - alert: PaymentFailures
+        expr: rate(payment_failures_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Falhas de pagamento detectadas"
+          description: "Taxa de falhas de pagamento está acima do esperado"
+
+      # Alerta para falhas de webhook
+      - alert: WebhookFailures
+        expr: rate(webhook_failures_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Falhas de webhook detectadas"
+          description: "Taxa de falhas de webhook está acima do esperado"
+
+      # Alerta para fila de webhooks grande
+      - alert: LargeWebhookQueue
+        expr: webhook_queue_size > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Fila de webhooks grande"
+          description: "A fila de webhooks está com mais de 1000 itens pendentes" 

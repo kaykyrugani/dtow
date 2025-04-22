@@ -21,7 +21,7 @@ export const cacheMiddleware = (ttl: number = 3600) => {
       // Sobrescreve o método json para capturar a resposta
       const originalJson = res.json;
       res.json = function (body: unknown) {
-        cacheService.set(key, body, ttl).catch((error) => {
+        cacheService.set(key, body, ttl).catch(error => {
           logger.error('Erro ao salvar no cache:', error);
         });
         return originalJson.call(this, body);
@@ -33,4 +33,4 @@ export const cacheMiddleware = (ttl: number = 3600) => {
       next();
     }
   };
-}; 
+};

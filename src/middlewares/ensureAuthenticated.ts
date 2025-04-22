@@ -13,11 +13,7 @@ declare global {
   }
 }
 
-export async function ensureAuthenticated(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export async function ensureAuthenticated(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -31,7 +27,7 @@ export async function ensureAuthenticated(
 
     const refreshToken = await prisma.refreshToken.findUnique({
       where: { token },
-      include: { usuario: true }
+      include: { usuario: true },
     });
 
     if (!refreshToken) {
@@ -43,11 +39,11 @@ export async function ensureAuthenticated(
     }
 
     req.user = {
-      id: refreshToken.usuario.id
+      id: refreshToken.usuario.id,
     };
 
     return next();
   } catch (error) {
     throw new AppError('Token inválido', 401);
   }
-} 
+}

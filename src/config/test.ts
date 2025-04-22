@@ -60,4 +60,4 @@ export async function closeTestConnection(prisma: PrismaClient) {
     console.error('Erro ao fechar conexão com banco de dados:', error);
     throw error;
   }
-} 
+}

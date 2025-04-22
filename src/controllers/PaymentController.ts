@@ -13,17 +13,15 @@ export class PaymentController {
       const { pedidoId, valor, descricao } = req.body;
 
       if (!pedidoId || !valor || !descricao) {
-        throw new AppError(
-          ERROR_CODES.VALIDATION_ERROR,
-          HttpStatusCode.BAD_REQUEST,
-          { message: 'Dados incompletos para criar preferência de pagamento' }
-        );
+        throw new AppError(ERROR_CODES.VALIDATION_ERROR, HttpStatusCode.BAD_REQUEST, {
+          message: 'Dados incompletos para criar preferência de pagamento',
+        });
       }
 
       const preference = await PaymentController.paymentService.criarPreferenciaCheckoutPro(
         pedidoId,
         valor,
-        descricao
+        descricao,
       );
 
       res.json(preference);
@@ -40,4 +38,4 @@ export class PaymentController {
       next(error);
     }
   }
-} 
+}

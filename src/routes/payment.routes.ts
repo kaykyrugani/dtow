@@ -10,14 +10,18 @@ const createPreferenceSchema = z.object({
   body: z.object({
     pedidoId: z.string().uuid(),
     valor: z.number().positive(),
-    descricao: z.string().min(1)
-  })
+    descricao: z.string().min(1),
+  }),
 });
 
 // Rota para criar preferência de pagamento (requer autenticação)
-paymentRouter.post('/create-preference', authMiddleware(['USER', 'ADMIN']), PaymentController.criarPreferencia);
+paymentRouter.post(
+  '/create-preference',
+  authMiddleware(['USER', 'ADMIN']),
+  PaymentController.criarPreferencia,
+);
 
 // Rota para webhook do Mercado Pago (não requer autenticação)
 paymentRouter.post('/webhooks/mercadopago', PaymentController.webhook);
 
-export { paymentRouter }; 
+export { paymentRouter };

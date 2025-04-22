@@ -10,9 +10,9 @@ export const responseTimeMiddleware = (req: Request, res: Response, next: NextFu
       duration,
       req.method,
       req.route?.path || req.path,
-      res.statusCode
+      res.statusCode,
     );
   });
 
   next();
-}; 
+};

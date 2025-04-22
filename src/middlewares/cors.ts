@@ -10,4 +10,4 @@ export const corsMiddleware = () => {
     credentials: true,
     maxAge: 86400, // 24 horas
   });
-}; 
+};

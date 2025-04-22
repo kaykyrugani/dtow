@@ -14,7 +14,7 @@ describe('ProductService', () => {
     id: 1,
     nome: 'Produto Teste',
     descricao: 'Descrição do produto teste',
-    preco: 99.90,
+    preco: 99.9,
     desconto: null,
     marca: 'Marca Teste',
     categoria: 'Categoria Teste',
@@ -40,7 +40,7 @@ describe('ProductService', () => {
       const result = await productService.create({
         nome: 'Produto Teste',
         descricao: 'Descrição do produto teste',
-        preco: 99.90,
+        preco: 99.9,
         marca: 'Marca Teste',
         categoria: 'Categoria Teste',
         subcategoria: 'Subcategoria Teste',
@@ -54,18 +54,20 @@ describe('ProductService', () => {
     });
 
     it('deve lançar erro quando dados são inválidos', async () => {
-      await expect(productService.create({
-        nome: 'P', // Nome muito curto
-        descricao: 'Curta', // Descrição muito curta
-        preco: -10, // Preço negativo
-        marca: 'M',
-        categoria: 'C',
-        subcategoria: 'S',
-        imagem: 'invalida', // URL inválida
-        imagens: '',
-        tamanhos: '',
-        estoque: -1, // Estoque negativo
-      } as any)).rejects.toThrow();
+      await expect(
+        productService.create({
+          nome: 'P', // Nome muito curto
+          descricao: 'Curta', // Descrição muito curta
+          preco: -10, // Preço negativo
+          marca: 'M',
+          categoria: 'C',
+          subcategoria: 'S',
+          imagem: 'invalida', // URL inválida
+          imagens: '',
+          tamanhos: '',
+          estoque: -1, // Estoque negativo
+        } as any),
+      ).rejects.toThrow();
     });
   });
 
@@ -175,4 +177,4 @@ describe('ProductService', () => {
       expect(result.produtos[0].nome).toContain('Teste');
     });
   });
-}); 
+});

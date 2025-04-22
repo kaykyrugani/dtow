@@ -2,7 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { QueueService } from '../../modules/notification/services/queue.service';
 import { EmailService } from '../../modules/notification/services/email.service';
 import { Queue, Worker } from 'bullmq';
-import { NotificationData, NotificationType } from '../../modules/notification/types/notification.types';
+import {
+  NotificationData,
+  NotificationType,
+} from '../../modules/notification/types/notification.types';
 
 // Mock do BullMQ
 vi.mock('bullmq', () => ({
@@ -10,12 +13,12 @@ vi.mock('bullmq', () => ({
     add: vi.fn().mockResolvedValue({ id: 'test-job-id' }),
     getJob: vi.fn().mockResolvedValue({ id: 'test-job-id' }),
     getJobs: vi.fn().mockResolvedValue([{ id: 'test-job-id' }]),
-    clean: vi.fn().mockResolvedValue(undefined)
+    clean: vi.fn().mockResolvedValue(undefined),
   })),
   Worker: vi.fn().mockImplementation(() => ({
     on: vi.fn(),
-    run: vi.fn()
-  }))
+    run: vi.fn(),
+  })),
 }));
 
 describe('QueueService', () => {
@@ -27,18 +30,20 @@ describe('QueueService', () => {
   beforeEach(() => {
     // Limpa todos os mocks antes de cada teste
     vi.clearAllMocks();
-    
+
     // Cria mocks dos serviços
     mockEmailService = {
-      sendTemplateEmail: vi.fn().mockResolvedValue({ success: true, messageId: 'test-message-id' })
+      sendTemplateEmail: vi.fn().mockResolvedValue({ success: true, messageId: 'test-message-id' }),
     } as any;
 
     // Cria uma nova instância do serviço
     queueService = new QueueService(mockEmailService);
-    
+
     // Obtém as referências dos mocks
     mockQueue = new Queue('notifications', { connection: { host: 'localhost', port: 6379 } });
-    mockWorker = new Worker('notifications', async () => {}, { connection: { host: 'localhost', port: 6379 } });
+    mockWorker = new Worker('notifications', async () => {}, {
+      connection: { host: 'localhost', port: 6379 },
+    });
   });
 
   describe('addNotification', () => {
@@ -48,7 +53,7 @@ describe('QueueService', () => {
         priority: 'normal',
         recipient: {
           email: 'test@example.com',
-          name: 'Test User'
+          name: 'Test User',
         },
         data: {
           nome: 'Test User',
@@ -56,11 +61,9 @@ describe('QueueService', () => {
           dataPedido: '2025-04-15',
           statusPedido: 'Confirmado',
           totalPedido: '299,90',
-          itens: [
-            { quantidade: 1, nome: 'Produto A', preco: '199,90' }
-          ],
-          linkAcompanhamento: 'https://onlywave.com.br/pedidos/123'
-        }
+          itens: [{ quantidade: 1, nome: 'Produto A', preco: '199,90' }],
+          linkAcompanhamento: 'https://onlywave.com.br/pedidos/123',
+        },
       };
 
       const job = await queueService.addNotification(notificationData);
@@ -73,9 +76,9 @@ describe('QueueService', () => {
           attempts: 3,
           backoff: {
             type: 'exponential',
-            delay: 1000
-          }
-        })
+            delay: 1000,
+          },
+        }),
       );
     });
 
@@ -84,17 +87,17 @@ describe('QueueService', () => {
         type: 'order_confirmation' as NotificationType,
         priority: 'high',
         recipient: {
-          email: 'test@example.com'
+          email: 'test@example.com',
         },
-        data: {}
+        data: {},
       };
 
       const options = {
         attempts: 5,
         backoff: {
           type: 'fixed' as const,
-          delay: 2000
-        }
+          delay: 2000,
+        },
       };
 
       await queueService.addNotification(notificationData, options);
@@ -102,7 +105,7 @@ describe('QueueService', () => {
       expect(mockQueue.add).toHaveBeenCalledWith(
         'order_confirmation',
         notificationData,
-        expect.objectContaining(options)
+        expect.objectContaining(options),
       );
     });
   });
@@ -114,12 +117,12 @@ describe('QueueService', () => {
         priority: 'normal',
         recipient: {
           email: 'test@example.com',
-          name: 'Test User'
+          name: 'Test User',
         },
         data: {
           nome: 'Test User',
-          numeroPedido: '123'
-        }
+          numeroPedido: '123',
+        },
       };
 
       const result = await queueService['processNotification'](notificationData);
@@ -131,8 +134,8 @@ describe('QueueService', () => {
         'order_confirmation',
         expect.objectContaining({
           nome: 'Test User',
-          numeroPedido: '123'
-        })
+          numeroPedido: '123',
+        }),
       );
     });
 
@@ -144,14 +147,14 @@ describe('QueueService', () => {
         type: 'order_confirmation' as NotificationType,
         priority: 'low',
         recipient: {
-          email: 'test@example.com'
+          email: 'test@example.com',
         },
-        data: {}
+        data: {},
       };
 
-      await expect(queueService['processNotification'](notificationData))
-        .rejects
-        .toThrow('Email error');
+      await expect(queueService['processNotification'](notificationData)).rejects.toThrow(
+        'Email error',
+      );
     });
   });
 
@@ -188,4 +191,4 @@ describe('QueueService', () => {
       expect(mockQueue.clean).toHaveBeenCalledWith(2000, 'failed');
     });
   });
-}); 
+});

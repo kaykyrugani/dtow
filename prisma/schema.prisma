@@ -202,27 +202,28 @@ model WebhookLog {
 }
 
 model Payment {
-  id              String   @id @default(uuid())
-  paymentId       String   @unique
-  externalReference String?
-  status          String
-  paymentType     String
-  paymentMethod   String?
-  amount          Float
-  currency        String   @default("BRL")
-  payerEmail      String?
-  payerName       String?
-  payerDocument   String?
-  installments    Int?
-  processedAt     DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                String   @id @default(uuid())
+  amount           Float
+  status           String
+  external_reference String?
+  payment_type_id  String
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  order            Order?   @relation(fields: [external_reference], references: [id])
 
-  @@index([paymentId])
-  @@index([externalReference])
-  @@index([status])
-  @@index([processedAt])
   @@map("payments")
+}
+
+model Order {
+  id         String   @id @default(uuid())
+  status     String
+  total      Float
+  payment_id String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  payment    Payment? @relation(fields: [payment_id], references: [id])
+
+  @@map("orders")
 }
 
 model AuditLog {

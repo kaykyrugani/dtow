@@ -20,7 +20,7 @@ describe('Product Integration Tests', () => {
     marca: 'Marca Teste',
     modelo: 'Modelo Teste',
     quantidadeEstoque: 100,
-    imagemUrl: 'https://exemplo.com/imagem.jpg'
+    imagemUrl: 'https://exemplo.com/imagem.jpg',
   };
 
   beforeAll(async () => {
@@ -28,13 +28,13 @@ describe('Product Integration Tests', () => {
     const adminUser = await createTestUser({
       email: 'admin@test.com',
       senha: 'Admin@123',
-      tipoUsuario: 'ADMIN'
+      tipoUsuario: 'ADMIN',
     });
 
     const customerUser = await createTestUser({
       email: 'customer@test.com',
       senha: 'Customer@123',
-      tipoUsuario: 'CLIENTE'
+      tipoUsuario: 'CLIENTE',
     });
 
     adminToken = generateAuthToken(adminUser);
@@ -65,9 +65,7 @@ describe('Product Integration Tests', () => {
     });
 
     it('deve retornar erro 401 quando não autenticado', async () => {
-      const response = await request(app)
-        .post('/products')
-        .send(mockProductData);
+      const response = await request(app).post('/products').send(mockProductData);
 
       expect(response.status).toBe(401);
     });
@@ -100,15 +98,13 @@ describe('Product Integration Tests', () => {
         data: [
           mockProductData,
           { ...mockProductData, nome: 'Produto 2' },
-          { ...mockProductData, nome: 'Produto 3' }
-        ]
+          { ...mockProductData, nome: 'Produto 3' },
+        ],
       });
     });
 
     it('deve listar produtos com paginação', async () => {
-      const response = await request(app)
-        .get('/products')
-        .query({ page: 1, limit: 2 });
+      const response = await request(app).get('/products').query({ page: 1, limit: 2 });
 
       expect(response.status).toBe(200);
       expect(response.body.produtos).toHaveLength(2);
@@ -116,8 +112,7 @@ describe('Product Integration Tests', () => {
     });
 
     it('deve filtrar produtos por categoria', async () => {
-      const response = await request(app)
-        .get(`/products/categoria/${mockProductData.categoria}`);
+      const response = await request(app).get(`/products/categoria/${mockProductData.categoria}`);
 
       expect(response.status).toBe(200);
       expect(response.body.produtos).toHaveLength(3);
@@ -125,9 +120,7 @@ describe('Product Integration Tests', () => {
     });
 
     it('deve buscar produtos por termo', async () => {
-      const response = await request(app)
-        .get('/products/search')
-        .query({ q: 'Teste' });
+      const response = await request(app).get('/products/search').query({ q: 'Teste' });
 
       expect(response.status).toBe(200);
       expect(response.body.produtos).toHaveLength(3);
@@ -138,14 +131,13 @@ describe('Product Integration Tests', () => {
   describe('GET /products/:id', () => {
     beforeEach(async () => {
       const product = await prisma.produto.create({
-        data: mockProductData
+        data: mockProductData,
       });
       testProductId = product.id;
     });
 
     it('deve retornar um produto específico', async () => {
-      const response = await request(app)
-        .get(`/products/${testProductId}`);
+      const response = await request(app).get(`/products/${testProductId}`);
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject(mockProductData);
@@ -153,8 +145,7 @@ describe('Product Integration Tests', () => {
     });
 
     it('deve retornar erro 404 quando produto não existe', async () => {
-      const response = await request(app)
-        .get('/products/99999');
+      const response = await request(app).get('/products/99999');
 
       expect(response.status).toBe(404);
     });
@@ -163,7 +154,7 @@ describe('Product Integration Tests', () => {
   describe('PUT /products/:id', () => {
     beforeEach(async () => {
       const product = await prisma.produto.create({
-        data: mockProductData
+        data: mockProductData,
       });
       testProductId = product.id;
     });
@@ -171,7 +162,7 @@ describe('Product Integration Tests', () => {
     it('deve atualizar um produto quando autenticado como admin', async () => {
       const updateData = {
         preco: 149.99,
-        quantidadeEstoque: 50
+        quantidadeEstoque: 50,
       };
 
       const response = await request(app)
@@ -182,7 +173,7 @@ describe('Product Integration Tests', () => {
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
         ...mockProductData,
-        ...updateData
+        ...updateData,
       });
     });
 
@@ -199,7 +190,7 @@ describe('Product Integration Tests', () => {
   describe('DELETE /products/:id', () => {
     beforeEach(async () => {
       const product = await prisma.produto.create({
-        data: mockProductData
+        data: mockProductData,
       });
       testProductId = product.id;
     });
@@ -212,7 +203,7 @@ describe('Product Integration Tests', () => {
       expect(response.status).toBe(204);
 
       const deletedProduct = await prisma.produto.findUnique({
-        where: { id: testProductId }
+        where: { id: testProductId },
       });
       expect(deletedProduct).toBeNull();
     });
@@ -225,4 +216,4 @@ describe('Product Integration Tests', () => {
       expect(response.status).toBe(403);
     });
   });
-}); 
+});

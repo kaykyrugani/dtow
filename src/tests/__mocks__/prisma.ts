@@ -1,25 +1,25 @@
-import { vi } from 'vitest'
-import { PrismaClient } from '@prisma/client'
+import { vi } from 'vitest';
+import { PrismaClient } from '@prisma/client';
 
 type Usuario = {
-  id: number
-  nome: string
-  email: string
-  senha: string
-  cpf: string
-  tipoUsuario: string
-  tokenRecuperacao: string | null
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  nome: string;
+  email: string;
+  senha: string;
+  cpf: string;
+  tipoUsuario: string;
+  tokenRecuperacao: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 type Pedido = {
-  id: number
-  usuarioId: number
-  status: string
-  createdAt: Date
-  updatedAt: Date
-}
+  id: number;
+  usuarioId: number;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export const mockPrisma = {
   usuario: {
@@ -39,8 +39,8 @@ export const mockPrisma = {
     create: vi.fn(),
     findMany: vi.fn(),
   },
-} as unknown as PrismaClient
+} as unknown as PrismaClient;
 
-export type MockPrismaType = typeof mockPrisma
+export type MockPrismaType = typeof mockPrisma;
 
-export default mockPrisma 
+export default mockPrisma;

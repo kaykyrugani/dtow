@@ -1,9 +1,9 @@
-import { Router } from 'express'
-import { ProdutoController } from '../controllers/produtoController'
-import { authMiddleware } from '../middlewares/auth'
-import { adminMiddleware } from '../middlewares/admin'
-import { validarSchema } from '../middlewares/validator'
-import { produtoSchema } from '../schemas/produtoSchemas'
+import { Router } from 'express';
+import { ProdutoController } from '../controllers/produtoController';
+import { authMiddleware } from '../middlewares/auth';
+import { adminMiddleware } from '../middlewares/admin';
+import { validarSchema } from '../middlewares/validator';
+import { produtoSchema } from '../schemas/produtoSchemas';
 
 /**
  * @swagger
@@ -12,7 +12,7 @@ import { produtoSchema } from '../schemas/produtoSchemas'
  *   description: Endpoints para gerenciamento de produtos
  */
 
-const produtoRouter = Router()
+const produtoRouter = Router();
 
 /**
  * @swagger
@@ -50,7 +50,7 @@ const produtoRouter = Router()
  *                 totalPages:
  *                   type: integer
  */
-produtoRouter.get('/', ProdutoController.listar)
+produtoRouter.get('/', ProdutoController.listar);
 
 /**
  * @swagger
@@ -75,10 +75,10 @@ produtoRouter.get('/', ProdutoController.listar)
  *       404:
  *         description: Produto não encontrado
  */
-produtoRouter.get('/:id', ProdutoController.obterPorId)
+produtoRouter.get('/:id', ProdutoController.obterPorId);
 
 // Rotas protegidas (admin)
-produtoRouter.use(authMiddleware, adminMiddleware)
+produtoRouter.use(authMiddleware, adminMiddleware);
 
 /**
  * @swagger
@@ -106,7 +106,7 @@ produtoRouter.use(authMiddleware, adminMiddleware)
  *       400:
  *         description: Dados inválidos
  */
-produtoRouter.post('/', validarSchema(produtoSchema), ProdutoController.criar)
+produtoRouter.post('/', validarSchema(produtoSchema), ProdutoController.criar);
 
 /**
  * @swagger
@@ -143,7 +143,7 @@ produtoRouter.post('/', validarSchema(produtoSchema), ProdutoController.criar)
  *       400:
  *         description: Dados inválidos
  */
-produtoRouter.put('/:id', validarSchema(produtoSchema), ProdutoController.atualizar)
+produtoRouter.put('/:id', validarSchema(produtoSchema), ProdutoController.atualizar);
 
 /**
  * @swagger
@@ -168,9 +168,9 @@ produtoRouter.put('/:id', validarSchema(produtoSchema), ProdutoController.atuali
  *       404:
  *         description: Produto não encontrado
  */
-produtoRouter.delete('/:id', ProdutoController.excluir)
+produtoRouter.delete('/:id', ProdutoController.excluir);
 
-export { produtoRouter }
+export { produtoRouter };
 
 /**
  * @swagger
@@ -229,4 +229,4 @@ export { produtoRouter }
  *         imagem:
  *           type: string
  *           description: URL da imagem do produto
- */ 
+ */

@@ -42,4 +42,4 @@ container.registerSingleton('PaymentService', PaymentService);
 container.registerSingleton('CouponService', CouponService);
 container.registerSingleton('ReviewService', ReviewService);
 
-export { container }; 
+export { container };

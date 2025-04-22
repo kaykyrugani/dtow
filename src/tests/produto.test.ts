@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ProdutoService } from '../services/produtoService'
-import prisma from '../lib/prisma'
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { ProdutoService } from '../services/produtoService';
+import prisma from '../lib/prisma';
 
 vi.mock('../lib/prisma', () => {
   return {
@@ -10,11 +10,11 @@ vi.mock('../lib/prisma', () => {
         findUnique: vi.fn(),
         update: vi.fn(),
         delete: vi.fn(),
-        findMany: vi.fn()
-      }
-    }
-  }
-})
+        findMany: vi.fn(),
+      },
+    },
+  };
+});
 
 describe('ProdutoService', () => {
   const mockProduto = {
@@ -24,75 +24,75 @@ describe('ProdutoService', () => {
     preco: 99.99,
     estoque: 10,
     createdAt: new Date('2025-04-12T17:34:54.680Z'),
-    updatedAt: new Date('2025-04-12T17:34:54.680Z')
-  }
+    updatedAt: new Date('2025-04-12T17:34:54.680Z'),
+  };
 
   beforeEach(() => {
-    vi.clearAllMocks()
-  })
+    vi.clearAllMocks();
+  });
 
   it('deve criar um produto com sucesso', async () => {
-    vi.mocked(prisma.produto.create).mockResolvedValue(mockProduto)
+    vi.mocked(prisma.produto.create).mockResolvedValue(mockProduto);
 
     const produto = await ProdutoService.criar({
       nome: 'Produto Teste',
       descricao: 'Descrição teste',
       preco: 99.99,
-      estoque: 10
-    })
+      estoque: 10,
+    });
 
-    expect(produto).toEqual(mockProduto)
+    expect(produto).toEqual(mockProduto);
     expect(prisma.produto.create).toHaveBeenCalledWith({
       data: {
         nome: 'Produto Teste',
         descricao: 'Descrição teste',
         preco: 99.99,
-        estoque: 10
-      }
-    })
-  })
+        estoque: 10,
+      },
+    });
+  });
 
   it('deve atualizar um produto com sucesso', async () => {
-    const produtoAtualizado = { ...mockProduto, nome: 'Produto Atualizado' }
-    
-    vi.mocked(prisma.produto.findUnique).mockResolvedValue(mockProduto)
-    vi.mocked(prisma.produto.update).mockResolvedValue(produtoAtualizado)
+    const produtoAtualizado = { ...mockProduto, nome: 'Produto Atualizado' };
+
+    vi.mocked(prisma.produto.findUnique).mockResolvedValue(mockProduto);
+    vi.mocked(prisma.produto.update).mockResolvedValue(produtoAtualizado);
 
     const resultado = await ProdutoService.atualizar(1, {
-      nome: 'Produto Atualizado'
-    })
+      nome: 'Produto Atualizado',
+    });
 
-    expect(resultado).toEqual(produtoAtualizado)
+    expect(resultado).toEqual(produtoAtualizado);
     expect(prisma.produto.findUnique).toHaveBeenCalledWith({
-      where: { id: 1 }
-    })
+      where: { id: 1 },
+    });
     expect(prisma.produto.update).toHaveBeenCalledWith({
       where: { id: 1 },
-      data: { nome: 'Produto Atualizado' }
-    })
-  })
+      data: { nome: 'Produto Atualizado' },
+    });
+  });
 
   it('deve excluir um produto com sucesso', async () => {
-    vi.mocked(prisma.produto.findUnique).mockResolvedValue(mockProduto)
-    vi.mocked(prisma.produto.delete).mockResolvedValue(mockProduto)
+    vi.mocked(prisma.produto.findUnique).mockResolvedValue(mockProduto);
+    vi.mocked(prisma.produto.delete).mockResolvedValue(mockProduto);
 
-    const resultado = await ProdutoService.deletar(1)
+    const resultado = await ProdutoService.deletar(1);
 
-    expect(resultado).toEqual(mockProduto)
+    expect(resultado).toEqual(mockProduto);
     expect(prisma.produto.findUnique).toHaveBeenCalledWith({
-      where: { id: 1 }
-    })
+      where: { id: 1 },
+    });
     expect(prisma.produto.delete).toHaveBeenCalledWith({
-      where: { id: 1 }
-    })
-  })
+      where: { id: 1 },
+    });
+  });
 
   it('deve buscar todos os produtos', async () => {
-    vi.mocked(prisma.produto.findMany).mockResolvedValue([mockProduto])
+    vi.mocked(prisma.produto.findMany).mockResolvedValue([mockProduto]);
 
-    const produtos = await ProdutoService.buscarTodos()
+    const produtos = await ProdutoService.buscarTodos();
 
-    expect(produtos).toEqual([mockProduto])
-    expect(prisma.produto.findMany).toHaveBeenCalled()
-  })
-}) 
+    expect(produtos).toEqual([mockProduto]);
+    expect(prisma.produto.findMany).toHaveBeenCalled();
+  });
+});

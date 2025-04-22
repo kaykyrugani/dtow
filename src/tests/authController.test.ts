@@ -10,8 +10,8 @@ vi.mock('../services/authService', () => ({
     cadastrar: vi.fn(),
     login: vi.fn(),
     gerarTokenRecuperacao: vi.fn(),
-    alterarSenha: vi.fn()
-  }
+    alterarSenha: vi.fn(),
+  },
 }));
 
 describe('AuthController', () => {
@@ -20,14 +20,14 @@ describe('AuthController', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     mockReq = {
-      body: {}
+      body: {},
     };
 
     mockRes = {
       status: vi.fn().mockReturnThis(),
-      json: vi.fn()
+      json: vi.fn(),
     };
   });
 
@@ -36,13 +36,13 @@ describe('AuthController', () => {
       const dadosCadastro = {
         nome: 'João Silva',
         email: 'joao@example.com',
-        senha: 'Senha@123'
+        senha: 'Senha@123',
       };
       mockReq.body = dadosCadastro;
 
       const mockResultado = {
         usuario: { id: 1, ...dadosCadastro },
-        token: 'token_mock'
+        token: 'token_mock',
       };
       vi.mocked(AuthService.cadastrar).mockResolvedValue(mockResultado);
 
@@ -54,7 +54,7 @@ describe('AuthController', () => {
 
     test('deve retornar erro 400 para dados inválidos', async () => {
       const zodError = new ZodError([
-        { code: 'invalid_type', path: ['email'], message: 'Email inválido' }
+        { code: 'invalid_type', path: ['email'], message: 'Email inválido' },
       ]);
       vi.mocked(AuthService.cadastrar).mockRejectedValue(zodError);
 
@@ -63,7 +63,7 @@ describe('AuthController', () => {
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
         erro: 'Dados inválidos',
-        detalhes: zodError.errors
+        detalhes: zodError.errors,
       });
     });
   });
@@ -72,13 +72,13 @@ describe('AuthController', () => {
     test('deve fazer login com sucesso', async () => {
       const credenciais = {
         email: 'joao@example.com',
-        senha: 'Senha@123'
+        senha: 'Senha@123',
       };
       mockReq.body = credenciais;
 
       const mockResultado = {
         usuario: { id: 1, email: credenciais.email },
-        token: 'token_mock'
+        token: 'token_mock',
       };
       vi.mocked(AuthService.login).mockResolvedValue(mockResultado);
 
@@ -94,7 +94,7 @@ describe('AuthController', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
-        erro: 'Credenciais inválidas'
+        erro: 'Credenciais inválidas',
       });
     });
   });
@@ -111,7 +111,7 @@ describe('AuthController', () => {
 
       expect(mockRes.json).toHaveBeenCalledWith({
         mensagem: 'Se o email existir, você receberá as instruções de recuperação',
-        token: mockToken
+        token: mockToken,
       });
     });
 
@@ -123,7 +123,7 @@ describe('AuthController', () => {
 
       expect(mockRes.json).toHaveBeenCalledWith({
         mensagem: 'Se o email existir, você receberá as instruções de recuperação',
-        token: undefined
+        token: undefined,
       });
     });
   });
@@ -132,7 +132,7 @@ describe('AuthController', () => {
     test('deve alterar senha com sucesso', async () => {
       const dados = {
         token: 'token_valido',
-        novaSenha: 'NovaSenha@123'
+        novaSenha: 'NovaSenha@123',
       };
       mockReq.body = dados;
 
@@ -141,14 +141,14 @@ describe('AuthController', () => {
       await AuthController.alterarSenha(mockReq, mockRes);
 
       expect(mockRes.json).toHaveBeenCalledWith({
-        mensagem: 'Senha alterada com sucesso'
+        mensagem: 'Senha alterada com sucesso',
       });
     });
 
     test('deve retornar erro 400 para token inválido', async () => {
       mockReq.body = {
         token: 'token_invalido',
-        novaSenha: 'NovaSenha@123'
+        novaSenha: 'NovaSenha@123',
       };
 
       vi.mocked(AuthService.alterarSenha).mockRejectedValue(new Error('Token inválido'));
@@ -157,8 +157,8 @@ describe('AuthController', () => {
 
       expect(mockRes.status).toHaveBeenCalledWith(400);
       expect(mockRes.json).toHaveBeenCalledWith({
-        erro: 'Token inválido'
+        erro: 'Token inválido',
       });
     });
   });
-}); 
+});

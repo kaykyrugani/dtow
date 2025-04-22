@@ -8,7 +8,7 @@ const createAddressSchema = z.object({
   numero: z.string(),
   complemento: z.string().optional(),
   tipo: z.enum(['RESIDENCIAL', 'COMERCIAL']).optional(),
-  principal: z.boolean().optional()
+  principal: z.boolean().optional(),
 });
 
 export class AddressController {
@@ -64,4 +64,4 @@ export class AddressController {
       next(error);
     }
   }
-} 
+}

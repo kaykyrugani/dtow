@@ -42,7 +42,7 @@ describe('AuthController', () => {
       const expectedResponse = {
         usuario: testUser as Prisma.Usuario,
         accessToken: 'token_jwt',
-        refreshToken: 'refresh_token'
+        refreshToken: 'refresh_token',
       };
       vi.spyOn(authService, 'cadastrar').mockResolvedValue(expectedResponse);
 
@@ -69,7 +69,7 @@ describe('AuthController', () => {
       const expectedResponse = {
         usuario: createTestUser() as Prisma.Usuario,
         accessToken: 'token_jwt',
-        refreshToken: 'refresh_token'
+        refreshToken: 'refresh_token',
       };
       req.body = loginData;
       vi.spyOn(authService, 'login').mockResolvedValue(expectedResponse);
@@ -96,7 +96,7 @@ describe('AuthController', () => {
       req.body = { email };
       const expectedResponse = {
         status: 'ok' as const,
-        token: 'token_recuperacao'
+        token: 'token_recuperacao',
       };
       vi.spyOn(authService, 'gerarTokenRecuperacao').mockResolvedValue(expectedResponse);
 
@@ -105,7 +105,7 @@ describe('AuthController', () => {
       expect(authService.gerarTokenRecuperacao).toHaveBeenCalledWith(email);
       expect(res.json).toHaveBeenCalledWith({
         mensagem: 'Se o email existir, você receberá as instruções de recuperação',
-        token: expectedResponse.token
+        token: expectedResponse.token,
       });
     });
   });
@@ -116,7 +116,7 @@ describe('AuthController', () => {
       const novaSenha = 'nova_senha_123';
       req.body = { token, novaSenha };
       const expectedResponse = {
-        mensagem: 'Senha alterada com sucesso' as const
+        mensagem: 'Senha alterada com sucesso' as const,
       };
       vi.spyOn(authService, 'alterarSenha').mockResolvedValue(expectedResponse);
 

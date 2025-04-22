@@ -26,13 +26,13 @@ describe('BaseService', () => {
         total: 1,
         page: 1,
         limit: 10,
-        totalPages: 1
+        totalPages: 1,
       });
       expect(mockPrisma.usuario.findMany).toHaveBeenCalledWith({
         skip: 0,
         take: 10,
         where: {},
-        orderBy: {}
+        orderBy: {},
       });
     });
 
@@ -52,7 +52,7 @@ describe('BaseService', () => {
         skip: 0,
         take: 10,
         where,
-        orderBy
+        orderBy,
       });
     });
 
@@ -71,13 +71,13 @@ describe('BaseService', () => {
         total: 21,
         page: 2,
         limit: 10,
-        totalPages: 3
+        totalPages: 3,
       });
       expect(mockPrisma.usuario.findMany).toHaveBeenCalledWith({
         skip: 10,
         take: 10,
         where: {},
-        orderBy: {}
+        orderBy: {},
       });
     });
 
@@ -90,4 +90,4 @@ describe('BaseService', () => {
       await expect(service.paginar({})).rejects.toThrow('Erro na operação do banco');
     });
   });
-}); 
+});

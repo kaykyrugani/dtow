@@ -40,7 +40,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     };
 
     const usuario = await prisma.usuario.findUnique({
-      where: { id: decoded.id }
+      where: { id: decoded.id },
     });
 
     if (!usuario) {
@@ -49,7 +49,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 
     req.usuario = {
       id: usuario.id,
-      tipo: usuario.tipoUsuario
+      tipo: usuario.tipoUsuario,
     };
 
     next();
@@ -76,4 +76,4 @@ declare global {
       };
     }
   }
-} 
+}

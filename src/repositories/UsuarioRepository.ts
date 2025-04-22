@@ -9,7 +9,7 @@ export class UsuarioRepository extends BaseRepository<Usuario> {
   async findByEmail(email: string): Promise<Usuario | null> {
     try {
       return await this.prisma.usuario.findUnique({
-        where: { email }
+        where: { email },
       });
     } catch (error) {
       this.handleError(error);
@@ -25,11 +25,11 @@ export class UsuarioRepository extends BaseRepository<Usuario> {
           email: true,
           nome: true,
           senha: true,
-          tipoUsuario: true
-        }
+          tipoUsuario: true,
+        },
       });
     } catch (error) {
       this.handleError(error);
     }
   }
-} 
+}

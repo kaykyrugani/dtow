@@ -26,9 +26,12 @@ export class Validator {
     }
   }
 
-  static validatePartial<T extends z.ZodObject<any>>(schema: T, data: unknown): Partial<z.infer<T>> {
+  static validatePartial<T extends z.ZodObject<any>>(
+    schema: T,
+    data: unknown,
+  ): Partial<z.infer<T>> {
     return this.validateSync(schema.partial(), data);
   }
 }
 
-export const validate = Validator.validate; 
+export const validate = Validator.validate;

@@ -17,7 +17,7 @@ export const createDuplicateEmailError = () => {
   return new PrismaClientKnownRequestError(
     'Unique constraint failed on the fields: (`email`)',
     'P2002',
-    { target: ['email'] }
+    { target: ['email'] },
   );
 };
 
@@ -27,5 +27,5 @@ export const getMockUser = (overrides = {}) => ({
   nome: 'Usuário Teste',
   senha: 'hashed_senha',
   tipoUsuario: 'ADMIN' as const,
-  ...overrides
-}); 
+  ...overrides,
+});

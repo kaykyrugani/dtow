@@ -8,7 +8,7 @@ const mockUsuario = {
   tipoUsuario: 'CLIENTE',
   senha: '$2b$12$mockHashedPassword',
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 };
 
 export const createMockUsuarioRepository = () => ({
@@ -19,5 +19,5 @@ export const createMockUsuarioRepository = () => ({
   update: vi.fn().mockResolvedValue(mockUsuario),
   delete: vi.fn().mockResolvedValue(mockUsuario),
   findAll: vi.fn().mockResolvedValue([mockUsuario]),
-  count: vi.fn().mockResolvedValue(1)
-}); 
+  count: vi.fn().mockResolvedValue(1),
+});

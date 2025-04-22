@@ -10,7 +10,7 @@ export const createTestUser = (overrides: Partial<Usuario> = {}): Usuario => ({
   tipoUsuario: TipoUsuario.ADMIN,
   createdAt: new Date(),
   updatedAt: new Date(),
-  ...overrides
+  ...overrides,
 });
 
 export interface LoginData {
@@ -21,18 +21,18 @@ export interface LoginData {
 export const createTestLoginData = (overrides: Partial<LoginData> = {}): LoginData => ({
   email: 'test@example.com',
   senha: 'senha_valida_123',
-  ...overrides
+  ...overrides,
 });
 
 export const createPrismaError = (
   code: string,
   message = 'Prisma error',
-  meta?: Record<string, any>
+  meta?: Record<string, any>,
 ): PrismaClientKnownRequestError => {
   const error = new PrismaClientKnownRequestError(message, {
     code,
     clientVersion: '4.x.x',
-    meta
+    meta,
   });
   return error;
 };
@@ -47,4 +47,4 @@ export const createTokenExpiredError = (): Error => {
   const error = new Error('Token expired');
   error.name = 'TokenExpiredError';
   return error;
-}; 
+};

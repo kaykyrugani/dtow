@@ -1,4 +1,4 @@
-# Dependencies
+# Dependências
 node_modules/
 npm-debug.log*
 yarn-debug.log*
@@ -8,10 +8,14 @@ yarn-error.log*
 dist/
 build/
 
-# Environment
+# Ambiente
 .env
 .env.local
 .env.*.local
+
+# Logs
+logs/
+*.log
 
 # IDE
 .idea/
@@ -19,17 +23,20 @@ build/
 *.swp
 *.swo
 
-# Logs
-logs/
-*.log
-
-# Testing
-coverage/
-
-# Database
-*.sqlite
-*.sqlite3
-
-# OS
+# Sistema
 .DS_Store
 Thumbs.db
+
+# Testes
+coverage/
+.nyc_output/
+
+# Docker
+docker-compose.override.yml
+
+# Redis
+dump.rdb
+
+# Métricas
+prometheus_data/
+grafana_data/

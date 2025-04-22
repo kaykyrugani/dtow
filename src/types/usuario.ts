@@ -1,6 +1,6 @@
 export enum TipoUsuario {
   ADMIN = 'ADMIN',
-  CLIENTE = 'CLIENTE'
+  CLIENTE = 'CLIENTE',
 }
 
 export interface Usuario {
@@ -14,4 +14,4 @@ export interface Usuario {
   updatedAt: Date;
 }
 
-export interface UsuarioSemSenha extends Omit<Usuario, 'senha'> {} 
+export interface UsuarioSemSenha extends Omit<Usuario, 'senha'> {}

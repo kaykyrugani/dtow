@@ -1,8 +1,8 @@
-import { Router } from 'express'
-import { UsuarioController } from '../controllers/usuarioController'
-import { authMiddleware } from '../middlewares/auth'
-import { validarSchema } from '../middlewares/validator'
-import { atualizarPerfilSchema, enderecoSchema } from '../schemas/usuarioSchemas'
+import { Router } from 'express';
+import { UsuarioController } from '../controllers/usuarioController';
+import { authMiddleware } from '../middlewares/auth';
+import { validarSchema } from '../middlewares/validator';
+import { atualizarPerfilSchema, enderecoSchema } from '../schemas/usuarioSchemas';
 
 /**
  * @swagger
@@ -11,10 +11,10 @@ import { atualizarPerfilSchema, enderecoSchema } from '../schemas/usuarioSchemas
  *   description: Endpoints para gerenciamento de usuários
  */
 
-const usuarioRouter = Router()
+const usuarioRouter = Router();
 
 // Rotas protegidas
-usuarioRouter.use(authMiddleware)
+usuarioRouter.use(authMiddleware);
 
 /**
  * @swagger
@@ -34,7 +34,7 @@ usuarioRouter.use(authMiddleware)
  *       401:
  *         description: Não autorizado
  */
-usuarioRouter.get('/perfil', UsuarioController.obterPerfil)
+usuarioRouter.get('/perfil', UsuarioController.obterPerfil);
 
 /**
  * @swagger
@@ -62,7 +62,11 @@ usuarioRouter.get('/perfil', UsuarioController.obterPerfil)
  *       400:
  *         description: Dados inválidos
  */
-usuarioRouter.put('/perfil', validarSchema(atualizarPerfilSchema), UsuarioController.atualizarPerfil)
+usuarioRouter.put(
+  '/perfil',
+  validarSchema(atualizarPerfilSchema),
+  UsuarioController.atualizarPerfil,
+);
 
 /**
  * @swagger
@@ -90,7 +94,7 @@ usuarioRouter.put('/perfil', validarSchema(atualizarPerfilSchema), UsuarioContro
  *       400:
  *         description: Dados inválidos
  */
-usuarioRouter.post('/endereco', validarSchema(enderecoSchema), UsuarioController.adicionarEndereco)
+usuarioRouter.post('/endereco', validarSchema(enderecoSchema), UsuarioController.adicionarEndereco);
 
 /**
  * @swagger
@@ -132,9 +136,9 @@ usuarioRouter.post('/endereco', validarSchema(enderecoSchema), UsuarioController
  *       401:
  *         description: Não autorizado
  */
-usuarioRouter.get('/pedidos', UsuarioController.listarPedidos)
+usuarioRouter.get('/pedidos', UsuarioController.listarPedidos);
 
-export { usuarioRouter }
+export { usuarioRouter };
 
 /**
  * @swagger
@@ -299,4 +303,4 @@ export { usuarioRouter }
  *           description: Preço unitário do produto no momento da compra
  *         produto:
  *           $ref: '#/components/schemas/Produto'
- */ 
+ */

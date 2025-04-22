@@ -9,7 +9,7 @@ const router = Router();
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
   max: 5, // limite de 5 tentativas
-  message: { erro: 'Muitas tentativas de login. Tente novamente em 15 minutos.' }
+  message: { erro: 'Muitas tentativas de login. Tente novamente em 15 minutos.' },
 });
 
 // Rotas públicas
@@ -18,4 +18,4 @@ router.post('/login', loginLimiter, AuthController.login as RequestHandler);
 router.post('/recuperar-senha', AuthController.recuperarSenha as RequestHandler);
 router.post('/alterar-senha', AuthController.alterarSenha as RequestHandler);
 
-export default router; 
+export default router;

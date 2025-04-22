@@ -8,4 +8,4 @@ const metricsRouter = Router();
 // Protegida por autenticação para evitar acesso não autorizado
 metricsRouter.get('/', ensureAuthenticated, metricsRoute);
 
-export default metricsRouter; 
+export default metricsRouter;

@@ -23,22 +23,26 @@ export async function createTestUser(data: CreateTestUserData) {
       tipoUsuario: data.tipoUsuario,
       nome: 'Usuário Teste',
       cpf: '12345678900',
-      telefone: '11999999999'
-    }
+      telefone: '11999999999',
+    },
   });
 }
 
-export function generateAuthToken(user: { id: number; email: string; tipoUsuario: UserType }): string {
+export function generateAuthToken(user: {
+  id: number;
+  email: string;
+  tipoUsuario: UserType;
+}): string {
   return sign(
     {
       id: user.id,
       email: user.email,
-      tipoUsuario: user.tipoUsuario
+      tipoUsuario: user.tipoUsuario,
     },
     env.JWT_SECRET,
     {
       subject: user.id.toString(),
-      expiresIn: '1d'
-    }
+      expiresIn: '1d',
+    },
   );
-} 
+}

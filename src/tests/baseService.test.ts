@@ -66,7 +66,7 @@ describe('BaseService', () => {
         skip: 0,
         take: 10,
         where: {},
-        orderBy: {}
+        orderBy: {},
       });
     });
 
@@ -77,14 +77,14 @@ describe('BaseService', () => {
       await service.findAll({
         page: 1,
         limit: 10,
-        orderBy: { name: 'desc' }
+        orderBy: { name: 'desc' },
       });
 
       expect(mockPrisma.produto.findMany).toHaveBeenCalledWith({
         skip: 0,
         take: 10,
         where: {},
-        orderBy: { name: 'desc' }
+        orderBy: { name: 'desc' },
       });
     });
   });
@@ -98,7 +98,7 @@ describe('BaseService', () => {
 
       expect(result).toEqual(mockItem);
       expect(mockPrisma.produto.findUnique).toHaveBeenCalledWith({
-        where: { id: 1 }
+        where: { id: 1 },
       });
     });
 
@@ -122,7 +122,7 @@ describe('BaseService', () => {
 
       expect(result).toEqual(mockCreated);
       expect(mockPrisma.produto.create).toHaveBeenCalledWith({
-        data: mockData
+        data: mockData,
       });
     });
 
@@ -145,7 +145,7 @@ describe('BaseService', () => {
       expect(result).toEqual(mockUpdated);
       expect(mockPrisma.produto.update).toHaveBeenCalledWith({
         where: { id: 1 },
-        data: mockData
+        data: mockData,
       });
     });
 
@@ -163,7 +163,7 @@ describe('BaseService', () => {
       await service.delete(1);
 
       expect(mockPrisma.produto.delete).toHaveBeenCalledWith({
-        where: { id: 1 }
+        where: { id: 1 },
       });
     });
 
@@ -199,4 +199,4 @@ describe('BaseService', () => {
       expect(() => service['handleError'](error)).toThrow('Erro personalizado');
     });
   });
-}); 
+});

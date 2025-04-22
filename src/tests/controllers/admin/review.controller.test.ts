@@ -10,9 +10,9 @@ vi.mock('@prisma/client', () => ({
       update: vi.fn(),
       groupBy: vi.fn(),
       count: vi.fn(),
-      aggregate: vi.fn()
-    }
-  }))
+      aggregate: vi.fn(),
+    },
+  })),
 }));
 
 describe('ReviewController', () => {
@@ -25,19 +25,17 @@ describe('ReviewController', () => {
     mockReq = {
       user: { id: '1', tipoUsuario: 'ADMIN' },
       params: {},
-      body: {}
+      body: {},
     };
     mockRes = {
       json: vi.fn().mockReturnThis(),
-      status: vi.fn().mockReturnThis()
+      status: vi.fn().mockReturnThis(),
     };
   });
 
   describe('listPendingReviews', () => {
     it('should return pending reviews', async () => {
-      const mockReviews = [
-        { id: '1', status: 'PENDING' }
-      ];
+      const mockReviews = [{ id: '1', status: 'PENDING' }];
 
       vi.mocked(prisma.avaliacao.findMany).mockResolvedValue(mockReviews);
 
@@ -51,13 +49,13 @@ describe('ReviewController', () => {
             select: {
               id: true,
               nome: true,
-              email: true
-            }
-          }
+              email: true,
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc'
-        }
+          createdAt: 'desc',
+        },
       });
 
       expect(mockRes.json).toHaveBeenCalledWith(mockReviews);
@@ -66,9 +64,7 @@ describe('ReviewController', () => {
     it('should throw error when database fails', async () => {
       vi.mocked(prisma.avaliacao.findMany).mockRejectedValue(new Error('Database error'));
 
-      await expect(ReviewController.listPendingReviews(mockReq, mockRes))
-        .rejects
-        .toThrow(AppError);
+      await expect(ReviewController.listPendingReviews(mockReq, mockRes)).rejects.toThrow(AppError);
     });
   });
 
@@ -86,7 +82,7 @@ describe('ReviewController', () => {
         data: {
           status: 'APPROVED',
           reviewedBy: '1',
-          reviewedAt: expect.any(Date)
+          reviewedAt: expect.any(Date),
         },
         include: {
           produto: true,
@@ -94,10 +90,10 @@ describe('ReviewController', () => {
             select: {
               id: true,
               nome: true,
-              email: true
-            }
-          }
-        }
+              email: true,
+            },
+          },
+        },
       });
 
       expect(mockRes.json).toHaveBeenCalledWith(mockReview);
@@ -120,7 +116,7 @@ describe('ReviewController', () => {
           status: 'REJECTED',
           reviewedBy: '1',
           reviewedAt: expect.any(Date),
-          rejectionReason: 'Conteúdo inadequado'
+          rejectionReason: 'Conteúdo inadequado',
         },
         include: {
           produto: true,
@@ -128,10 +124,10 @@ describe('ReviewController', () => {
             select: {
               id: true,
               nome: true,
-              email: true
-            }
-          }
-        }
+              email: true,
+            },
+          },
+        },
       });
 
       expect(mockRes.json).toHaveBeenCalledWith(mockReview);
@@ -143,13 +139,13 @@ describe('ReviewController', () => {
       const mockStats = [
         { status: 'PENDING', _count: { id: 5 } },
         { status: 'APPROVED', _count: { id: 10 } },
-        { status: 'REJECTED', _count: { id: 2 } }
+        { status: 'REJECTED', _count: { id: 2 } },
       ];
 
       vi.mocked(prisma.avaliacao.groupBy).mockResolvedValue(mockStats);
       vi.mocked(prisma.avaliacao.count).mockResolvedValue(17);
       vi.mocked(prisma.avaliacao.aggregate).mockResolvedValue({
-        _avg: { nota: 4.5 }
+        _avg: { nota: 4.5 },
       });
 
       await ReviewController.getReviewStats(mockReq, mockRes);
@@ -157,8 +153,8 @@ describe('ReviewController', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         stats: mockStats,
         totalReviews: 17,
-        averageRating: 4.5
+        averageRating: 4.5,
       });
     });
   });
-}); 
+});

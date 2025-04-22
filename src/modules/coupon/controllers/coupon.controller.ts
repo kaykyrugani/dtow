@@ -27,7 +27,9 @@ export class CouponController {
       if (error instanceof AppError) {
         return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Erro interno do servidor' });
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ message: 'Erro interno do servidor' });
     }
   }
 
@@ -44,7 +46,9 @@ export class CouponController {
       if (error instanceof AppError) {
         return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Erro interno do servidor' });
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ message: 'Erro interno do servidor' });
     }
   }
 
@@ -88,7 +92,9 @@ export class CouponController {
       if (error instanceof AppError) {
         return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Erro interno do servidor' });
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ message: 'Erro interno do servidor' });
     }
   }
 
@@ -110,7 +116,9 @@ export class CouponController {
       if (error instanceof AppError) {
         return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Erro interno do servidor' });
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ message: 'Erro interno do servidor' });
     }
   }
 
@@ -132,7 +140,9 @@ export class CouponController {
       if (error instanceof AppError) {
         return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Erro interno do servidor' });
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ message: 'Erro interno do servidor' });
     }
   }
 
@@ -154,7 +164,9 @@ export class CouponController {
       if (error instanceof AppError) {
         return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Erro interno do servidor' });
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ message: 'Erro interno do servidor' });
     }
   }
 
@@ -173,7 +185,9 @@ export class CouponController {
       if (error instanceof AppError) {
         return res.status(error.statusCode).json({ message: error.message });
       }
-      return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: 'Erro interno do servidor' });
+      return res
+        .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({ message: 'Erro interno do servidor' });
     }
   }
-} 
+}

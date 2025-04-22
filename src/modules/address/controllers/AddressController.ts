@@ -24,21 +24,21 @@ export class AddressController {
   static async criar(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const enderecoData = enderecoSchema.parse(req.body);
-      
+
       // Consulta o CEP para validar e preencher dados
       const cepData = await AddressController.cepService.consultarCep(enderecoData.cep);
-      
+
       // Atualiza os dados do endereço com as informações do CEP
       const enderecoCompleto = {
         ...enderecoData,
         logradouro: cepData.logradouro,
         bairro: cepData.bairro,
         cidade: cepData.cidade,
-        uf: cepData.uf
+        uf: cepData.uf,
       };
 
       const endereco = await AddressController.prisma.endereco.create({
-        data: enderecoCompleto
+        data: enderecoCompleto,
       });
 
       res.status(HttpStatusCode.CREATED).json(endereco);
@@ -54,19 +54,19 @@ export class AddressController {
 
       // Consulta o CEP para validar e preencher dados
       const cepData = await AddressController.cepService.consultarCep(enderecoData.cep);
-      
+
       // Atualiza os dados do endereço com as informações do CEP
       const enderecoCompleto = {
         ...enderecoData,
         logradouro: cepData.logradouro,
         bairro: cepData.bairro,
         cidade: cepData.cidade,
-        uf: cepData.uf
+        uf: cepData.uf,
       };
 
       const endereco = await AddressController.prisma.endereco.update({
         where: { id },
-        data: enderecoCompleto
+        data: enderecoCompleto,
       });
 
       res.json(endereco);
@@ -80,7 +80,7 @@ export class AddressController {
       const { id } = req.params;
 
       await AddressController.prisma.endereco.delete({
-        where: { id }
+        where: { id },
       });
 
       res.status(HttpStatusCode.NO_CONTENT).send();
@@ -94,15 +94,13 @@ export class AddressController {
       const { id } = req.params;
 
       const endereco = await AddressController.prisma.endereco.findUnique({
-        where: { id }
+        where: { id },
       });
 
       if (!endereco) {
-        throw new AppError(
-          ERROR_CODES.NOT_FOUND,
-          HttpStatusCode.NOT_FOUND,
-          { message: 'Endereço não encontrado' }
-        );
+        throw new AppError(ERROR_CODES.NOT_FOUND, HttpStatusCode.NOT_FOUND, {
+          message: 'Endereço não encontrado',
+        });
       }
 
       res.json(endereco);
@@ -116,7 +114,7 @@ export class AddressController {
       const { usuarioId } = req.params;
 
       const enderecos = await AddressController.prisma.endereco.findMany({
-        where: { usuarioId }
+        where: { usuarioId },
       });
 
       res.json(enderecos);
@@ -124,4 +122,4 @@ export class AddressController {
       next(error);
     }
   }
-} 
+}

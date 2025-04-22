@@ -53,4 +53,4 @@ export const config = {
     pass: env.SMTP_PASS,
     from: env.SMTP_FROM,
   },
-} as const; 
+} as const;

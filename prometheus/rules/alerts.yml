@@ -123,4 +123,87 @@ groups:
           severity: critical
         annotations:
           summary: "Atividade suspeita por IP"
-          description: "IP {{ $labels.ip }} com {{ $value }} requisições não autorizadas por minuto" 
+          description: "IP {{ $labels.ip }} com {{ $value }} requisições não autorizadas por minuto"
+
+      - alert: HighErrorRate
+        expr: rate(onlywave_errors_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Alta taxa de erros"
+          description: "A taxa de erros está acima de 0.1 por segundo nos últimos 5 minutos"
+
+      - alert: HighRequestDuration
+        expr: histogram_quantile(0.95, rate(onlywave_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alta duração das requisições"
+          description: "95% das requisições estão levando mais de 2 segundos"
+
+      - alert: HighPaymentFailureRate
+        expr: rate(onlywave_payments_total{status="failed"}[5m]) / rate(onlywave_payments_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Alta taxa de falha em pagamentos"
+          description: "Mais de 10% dos pagamentos estão falhando"
+
+      - alert: HighWebhookFailureRate
+        expr: rate(onlywave_webhooks_total{status="failed"}[5m]) / rate(onlywave_webhooks_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Alta taxa de falha em webhooks"
+          description: "Mais de 10% dos webhooks estão falhando"
+
+  - name: payment_alerts
+    rules:
+      - alert: HighPaymentFailureRate
+        expr: rate(payment_failures_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Alta taxa de falhas em pagamentos"
+          description: "A taxa de falhas em pagamentos está acima de 10% nos últimos 5 minutos"
+
+      - alert: HighProcessingDuration
+        expr: histogram_quantile(0.95, rate(payment_processing_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alto tempo de processamento de pagamentos"
+          description: "95% dos pagamentos estão demorando mais de 2 segundos para serem processados"
+
+      - alert: WebhookQueueGrowing
+        expr: webhook_queue_size > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Fila de webhooks crescendo"
+          description: "A fila de webhooks tem mais de 100 itens aguardando processamento"
+
+      - alert: HighCacheErrorRate
+        expr: rate(payment_cache_errors_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alta taxa de erros no cache"
+          description: "A taxa de erros no cache está acima de 5% nos últimos 5 minutos"
+
+      - alert: HighEventPublishFailureRate
+        expr: rate(payment_event_errors_total[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Alta taxa de falhas na publicação de eventos"
+          description: "A taxa de falhas na publicação de eventos está acima de 5% nos últimos 5 minutos" 

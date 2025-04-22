@@ -44,4 +44,4 @@ export interface ProductResponseDTO {
   ativo: boolean;
   criadoEm: Date;
   atualizadoEm: Date;
-} 
+}

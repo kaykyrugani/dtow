@@ -52,7 +52,7 @@ describe('ReviewController', () => {
       await ReviewController.createReview(
         mockRequest as Request,
         mockResponse as Response,
-        mockNext
+        mockNext,
       );
 
       expect(mockResponse.status).toHaveBeenCalledWith(201);
@@ -64,18 +64,16 @@ describe('ReviewController', () => {
       mockRequest.body = { nota: 5 };
 
       vi.spyOn(reviewService, 'createReview').mockRejectedValue(
-        new AppError('Produto não encontrado', 404)
+        new AppError('Produto não encontrado', 404),
       );
 
       await ReviewController.createReview(
         mockRequest as Request,
         mockResponse as Response,
-        mockNext
+        mockNext,
       );
 
-      expect(mockNext).toHaveBeenCalledWith(
-        expect.any(AppError)
-      );
+      expect(mockNext).toHaveBeenCalledWith(expect.any(AppError));
     });
   });
 
@@ -103,7 +101,7 @@ describe('ReviewController', () => {
       await ReviewController.updateReview(
         mockRequest as Request,
         mockResponse as Response,
-        mockNext
+        mockNext,
       );
 
       expect(mockResponse.json).toHaveBeenCalledWith(mockUpdatedReview);
@@ -119,7 +117,7 @@ describe('ReviewController', () => {
       await ReviewController.deleteReview(
         mockRequest as Request,
         mockResponse as Response,
-        mockNext
+        mockNext,
       );
 
       expect(mockResponse.status).toHaveBeenCalledWith(204);
@@ -153,7 +151,7 @@ describe('ReviewController', () => {
       await ReviewController.getProductReviews(
         mockRequest as Request,
         mockResponse as Response,
-        mockNext
+        mockNext,
       );
 
       expect(mockResponse.json).toHaveBeenCalledWith(mockReviews);
@@ -187,10 +185,10 @@ describe('ReviewController', () => {
       await ReviewController.getAllReviews(
         mockRequest as Request,
         mockResponse as Response,
-        mockNext
+        mockNext,
       );
 
       expect(mockResponse.json).toHaveBeenCalledWith(mockReviews);
     });
   });
-}); 
+});

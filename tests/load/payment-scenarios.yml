@@ -1,0 +1,136 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 50
+      name: "Aquecimento"
+    - duration: 300
+      arrivalRate: 50
+      name: "Carga Sustentada"
+    - duration: 60
+      arrivalRate: 100
+      name: "Pico de Carga"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+      Authorization: "Bearer {{ $processEnvironment.JWT_TOKEN }}"
+  variables:
+    cpf: ["123.456.789-00", "987.654.321-00", "111.222.333-44"]
+    email: ["test1@example.com", "test2@example.com", "test3@example.com"]
+    amount: [100, 200, 300, 400, 500]
+
+scenarios:
+  - name: "Fluxo de Pagamento PIX"
+    flow:
+      - post:
+          url: "/api/payments"
+          json:
+            type: "pix"
+            amount: "{{ $randomNumber(100, 500) }}"
+            payer:
+              document: "{{ $randomString(11) }}"
+              email: "{{ $randomString(10) }}@example.com"
+          capture:
+            - json: "$.id"
+              as: "paymentId"
+            - json: "$.status"
+              as: "status"
+          expect:
+            - statusCode: 201
+            - hasProperty: "id"
+            - hasProperty: "status"
+          think: 2
+      - get:
+          url: "/api/payments/{{ paymentId }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "status"
+          think: 1
+
+  - name: "Fluxo de Pagamento Cartão"
+    flow:
+      - post:
+          url: "/api/payments"
+          json:
+            type: "credit_card"
+            amount: "{{ $randomNumber(100, 500) }}"
+            payer:
+              document: "{{ $randomString(11) }}"
+              email: "{{ $randomString(10) }}@example.com"
+            card:
+              number: "4111111111111111"
+              expirationMonth: "12"
+              expirationYear: "2025"
+              securityCode: "123"
+              holder:
+                name: "Test User"
+                document: "{{ $randomString(11) }}"
+          capture:
+            - json: "$.id"
+              as: "paymentId"
+            - json: "$.status"
+              as: "status"
+          expect:
+            - statusCode: 201
+            - hasProperty: "id"
+            - hasProperty: "status"
+          think: 2
+      - get:
+          url: "/api/payments/{{ paymentId }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "status"
+          think: 1
+
+  - name: "Fluxo de Reembolso"
+    flow:
+      - post:
+          url: "/api/payments"
+          json:
+            type: "pix"
+            amount: "{{ $randomNumber(100, 500) }}"
+            payer:
+              document: "{{ $randomString(11) }}"
+              email: "{{ $randomString(10) }}@example.com"
+          capture:
+            - json: "$.id"
+              as: "paymentId"
+          expect:
+            - statusCode: 201
+          think: 2
+      - post:
+          url: "/api/payments/{{ paymentId }}/refund"
+          json:
+            amount: "{{ $randomNumber(100, 500) }}"
+            reason: "Test refund"
+          expect:
+            - statusCode: 200
+            - hasProperty: "status"
+          think: 1
+
+  - name: "Consulta de Status"
+    flow:
+      - get:
+          url: "/api/payments/status"
+          qs:
+            document: "{{ $randomString(11) }}"
+          expect:
+            - statusCode: 200
+            - hasProperty: "payments"
+          think: 1
+
+  - name: "Webhook de Pagamento"
+    flow:
+      - post:
+          url: "/api/webhooks/payment"
+          json:
+            action: "payment.created"
+            data:
+              id: "{{ $randomString(32) }}"
+              status: "approved"
+              amount: "{{ $randomNumber(100, 500) }}"
+              external_reference: "{{ $randomString(16) }}"
+          expect:
+            - statusCode: 200
+          think: 1 

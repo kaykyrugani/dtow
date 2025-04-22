@@ -7,7 +7,7 @@ export const mockPrismaError = (code: string, meta?: Record<string, any>) => {
     code,
     meta,
     name: 'PrismaClientKnownRequestError',
-    message: `Prisma error with code ${code}`
+    message: `Prisma error with code ${code}`,
   });
   return error as PrismaClientKnownRequestError;
 };
@@ -22,4 +22,4 @@ export const mockNotFoundError = () => {
 
 export const mockValidationError = () => {
   return mockPrismaError('P2001');
-}; 
+};

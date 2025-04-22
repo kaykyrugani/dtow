@@ -10,11 +10,7 @@ const orderRouter = Router();
 orderRouter.use(authMiddleware());
 
 // Criar pedido
-orderRouter.post(
-  '/',
-  validateSchema(createOrderSchema),
-  OrderController.create
-);
+orderRouter.post('/', validateSchema(createOrderSchema), OrderController.create);
 
 // Buscar pedido por ID
 orderRouter.get('/:id', OrderController.findById);
@@ -26,10 +22,10 @@ orderRouter.get('/usuario/:usuarioId', OrderController.findByUserId);
 orderRouter.patch(
   '/:id/status',
   validateSchema(updateOrderStatusSchema),
-  OrderController.updateStatus
+  OrderController.updateStatus,
 );
 
 // Cancelar pedido
 orderRouter.post('/:id/cancel', OrderController.cancel);
 
-export { orderRouter }; 
+export { orderRouter };

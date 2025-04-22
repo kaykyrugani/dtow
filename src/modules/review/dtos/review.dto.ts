@@ -29,4 +29,4 @@ export interface ReviewResponse {
     id: string;
     nome: string;
   };
-} 
+}

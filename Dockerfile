@@ -1,30 +1,35 @@
-# Etapa de build
-FROM node:18-alpine
+# Build stage
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
-COPY prisma ./prisma/
-
 RUN npm install
 
 COPY . .
-
 RUN npm run build
 
-# Etapa de produção
+# Production stage
 FROM node:18-alpine
+
 WORKDIR /app
-COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/node_modules ./node_modules
+
 COPY package*.json ./
-COPY prisma ./prisma
+RUN npm install --production
 
-# Gerar cliente Prisma
-RUN npx prisma generate
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
 
-# Criar diretório para logs
-RUN mkdir -p /app/logs
+# Configurações de segurança
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
 
-EXPOSE 3333
-CMD ["npm", "start"] 
+# Variáveis de ambiente
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Expor porta
+EXPOSE 3000
+
+# Comando para iniciar a aplicação
+CMD ["npm", "run", "start:prod"] 

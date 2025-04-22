@@ -20,7 +20,7 @@ export class ProdutoService extends BaseService {
     await this.validarDadosProduto(dados);
 
     return await prisma.produto.create({
-      data: dados
+      data: dados,
     });
   }
 
@@ -28,7 +28,7 @@ export class ProdutoService extends BaseService {
     await this.validarDadosProduto(dados);
 
     const produto = await prisma.produto.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!produto) {
@@ -37,13 +37,13 @@ export class ProdutoService extends BaseService {
 
     return await prisma.produto.update({
       where: { id },
-      data: dados
+      data: dados,
     });
   }
 
   static async deletar(id: number) {
     const produto = await prisma.produto.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!produto) {
@@ -51,7 +51,7 @@ export class ProdutoService extends BaseService {
     }
 
     return await prisma.produto.delete({
-      where: { id }
+      where: { id },
     });
   }
 
@@ -80,4 +80,4 @@ export class ProdutoService extends BaseService {
       throw new Error('Preço é obrigatório');
     }
   }
-} 
+}

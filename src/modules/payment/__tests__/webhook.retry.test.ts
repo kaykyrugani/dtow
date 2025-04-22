@@ -22,26 +22,25 @@ describe('PaymentService - Webhook Retry Mechanism', () => {
     it('deve tentar novamente após falha temporária', async () => {
       const webhookData = {
         action: 'payment.updated',
-        data: { id: 'payment-123' }
+        data: { id: 'payment-123' },
       };
 
       const mockPayment = {
         id: 'payment-123',
         external_reference: 'order-123',
-        status: 'approved'
+        status: 'approved',
       };
 
       // Primeira tentativa falha
-      jest.spyOn(paymentService['payment'], 'get')
+      jest
+        .spyOn(paymentService['payment'], 'get')
         .mockRejectedValueOnce(new Error('ETIMEDOUT'))
         // Segunda tentativa sucede
         .mockResolvedValueOnce({ response: mockPayment } as any);
 
       mockPrisma.pedido.update.mockResolvedValue({} as any);
 
-      await expect(paymentService.handleWebhook(webhookData))
-        .resolves
-        .toBeDefined();
+      await expect(paymentService.handleWebhook(webhookData)).resolves.toBeDefined();
 
       expect(paymentService['payment'].get).toHaveBeenCalledTimes(2);
     });
@@ -49,16 +48,13 @@ describe('PaymentService - Webhook Retry Mechanism', () => {
     it('deve parar após número máximo de tentativas', async () => {
       const webhookData = {
         action: 'payment.updated',
-        data: { id: 'payment-123' }
+        data: { id: 'payment-123' },
       };
 
       // Todas as tentativas falham
-      jest.spyOn(paymentService['payment'], 'get')
-        .mockRejectedValue(new Error('ETIMEDOUT'));
+      jest.spyOn(paymentService['payment'], 'get').mockRejectedValue(new Error('ETIMEDOUT'));
 
-      await expect(paymentService.handleWebhook(webhookData))
-        .rejects
-        .toThrow(AppError);
+      await expect(paymentService.handleWebhook(webhookData)).rejects.toThrow(AppError);
 
       expect(paymentService['payment'].get).toHaveBeenCalledTimes(3);
     });
@@ -66,44 +62,35 @@ describe('PaymentService - Webhook Retry Mechanism', () => {
     it('deve registrar tentativas no log', async () => {
       const webhookData = {
         action: 'payment.updated',
-        data: { id: 'payment-123' }
+        data: { id: 'payment-123' },
       };
 
-      jest.spyOn(paymentService['payment'], 'get')
-        .mockRejectedValue(new Error('ETIMEDOUT'));
+      jest.spyOn(paymentService['payment'], 'get').mockRejectedValue(new Error('ETIMEDOUT'));
 
       const consoleSpy = jest.spyOn(console, 'error');
 
-      await expect(paymentService.handleWebhook(webhookData))
-        .rejects
-        .toThrow();
+      await expect(paymentService.handleWebhook(webhookData)).rejects.toThrow();
 
       expect(consoleSpy).toHaveBeenCalledWith(
         'Erro ao processar webhook',
         expect.objectContaining({
           error: expect.any(Error),
-          attempt: expect.any(Number)
-        })
+          attempt: expect.any(Number),
+        }),
       );
     });
 
     it('deve atualizar métricas de retry', async () => {
       const webhookData = {
         action: 'payment.updated',
-        data: { id: 'payment-123' }
+        data: { id: 'payment-123' },
       };
 
-      jest.spyOn(paymentService['payment'], 'get')
-        .mockRejectedValue(new Error('ETIMEDOUT'));
+      jest.spyOn(paymentService['payment'], 'get').mockRejectedValue(new Error('ETIMEDOUT'));
 
-      await expect(paymentService.handleWebhook(webhookData))
-        .rejects
-        .toThrow();
+      await expect(paymentService.handleWebhook(webhookData)).rejects.toThrow();
 
-      expect(mockMetrics.incrementCacheMiss).toHaveBeenCalledWith(
-        'payment',
-        'handle_webhook'
-      );
+      expect(mockMetrics.incrementCacheMiss).toHaveBeenCalledWith('payment', 'handle_webhook');
     });
   });
 
@@ -112,22 +99,23 @@ describe('PaymentService - Webhook Retry Mechanism', () => {
       const webhooks = [
         { action: 'payment.updated', data: { id: 'payment-1' } },
         { action: 'payment.updated', data: { id: 'payment-2' } },
-        { action: 'payment.updated', data: { id: 'payment-3' } }
+        { action: 'payment.updated', data: { id: 'payment-3' } },
       ];
 
       const mockPayment = {
         id: 'payment-123',
         external_reference: 'order-123',
-        status: 'approved'
+        status: 'approved',
       };
 
-      jest.spyOn(paymentService['payment'], 'get')
+      jest
+        .spyOn(paymentService['payment'], 'get')
         .mockResolvedValue({ response: mockPayment } as any);
 
       mockPrisma.pedido.update.mockResolvedValue({} as any);
 
       const results = await Promise.all(
-        webhooks.map(webhook => paymentService.handleWebhook(webhook))
+        webhooks.map(webhook => paymentService.handleWebhook(webhook)),
       );
 
       expect(results).toHaveLength(3);
@@ -138,17 +126,20 @@ describe('PaymentService - Webhook Retry Mechanism', () => {
       const webhooks = [
         { action: 'payment.updated', data: { id: 'payment-1' } },
         { action: 'payment.updated', data: { id: 'payment-2' } },
-        { action: 'payment.updated', data: { id: 'payment-3' } }
+        { action: 'payment.updated', data: { id: 'payment-3' } },
       ];
 
-      jest.spyOn(paymentService['payment'], 'get')
+      jest
+        .spyOn(paymentService['payment'], 'get')
         .mockRejectedValueOnce(new Error('Failed'))
-        .mockResolvedValue({ response: { id: 'payment-123', external_reference: 'order-123' } } as any);
+        .mockResolvedValue({
+          response: { id: 'payment-123', external_reference: 'order-123' },
+        } as any);
 
       mockPrisma.pedido.update.mockResolvedValue({} as any);
 
       const results = await Promise.allSettled(
-        webhooks.map(webhook => paymentService.handleWebhook(webhook))
+        webhooks.map(webhook => paymentService.handleWebhook(webhook)),
       );
 
       expect(results).toHaveLength(3);
@@ -157,4 +148,4 @@ describe('PaymentService - Webhook Retry Mechanism', () => {
       expect(results[2].status).toBe('fulfilled');
     });
   });
-}); 
+});

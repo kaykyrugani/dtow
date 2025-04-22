@@ -2,11 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../errors/AppError';
 import { HttpStatusCode } from '../errors/HttpStatusCode';
 
-export function ensureAdmin(
-  request: Request,
-  response: Response,
-  next: NextFunction,
-): void {
+export function ensureAdmin(request: Request, response: Response, next: NextFunction): void {
   const { user } = request;
 
   if (!user || user.tipo !== 'ADMIN') {
@@ -14,4 +10,4 @@ export function ensureAdmin(
   }
 
   return next();
-} 
+}

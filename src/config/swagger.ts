@@ -13,22 +13,24 @@ const options = {
       contact: {
         name: 'Suporte OnlyWave',
         email: 'suporte@onlywave.com',
-        url: 'https://onlywave.com'
+        url: 'https://onlywave.com',
       },
       license: {
         name: 'MIT',
-        url: 'https://opensource.org/licenses/MIT'
-      }
+        url: 'https://opensource.org/licenses/MIT',
+      },
     },
     servers: [
       {
-        url: process.env.NODE_ENV === 'production' 
-          ? 'https://api.onlywave.com' 
-          : 'http://localhost:3000',
-        description: process.env.NODE_ENV === 'production' 
-          ? 'Servidor de Produção' 
-          : 'Servidor de Desenvolvimento'
-      }
+        url:
+          process.env.NODE_ENV === 'production'
+            ? 'https://api.onlywave.com'
+            : 'http://localhost:3000',
+        description:
+          process.env.NODE_ENV === 'production'
+            ? 'Servidor de Produção'
+            : 'Servidor de Desenvolvimento',
+      },
     ],
     components: {
       securitySchemes: {
@@ -36,8 +38,8 @@ const options = {
           type: 'http',
           scheme: 'bearer',
           bearerFormat: 'JWT',
-          description: 'Token JWT obtido no endpoint de login'
-        }
+          description: 'Token JWT obtido no endpoint de login',
+        },
       },
       schemas: {
         Error: {
@@ -45,73 +47,73 @@ const options = {
           properties: {
             status: {
               type: 'string',
-              example: 'error'
+              example: 'error',
             },
             message: {
               type: 'string',
-              example: 'Mensagem de erro'
+              example: 'Mensagem de erro',
             },
             code: {
               type: 'string',
-              example: 'ERROR_CODE'
-            }
-          }
+              example: 'ERROR_CODE',
+            },
+          },
         },
         Pagination: {
           type: 'object',
           properties: {
             page: {
               type: 'integer',
-              example: 1
+              example: 1,
             },
             limit: {
               type: 'integer',
-              example: 10
+              example: 10,
             },
             total: {
               type: 'integer',
-              example: 100
+              example: 100,
             },
             totalPages: {
               type: 'integer',
-              example: 10
-            }
-          }
-        }
-      }
+              example: 10,
+            },
+          },
+        },
+      },
     },
     security: [
       {
-        bearerAuth: []
-      }
-    ]
+        bearerAuth: [],
+      },
+    ],
   },
-  apis: [
-    './src/routes/*.ts',
-    './src/models/*.ts',
-    './src/schemas/*.ts'
-  ]
+  apis: ['./src/routes/*.ts', './src/models/*.ts', './src/schemas/*.ts'],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
 
 export function setupSwagger(app: Express) {
   // Endpoint para servir a documentação do Swagger
-  app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-    customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'OnlyWave API Documentation',
-    customfavIcon: '/favicon.ico',
-    swaggerOptions: {
-      persistAuthorization: true,
-      displayRequestDuration: true,
-      filter: true,
-      deepLinking: true
-    }
-  }));
+  app.use(
+    '/docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+      customCss: '.swagger-ui .topbar { display: none }',
+      customSiteTitle: 'OnlyWave API Documentation',
+      customfavIcon: '/favicon.ico',
+      swaggerOptions: {
+        persistAuthorization: true,
+        displayRequestDuration: true,
+        filter: true,
+        deepLinking: true,
+      },
+    }),
+  );
 
   // Endpoint para servir o arquivo swagger.json
   app.get('/docs.json', (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'application/json');
     res.send(swaggerSpec);
   });
-} 
+}

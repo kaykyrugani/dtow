@@ -3,12 +3,7 @@ import { AppError } from '../utils/AppError';
 import { logger } from '../utils/logger';
 import { ZodError } from 'zod';
 
-export const errorHandler = (
-  error: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const errorHandler = (error: Error, req: Request, res: Response, next: NextFunction) => {
   if (error instanceof AppError) {
     return res.status(error.statusCode).json({
       status: 'error',
@@ -30,4 +25,4 @@ export const errorHandler = (
     status: 'error',
     message: 'Erro interno do servidor',
   });
-}; 
+};

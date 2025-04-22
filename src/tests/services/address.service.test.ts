@@ -25,14 +25,14 @@ describe('AddressService', () => {
         bairro: 'Centro',
         cidade: 'São Paulo',
         estado: 'SP',
-        usuarioId: 1
+        usuarioId: 1,
       };
 
       const enderecoCriado = {
         id: 1,
         ...enderecoData,
         criadoEm: new Date(),
-        atualizadoEm: new Date()
+        atualizadoEm: new Date(),
       };
 
       vi.spyOn(prisma.endereco, 'create').mockResolvedValue(enderecoCriado);
@@ -41,7 +41,7 @@ describe('AddressService', () => {
 
       expect(resultado).toEqual(enderecoCriado);
       expect(prisma.endereco.create).toHaveBeenCalledWith({
-        data: enderecoData
+        data: enderecoData,
       });
     });
 
@@ -54,7 +54,7 @@ describe('AddressService', () => {
         bairro: 'Centro',
         cidade: 'São Paulo',
         estado: 'SP',
-        usuarioId: 1
+        usuarioId: 1,
       };
 
       vi.spyOn(prisma.endereco, 'create').mockRejectedValue(new Error('Erro ao criar endereço'));
@@ -77,8 +77,8 @@ describe('AddressService', () => {
           estado: 'SP',
           usuarioId: 1,
           criadoEm: new Date(),
-          atualizadoEm: new Date()
-        }
+          atualizadoEm: new Date(),
+        },
       ];
 
       vi.spyOn(prisma.endereco, 'findMany').mockResolvedValue(enderecos);
@@ -87,12 +87,14 @@ describe('AddressService', () => {
 
       expect(resultado).toEqual(enderecos);
       expect(prisma.endereco.findMany).toHaveBeenCalledWith({
-        where: { usuarioId: 1 }
+        where: { usuarioId: 1 },
       });
     });
 
     it('deve lançar erro quando falhar ao listar endereços', async () => {
-      vi.spyOn(prisma.endereco, 'findMany').mockRejectedValue(new Error('Erro ao listar endereços'));
+      vi.spyOn(prisma.endereco, 'findMany').mockRejectedValue(
+        new Error('Erro ao listar endereços'),
+      );
 
       await expect(addressService.listarEnderecos(1)).rejects.toThrow(AppError);
     });
@@ -107,7 +109,7 @@ describe('AddressService', () => {
         complemento: 'Apto 2',
         bairro: 'Jardim',
         cidade: 'Rio de Janeiro',
-        estado: 'RJ'
+        estado: 'RJ',
       };
 
       const enderecoAtualizado = {
@@ -115,7 +117,7 @@ describe('AddressService', () => {
         ...enderecoData,
         usuarioId: 1,
         criadoEm: new Date(),
-        atualizadoEm: new Date()
+        atualizadoEm: new Date(),
       };
 
       vi.spyOn(prisma.endereco, 'update').mockResolvedValue(enderecoAtualizado);
@@ -125,7 +127,7 @@ describe('AddressService', () => {
       expect(resultado).toEqual(enderecoAtualizado);
       expect(prisma.endereco.update).toHaveBeenCalledWith({
         where: { id: 1 },
-        data: enderecoData
+        data: enderecoData,
       });
     });
 
@@ -137,10 +139,12 @@ describe('AddressService', () => {
         complemento: 'Apto 2',
         bairro: 'Jardim',
         cidade: 'Rio de Janeiro',
-        estado: 'RJ'
+        estado: 'RJ',
       };
 
-      vi.spyOn(prisma.endereco, 'update').mockRejectedValue(new Error('Erro ao atualizar endereço'));
+      vi.spyOn(prisma.endereco, 'update').mockRejectedValue(
+        new Error('Erro ao atualizar endereço'),
+      );
 
       await expect(addressService.atualizarEndereco(1, enderecoData)).rejects.toThrow(AppError);
     });
@@ -153,7 +157,7 @@ describe('AddressService', () => {
       await addressService.deletarEndereco(1);
 
       expect(prisma.endereco.delete).toHaveBeenCalledWith({
-        where: { id: 1 }
+        where: { id: 1 },
       });
     });
 
@@ -178,7 +182,7 @@ describe('AddressService', () => {
         principal: true,
         usuarioId: '1',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       };
 
       vi.spyOn(prisma.$transaction).mockResolvedValue(enderecoAtualizado);
@@ -190,9 +194,11 @@ describe('AddressService', () => {
     });
 
     it('deve lançar erro quando falhar ao definir endereço principal', async () => {
-      vi.spyOn(prisma.$transaction).mockRejectedValue(new Error('Erro ao definir endereço principal'));
+      vi.spyOn(prisma.$transaction).mockRejectedValue(
+        new Error('Erro ao definir endereço principal'),
+      );
 
       await expect(addressService.definirEnderecoPrincipal('1', '1')).rejects.toThrow(AppError);
     });
   });
-}); 
+});

@@ -7,7 +7,7 @@ export enum AlertSeverity {
   INFO = 'info',
   WARNING = 'warning',
   ERROR = 'error',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 export interface AlertConfig {
@@ -26,9 +26,7 @@ export class AlertService {
   private alertCounters: Map<string, number>;
   private alertTimestamps: Map<string, number[]>;
 
-  constructor(
-    @inject('LoggingService') private logger: LoggingService
-  ) {
+  constructor(@inject('LoggingService') private logger: LoggingService) {
     this.alertConfigs = new Map();
     this.alertCounters = new Map();
     this.alertTimestamps = new Map();
@@ -37,9 +35,7 @@ export class AlertService {
 
   public static getInstance(): AlertService {
     if (!AlertService.instance) {
-      AlertService.instance = new AlertService(
-        new LoggingService(config)
-      );
+      AlertService.instance = new AlertService(new LoggingService(config));
     }
     return AlertService.instance;
   }
@@ -52,7 +48,7 @@ export class AlertService {
       severity: AlertSeverity.ERROR,
       threshold: 0.1, // 10% de falha
       window: 300, // 5 minutos
-      channels: ['discord', 'email']
+      channels: ['discord', 'email'],
     });
 
     // Alertas de Webhook
@@ -62,7 +58,7 @@ export class AlertService {
       severity: AlertSeverity.WARNING,
       threshold: 60, // 60 segundos
       window: 300,
-      channels: ['discord']
+      channels: ['discord'],
     });
 
     // Alertas de Sistema
@@ -72,7 +68,7 @@ export class AlertService {
       severity: AlertSeverity.CRITICAL,
       threshold: 0.05, // 5% de erro
       window: 60,
-      channels: ['discord', 'email', 'slack']
+      channels: ['discord', 'email', 'slack'],
     });
   }
 
@@ -91,12 +87,10 @@ export class AlertService {
 
     const now = Date.now();
     const timestamps = this.alertTimestamps.get(name) || [];
-    
+
     // Remove timestamps antigos
-    const validTimestamps = timestamps.filter(
-      ts => now - ts <= config.window * 1000
-    );
-    
+    const validTimestamps = timestamps.filter(ts => now - ts <= config.window * 1000);
+
     validTimestamps.push(now);
     this.alertTimestamps.set(name, validTimestamps);
 
@@ -117,7 +111,7 @@ export class AlertService {
       value,
       threshold: alertConfig.threshold,
       timestamp: new Date().toISOString(),
-      environment: config.NODE_ENV
+      environment: config.NODE_ENV,
     };
 
     // Log do alerta
@@ -156,8 +150,9 @@ export class AlertService {
   public getAlertStats(name: string): { count: number; lastTriggered: Date | null } {
     const count = this.alertCounters.get(name) || 0;
     const timestamps = this.alertTimestamps.get(name) || [];
-    const lastTriggered = timestamps.length > 0 ? new Date(timestamps[timestamps.length - 1]) : null;
+    const lastTriggered =
+      timestamps.length > 0 ? new Date(timestamps[timestamps.length - 1]) : null;
 
     return { count, lastTriggered };
   }
-} 
+}

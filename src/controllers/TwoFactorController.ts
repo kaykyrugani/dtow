@@ -4,15 +4,15 @@ import { AppError } from '../utils/AppError';
 import { z } from 'zod';
 
 const enable2FASchema = z.object({
-  token: z.string().length(6)
+  token: z.string().length(6),
 });
 
 const disable2FASchema = z.object({
-  token: z.string().length(6)
+  token: z.string().length(6),
 });
 
 const verifyBackupCodeSchema = z.object({
-  code: z.string().min(10).max(10)
+  code: z.string().min(10).max(10),
 });
 
 export class TwoFactorController {
@@ -25,7 +25,7 @@ export class TwoFactorController {
       return res.json({
         secret,
         qrCode,
-        backupCodes
+        backupCodes,
       });
     } catch (error) {
       throw new AppError('Erro ao configurar 2FA', 500);
@@ -80,16 +80,16 @@ export class TwoFactorController {
         where: { id: req.user.id },
         select: {
           twoFactorEnabled: true,
-          twoFactorBackupCodes: true
-        }
+          twoFactorBackupCodes: true,
+        },
       });
 
       return res.json({
         enabled: user?.twoFactorEnabled || false,
-        backupCodesRemaining: user?.twoFactorBackupCodes?.length || 0
+        backupCodesRemaining: user?.twoFactorBackupCodes?.length || 0,
       });
     } catch (error) {
       throw new AppError('Erro ao obter status do 2FA', 500);
     }
   }
-} 
+}

@@ -13,16 +13,16 @@ describe('SecurityMiddleware', () => {
       url: '/test',
       headers: {
         authorization: 'Bearer token123',
-        'content-type': 'application/json'
+        'content-type': 'application/json',
       },
       body: {
         senha: '123456',
-        email: 'test@example.com'
+        email: 'test@example.com',
       },
       query: {
         cpf: '123.456.789-00',
-        nome: 'Test User'
-      }
+        nome: 'Test User',
+      },
     };
 
     res = {
@@ -48,7 +48,7 @@ describe('SecurityMiddleware', () => {
       expect(res.status).toHaveBeenCalledWith(408);
       expect(res.json).toHaveBeenCalledWith({
         error: 'Request Timeout',
-        message: 'A requisição excedeu o tempo limite'
+        message: 'A requisição excedeu o tempo limite',
       });
 
       vi.useRealTimers();
@@ -78,7 +78,7 @@ describe('SecurityMiddleware', () => {
         senha: '123456',
         cpf: '123.456.789-00',
         token: 'abc123',
-        email: 'test@example.com'
+        email: 'test@example.com',
       });
 
       // Assert
@@ -86,7 +86,7 @@ describe('SecurityMiddleware', () => {
         senha: '[REDACTED]',
         cpf: '[REDACTED]',
         token: '[REDACTED]',
-        email: 'test@example.com'
+        email: 'test@example.com',
       });
     });
 
@@ -95,22 +95,22 @@ describe('SecurityMiddleware', () => {
       const sanitized = SecurityMiddleware.sanitizeLog({
         user: {
           senha: '123456',
-          cpf: '123.456.789-00'
+          cpf: '123.456.789-00',
         },
         data: {
-          email: 'test@example.com'
-        }
+          email: 'test@example.com',
+        },
       });
 
       // Assert
       expect(sanitized).toEqual({
         user: {
           senha: '[REDACTED]',
-          cpf: '[REDACTED]'
+          cpf: '[REDACTED]',
         },
         data: {
-          email: 'test@example.com'
-        }
+          email: 'test@example.com',
+        },
       });
     });
   });
@@ -125,23 +125,17 @@ describe('SecurityMiddleware', () => {
 
       // Act
       SecurityMiddleware.loggerMiddleware(req as Request, res as Response, next);
-      
+
       // Simula o fim da requisição
       const finishCallback = (res.on as jest.Mock).mock.calls[0][1];
       finishCallback();
 
       // Assert
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining('[REDACTED]')
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.not.stringContaining('123456')
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.not.stringContaining('123.456.789-00')
-      );
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[REDACTED]'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.not.stringContaining('123456'));
+      expect(consoleSpy).toHaveBeenCalledWith(expect.not.stringContaining('123.456.789-00'));
 
       vi.useRealTimers();
     });
   });
-}); 
+});
