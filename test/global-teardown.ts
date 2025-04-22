@@ -8,10 +8,10 @@ export default async function globalTeardown() {
     // Desconecta do Redis
     const redisService = new RedisService();
     await redisService.quit();
-    
+
     logger.info('Ambiente de teste limpo com sucesso');
   } catch (error) {
     logger.error('Erro ao limpar ambiente de teste', error);
     throw error;
   }
-} 
+}

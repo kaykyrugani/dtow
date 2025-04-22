@@ -13,4 +13,4 @@ process.env.REDIS_HOST = 'localhost';
 process.env.REDIS_PORT = '6379';
 process.env.REDIS_DB = '1';
 process.env.REDIS_PASSWORD = '';
-process.env.ALLOWED_ORIGINS = 'http://localhost:3000'; 
+process.env.ALLOWED_ORIGINS = 'http://localhost:3000';

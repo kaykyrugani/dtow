@@ -19,9 +19,9 @@ describe('PaymentService Integration', () => {
         ConfigService,
         {
           provide: 'MERCADO_PAGO_CONFIG',
-          useValue: MercadoPagoConfig
-        }
-      ]
+          useValue: MercadoPagoConfig,
+        },
+      ],
     }).compile();
 
     service = module.get<PaymentService>(PaymentService);
@@ -45,11 +45,11 @@ describe('PaymentService Integration', () => {
         data: {
           id: 'TEST-123',
           amount: 100,
-          external_reference: 'ORDER-TEST-123'
+          external_reference: 'ORDER-TEST-123',
         },
         paymentType: 'credit_card',
         timestamp: Date.now(),
-        status: 'approved' as PaymentStatus
+        status: 'approved' as PaymentStatus,
       };
 
       const payment = await service.processWebhook(webhookData);
@@ -60,7 +60,7 @@ describe('PaymentService Integration', () => {
       expect(payment.status).toBe(webhookData.status);
 
       const savedPayment = await prisma.payment.findUnique({
-        where: { id: payment.id }
+        where: { id: payment.id },
       });
 
       expect(savedPayment).toBeDefined();
@@ -77,21 +77,17 @@ describe('PaymentService Integration', () => {
           amount: 100,
           status: 'approved',
           payment_type_id: 'credit_card',
-          external_reference: 'ORDER-TEST-123'
-        }
+          external_reference: 'ORDER-TEST-123',
+        },
       });
 
-      const refund = await service.reembolsarPagamento(
-        testPayment.id,
-        100,
-        'test_refund'
-      );
+      const refund = await service.reembolsarPagamento(testPayment.id, 100, 'test_refund');
 
       expect(refund.status).toBe('refunded');
       expect(refund.refund_reason).toBe('test_refund');
 
       const updatedPayment = await prisma.payment.findUnique({
-        where: { id: testPayment.id }
+        where: { id: testPayment.id },
       });
 
       expect(updatedPayment.status).toBe('refunded');
@@ -105,25 +101,21 @@ describe('PaymentService Integration', () => {
           amount: 100,
           status: 'approved',
           payment_type_id: 'credit_card',
-          external_reference: 'ORDER-TEST-123'
-        }
+          external_reference: 'ORDER-TEST-123',
+        },
       });
 
-      const refund = await service.reembolsarPagamento(
-        testPayment.id,
-        50,
-        'partial_refund'
-      );
+      const refund = await service.reembolsarPagamento(testPayment.id, 50, 'partial_refund');
 
       expect(refund.status).toBe('refunded');
       expect(refund.refund_amount).toBe(50);
 
       const updatedPayment = await prisma.payment.findUnique({
-        where: { id: testPayment.id }
+        where: { id: testPayment.id },
       });
 
       expect(updatedPayment.status).toBe('refunded');
       expect(updatedPayment.refund_amount).toBe(50);
     });
   });
-}); 
+});

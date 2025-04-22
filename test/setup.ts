@@ -33,8 +33,8 @@ beforeEach(async () => {
     get: () => ({
       host: 'localhost',
       port: 6379,
-      db: 0
-    })
+      db: 0,
+    }),
   } as any);
 
   await redis.onModuleInit();
@@ -71,4 +71,4 @@ beforeAll(() => {
 afterAll(() => {
   // Limpeza após todos os testes
   jest.clearAllMocks();
-}); 
+});

@@ -31,8 +31,8 @@ describe('PaymentController (e2e)', () => {
       customer_id: 'customer_123',
       order_id: 'order_123',
       metadata: {
-        product_id: 'prod_123'
-      }
+        product_id: 'prod_123',
+      },
     };
 
     it('deve processar um webhook com sucesso', () => {
@@ -40,7 +40,7 @@ describe('PaymentController (e2e)', () => {
         .post('/payments/webhook')
         .send(mockWebhookData)
         .expect(201)
-        .expect((res) => {
+        .expect(res => {
           expect(res.body).toHaveProperty('id', mockWebhookData.payment_id);
           expect(res.body).toHaveProperty('amount', mockWebhookData.amount);
           expect(res.body).toHaveProperty('status', PaymentStatus.COMPLETED);
@@ -56,13 +56,10 @@ describe('PaymentController (e2e)', () => {
         status: 'paid',
         payment_method: 'credit_card',
         customer_id: 'customer_123',
-        order_id: 'order_123'
+        order_id: 'order_123',
       };
 
-      return request(app.getHttpServer())
-        .post('/payments/webhook')
-        .send(invalidData)
-        .expect(400);
+      return request(app.getHttpServer()).post('/payments/webhook').send(invalidData).expect(400);
     });
 
     it('deve ser idempotente para webhooks duplicados', async () => {
@@ -93,20 +90,17 @@ describe('PaymentController (e2e)', () => {
         status: 'paid',
         payment_method: 'credit_card',
         customer_id: 'customer_123',
-        order_id: 'order_123'
+        order_id: 'order_123',
       };
 
-      await request(app.getHttpServer())
-        .post('/payments/webhook')
-        .send(webhookData)
-        .expect(201);
+      await request(app.getHttpServer()).post('/payments/webhook').send(webhookData).expect(201);
 
       // Tentar reembolso
       return request(app.getHttpServer())
         .post(`/payments/${webhookData.payment_id}/refund`)
         .send({ amount: 500, reason: 'customer_request' })
         .expect(200)
-        .expect((res) => {
+        .expect(res => {
           expect(res.body).toHaveProperty('id', webhookData.payment_id);
           expect(res.body).toHaveProperty('refundedAmount', 500);
           expect(res.body).toHaveProperty('status', PaymentStatus.PARTIALLY_REFUNDED);
@@ -130,13 +124,10 @@ describe('PaymentController (e2e)', () => {
         status: 'paid',
         payment_method: 'credit_card',
         customer_id: 'customer_123',
-        order_id: 'order_123'
+        order_id: 'order_123',
       };
 
-      await request(app.getHttpServer())
-        .post('/payments/webhook')
-        .send(webhookData)
-        .expect(201);
+      await request(app.getHttpServer()).post('/payments/webhook').send(webhookData).expect(201);
 
       // Tentar reembolso com valor maior
       return request(app.getHttpServer())
@@ -145,4 +136,4 @@ describe('PaymentController (e2e)', () => {
         .expect(400);
     });
   });
-}); 
+});

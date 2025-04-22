@@ -24,7 +24,7 @@ describe('CachedController (e2e)', () => {
     return request(app.getHttpServer())
       .get(`/cached/${key}`)
       .expect(200)
-      .expect((res) => {
+      .expect(res => {
         expect(res.body).toHaveProperty('data');
         expect(res.body).toHaveProperty('timestamp');
         expect(res.body.data).toContain(key);
@@ -36,7 +36,7 @@ describe('CachedController (e2e)', () => {
     return request(app.getHttpServer())
       .delete(`/cached/${key}`)
       .expect(200)
-      .expect((res) => {
+      .expect(res => {
         expect(res.body).toHaveProperty('message');
         expect(res.body.message).toBe('Cache invalidado com sucesso');
       });
@@ -44,14 +44,12 @@ describe('CachedController (e2e)', () => {
 
   it('should handle rate limiting', async () => {
     const key = 'test-key';
-    const requests = Array(11).fill(null).map(() =>
-      request(app.getHttpServer())
-        .get(`/cached/${key}`)
-        .expect(200)
-    );
+    const requests = Array(11)
+      .fill(null)
+      .map(() => request(app.getHttpServer()).get(`/cached/${key}`).expect(200));
 
     const responses = await Promise.all(requests);
     const lastResponse = responses[responses.length - 1];
     expect(lastResponse.status).toBe(429); // Too Many Requests
   });
-}); 
+});
